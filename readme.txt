@@ -1,6 +1,8 @@
 === Auto-Close Comments, Pingbacks and Trackbacks ===
 Tags: autoclose, comments, pingback, trackback, spam, anti-spam
 Contributors: Ajay D'Souza
+Donate link: http://ajaydsouza.com/donate/
+
 
 Close comments, pingbacks and trackbacks on your post automatically at intervals set by you
 
@@ -27,7 +29,7 @@ WordPress 1.5 or above
 
 All options can be customized within WP-Admin itself
 
-For more information, please visit http://ajaydsouza.com/wordpress/plugins/autoclose/#function
+For more information, please visit http://ajaydsouza.com/wordpress/plugins/autoclose/
 
 = Support =
 
