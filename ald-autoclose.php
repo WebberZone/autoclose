@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Auto-Close Comments, Pingbacks and Trackbacks
-Version:     1.0
+Version:     1.1
 Plugin URI:  http://ajaydsouza.com/wordpress/plugins/autoclose/
 Description: Automatically close Comments, Pingbacks and Trackbacks after certain amount of days.
 Author:      Ajay D'Souza
@@ -9,6 +9,11 @@ Author URI:  http://ajaydsouza.com/
 */
 
 if (!defined('ABSPATH')) die("Aren't you supposed to come here via WP-Admin?");
+
+function ald_autoclose_init() {
+     load_plugin_textdomain('ald_autoclose_plugin', PLUGINDIR.'/'.dirname(plugin_basename(__FILE__)));
+}
+add_action('init', 'ald_autoclose_init');
 
 define('ALD_ACC_DIR', dirname(__FILE__));
 
@@ -24,6 +29,8 @@ function ald_acc() {
 
     $comment_age = $acc_settings[comment_age]. ' DAY';
     $pbtb_age = $acc_settings[pbtb_age]. ' DAY';
+    $comment_pids = $acc_settings[comment_pids];
+    $pbtb_pids = $acc_settings[pbtb_pids];
 	
 	// Close Comments
 	if ($acc_settings[close_comment]) {
@@ -54,6 +61,27 @@ function ald_acc() {
         AND post_date < '$pbtb_date'
     ");
 	}
+
+	// Open Comments on these posts
+	if ($acc_settings[comment_pids]!='') {
+    $wpdb->query("
+        UPDATE $poststable
+        SET comment_status = 'open'
+        WHERE comment_status = 'closed'
+        AND post_status = 'publish'
+        AND ID IN ($comment_pids)
+    ");
+	}
+	// Open Pingbacks / Trackbacks on these posts
+	if ($acc_settings[pbtb_pids]!='') {
+    $wpdb->query("
+        UPDATE $poststable
+        SET ping_status = 'open'
+        WHERE ping_status = 'closed'
+        AND post_status = 'publish'
+        AND ID IN ($pbtb_pids)
+    ");
+	}
 }
 
 // Default Options
@@ -61,6 +89,8 @@ function acc_default_options() {
 	$acc_settings = 	Array (
 						comment_age => '90',	// Close comments before these many days
 						pbtb_age => '90',		// Close pingbacks/trackbacks before these many days
+						comment_pids => '',	// Comments on these Post IDs to open
+						pbtb_pids => '',		// Pingback on these Post IDs to open
 						close_comment => false,	// Close Comments
 						close_pbtb => false,		// Close Pingbacks and Trackbacks
 						daily_run => false,		// Run Daily?
@@ -74,16 +104,23 @@ function acc_default_options() {
 // Function to read options from the database
 function acc_read_options() 
 {
-	if(!is_array(get_option('ald_acc_settings')))
-	{
-		$acc_settings = acc_default_options();
+	$acc_settings_changed = false;
+	
+	$defaults = acc_default_options();
+	
+	$acc_settings = array_map('stripslashes',(array)get_option('ald_acc_settings'));
+	unset($acc_settings[0]); // produced by the (array) casting when there's nothing in the DB
+	
+	foreach ($defaults as $k=>$v) {
+		if (!isset($acc_settings[$k]))
+			$acc_settings[$k] = $v;
+		$acc_settings_changed = true;	
+	}
+	if ($acc_settings_changed == true)
 		update_option('ald_acc_settings', $acc_settings);
-	}
-	else
-	{
-		$acc_settings = get_option('ald_acc_settings');
-	}
+	
 	return $acc_settings;
+
 }
 
 // Function to enable run or actions
