@@ -2,7 +2,6 @@
 Tags: autoclose, comments, pingback, trackback, spam, anti-spam
 Contributors: Ajay D'Souza
 Donate link: http://ajaydsouza.com/donate/
-Stable tag: 1.1
 
 
 Close comments, pingbacks and trackbacks on your post automatically at intervals set by you
