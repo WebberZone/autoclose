@@ -13,6 +13,7 @@ function acc_options() {
 		$acc_settings[pbtb_pids] = $_POST['pbtb_pids'];
 		$acc_settings[close_comment] = (($_POST['close_comment']) ? true : false);
 		$acc_settings[close_pbtb] = (($_POST['close_pbtb']) ? true : false);
+		$acc_settings[delete_revisions] = (($_POST['delete_revisions']) ? true : false);
 		$acc_settings[cron_hour] = (($_POST['cron_hour']!='') ? $_POST['cron_hour'] : '');
 		$acc_settings[cron_min] = (($_POST['cron_min']!='') ? $_POST['cron_min'] : '');
 
@@ -27,23 +28,26 @@ function acc_options() {
 		update_option('ald_acc_settings', $acc_settings);
 		
 		if($_POST['acc_save']){
-			echo '<div id="message" class="updated fade"><p>Options saved successfully.</p></div>';
+			echo '<div id="message" class="updated fade"><p>'. __('Options saved successfully.','ald_autoclose_plugin') .'</p></div>';
 		}
 		else
 		{
 			ald_acc();
 			echo '<div id="message" class="updated fade">';
 			if ($acc_settings[close_comment]) {
-			    echo "<p><strong>Comments closed upto:</strong> ";
+			    echo "<p><strong>". __('Comments closed upto','ald_autoclose_plugin') .":</strong> ";
 				echo date('F j, Y, g:i a', (time() - $acc_settings[comment_age] * 86400));
 				echo "</p>";
 			}
 			if ($acc_settings[close_pbtb]) {
-				echo "<p><strong>Pingbacks/Trackbacks closed upto: </strong> ";
+				echo "<p><strong>". __('Pingbacks/Trackbacks closed upto','ald_autoclose_plugin') .": </strong> ";
 				echo date('F j, Y, g:i a', (time() - $acc_settings[pbtb_age] * 86400));
 				echo "</p>";
 			}
-			echo '<p>Options saved successfully.</p></div>';
+			if ($acc_settings[delete_revisions]) {
+				echo "<p><strong>". __('Post revisions deleted','ald_autoclose_plugin') ."</strong></p>";
+			}
+			echo '<p>'. __('Options saved successfully.','ald_autoclose_plugin') .'</p></div>';
 		}
 	}
 	
@@ -52,8 +56,9 @@ function acc_options() {
 		delete_option('ald_acc_settings');
 		$acc_settings = acc_default_options();
 		update_option('ald_acc_settings', $acc_settings);
+		acc_disable_run();
 		
-		echo '<div id="message" class="updated fade"><p>Options set to Default.</p></div>';
+		echo '<div id="message" class="updated fade"><p>'. __('Options set to Default.','ald_autoclose_plugin') .'</p></div>';
 	}
 
 	if (function_exists('wp_schedule_event'))
@@ -159,6 +164,10 @@ function acc_options() {
 		<input type="text" name="cron_hour" id="cron_hour" value="<?php echo $acc_settings[cron_hour]; ?>" size="2" maxlength="2" /> : <input type="text" name="cron_min" id="cron_min" value="<?php echo $acc_settings[cron_min]; ?>" size="2" maxlength="2" />
 		</label>
 		<?php _e('(Enter in 24-hour format. e.g. to run at 1:30pm, enter 13 and 30 respectively)', 'ald_autoclose_plugin'); ?>
+	</p>
+	<p>
+		<label><input type="checkbox" name="delete_revisions" id="delete_revisions" value="true" <?php if ($acc_settings[delete_revisions]) { ?> checked="checked" <?php } ?> />
+		<?php _e('Delete Post Revisions?', 'ald_autoclose_plugin'); ?></label>
 	</p>
 	<p>
         <input name="run_once" type="submit" id="run_once" value="Save Options and Run Once" style="border:#FF6600 1px solid" />

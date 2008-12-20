@@ -1,9 +1,9 @@
 <?php
 /*
 Plugin Name: Auto-Close Comments, Pingbacks and Trackbacks
-Version:     1.1
+Version:     1.2
 Plugin URI:  http://ajaydsouza.com/wordpress/plugins/autoclose/
-Description: Automatically close Comments, Pingbacks and Trackbacks after certain amount of days.
+Description: Automatically close Comments, Pingbacks and Trackbacks after certain amount of days.  <a href="options-general.php?page=acc_options">Configure...</a>
 Author:      Ajay D'Souza
 Author URI:  http://ajaydsouza.com/
 */
@@ -82,6 +82,14 @@ function ald_acc() {
         AND ID IN ($pbtb_pids)
     ");
 	}
+
+	// Delete Post Revisions (WordPress 2.6 and above)
+	if ($acc_settings[delete_revisions]) {
+    $wpdb->query("
+        DELETE FROM $poststable
+		WHERE post_type = 'revision'
+    ");
+	}
 }
 
 // Default Options
@@ -93,6 +101,7 @@ function acc_default_options() {
 						pbtb_pids => '',		// Pingback on these Post IDs to open
 						close_comment => false,	// Close Comments
 						close_pbtb => false,		// Close Pingbacks and Trackbacks
+						delete_revisions => true,		// Delete post revisions
 						daily_run => false,		// Run Daily?
 						cron_hour => '0',		// Cron Hour
 						cron_min => '0',		// Cron Minute

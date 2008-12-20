@@ -2,10 +2,18 @@
 Tags: autoclose, comments, pingback, trackback, spam, anti-spam
 Contributors: Ajay D'Souza
 Donate link: http://ajaydsouza.com/donate/
+Stable tag: trunk
+Requires at least: 1.5
+Tested up to: 2.7
 
 
-Close comments, pingbacks and trackbacks on your post automatically at intervals set by you
+Close comments, pingbacks and trackbacks on your posts automatically at intervals set by you
 
+== Description ==
+
+Automatically close comments, pingbacks and trackbacks on your posts. You can choose to keep comments / pingbacks / trackbacks open on certain posts.
+
+An extra feature is the ability to delete post revisions that were introduced in WordPress v2.6 onwards.
 
 == Installation ==
 
@@ -33,5 +41,6 @@ For more information, please visit http://ajaydsouza.com/wordpress/plugins/autoc
 
 = Support =
 
-All questions need to be redirected at the Support Forum at http://www.ajaydsouza.org/index.php?board=18.0
+All questions need to be redirected at the Support Forum at http://www.ajaydsouza.org/
+
 No support questions will be entertained in the comments or via email.
