@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Auto-Close Comments, Pingbacks and Trackbacks
-Version:     1.3
+Version:     1.3.1
 Plugin URI:  http://ajaydsouza.com/wordpress/plugins/autoclose/
 Description: Automatically close Comments, Pingbacks and Trackbacks after certain amount of days.  <a href="options-general.php?page=acc_options">Configure...</a>
 Author:      Ajay D'Souza
@@ -65,7 +65,7 @@ function ald_acc() {
 	}
 
 	// Close Comments on pages
-	if ($acc_settings[close_comment]) {
+	if ($acc_settings[close_comment_pages]) {
 		$comment_date = $wpdb->get_var("
 			SELECT DATE_ADD(DATE_SUB(CURDATE(), INTERVAL $comment_age), INTERVAL 1 DAY)
 		");
@@ -81,7 +81,7 @@ function ald_acc() {
 	}
 	
 	// Close Pingbacks/Trackbacks on pages
-	if ($acc_settings[close_pbtb]) {
+	if ($acc_settings[close_pbtb_pages]) {
 		$pbtb_date = $wpdb->get_var("
 			SELECT DATE_ADD(DATE_SUB(CURDATE(), INTERVAL $pbtb_age), INTERVAL 1 DAY)
 		");
