@@ -4,6 +4,8 @@
 *********************************************************************/
 function acc_options() {
 	
+    global $wpdb;
+    $poststable = $wpdb->posts;
 	$acc_settings = acc_read_options();
 
 	if(($_POST['acc_save'])||($_POST['run_once'])){
@@ -12,7 +14,9 @@ function acc_options() {
 		$acc_settings[comment_pids] = $_POST['comment_pids'];
 		$acc_settings[pbtb_pids] = $_POST['pbtb_pids'];
 		$acc_settings[close_comment] = (($_POST['close_comment']) ? true : false);
+		$acc_settings[close_comment_pages] = (($_POST['close_comment_pages']) ? true : false);
 		$acc_settings[close_pbtb] = (($_POST['close_pbtb']) ? true : false);
+		$acc_settings[close_pbtb_pages] = (($_POST['close_pbtb_pages']) ? true : false);
 		$acc_settings[delete_revisions] = (($_POST['delete_revisions']) ? true : false);
 		$acc_settings[cron_hour] = (($_POST['cron_hour']!='') ? $_POST['cron_hour'] : '');
 		$acc_settings[cron_min] = (($_POST['cron_min']!='') ? $_POST['cron_min'] : '');
@@ -35,12 +39,22 @@ function acc_options() {
 			ald_acc();
 			echo '<div id="message" class="updated fade">';
 			if ($acc_settings[close_comment]) {
-			    echo "<p><strong>". __('Comments closed upto','ald_autoclose_plugin') .":</strong> ";
+			    echo "<p><strong>". __('Comments on posts closed upto','ald_autoclose_plugin') .":</strong> ";
 				echo date('F j, Y, g:i a', (time() - $acc_settings[comment_age] * 86400));
 				echo "</p>";
 			}
 			if ($acc_settings[close_pbtb]) {
-				echo "<p><strong>". __('Pingbacks/Trackbacks closed upto','ald_autoclose_plugin') .": </strong> ";
+				echo "<p><strong>". __('Pingbacks/Trackbacks on posts closed upto','ald_autoclose_plugin') .": </strong> ";
+				echo date('F j, Y, g:i a', (time() - $acc_settings[pbtb_age] * 86400));
+				echo "</p>";
+			}
+			if ($acc_settings[close_comment_pages]) {
+			    echo "<p><strong>". __('Comments on pages closed upto','ald_autoclose_plugin') .":</strong> ";
+				echo date('F j, Y, g:i a', (time() - $acc_settings[comment_age] * 86400));
+				echo "</p>";
+			}
+			if ($acc_settings[close_pbtb_pages]) {
+				echo "<p><strong>". __('Pingbacks/Trackbacks on pages closed upto','ald_autoclose_plugin') .": </strong> ";
 				echo date('F j, Y, g:i a', (time() - $acc_settings[pbtb_age] * 86400));
 				echo "</p>";
 			}
@@ -59,6 +73,28 @@ function acc_options() {
 		acc_disable_run();
 		
 		echo '<div id="message" class="updated fade"><p>'. __('Options set to Default.','ald_autoclose_plugin') .'</p></div>';
+	}
+
+	if ($_POST['acc_opencomments']){
+		$wpdb->query("
+			UPDATE $poststable
+			SET comment_status = 'open'
+			WHERE comment_status = 'closed'
+			AND post_status = 'publish'
+		");
+	
+		echo '<div id="message" class="updated fade"><p>'. __('Comments opened on all posts','ald_autoclose_plugin') .'</p></div>';
+	}
+
+	if ($_POST['acc_openpings']){
+		$wpdb->query("
+			UPDATE $poststable
+			SET ping_status = 'open'
+			WHERE ping_status = 'closed'
+			AND post_status = 'publish'
+		");
+	
+		echo '<div id="message" class="updated fade"><p>'. __('Pingbacks/Trackbacks opened on all posts','ald_autoclose_plugin') .'</p></div>';
 	}
 
 	if (function_exists('wp_schedule_event'))
@@ -127,31 +163,35 @@ function acc_options() {
     </h3>
     </legend>
 	<p>
-		<label><strong><?php _e('Keep comments on these posts open: ', 'ald_autoclose_plugin'); ?></strong>
+		<label><strong><?php _e('Keep comments on these posts/pages open: ', 'ald_autoclose_plugin'); ?></strong>
 		<input type="text" name="comment_pids" id="comment_pids" value="<?php echo $acc_settings[comment_pids]; ?>" size="15" /> <?php _e('(Comma separated list of post IDs)', 'ald_autoclose_plugin'); ?>
 		</label>
 	</p>
 	<p>
-		<label><strong><?php _e('Keep pingbacks / trackbacks on these posts open: ', 'ald_autoclose_plugin'); ?></strong>
+		<label><strong><?php _e('Keep pingbacks / trackbacks on these posts/pages open: ', 'ald_autoclose_plugin'); ?></strong>
 		<input type="text" name="pbtb_pids" id="pbtb_pids" value="<?php echo $acc_settings[pbtb_pids]; ?>" size="15" /> <?php _e('(Comma separated list of post IDs)', 'ald_autoclose_plugin'); ?>
 		</label>
 	</p>
 	<hr />
 	<p>
 		<label><input type="checkbox" name="close_comment" id="close_comment" value="true" <?php if ($acc_settings[close_comment]) { ?> checked="checked" <?php } ?> />
-		<?php _e('Close Comments?', 'ald_autoclose_plugin'); ?></label>
+		<?php _e('Close Comments on posts?', 'ald_autoclose_plugin'); ?></label>
+		<label><input type="checkbox" name="close_comment_pages" id="close_comment_pages" value="true" <?php if ($acc_settings[close_comment_pages]) { ?> checked="checked" <?php } ?> />
+		<?php _e('Close Comments on pages?', 'ald_autoclose_plugin'); ?></label>
 	</p>
 	<p>
-		<label><strong><?php _e('Close Comments on posts older than ', 'ald_autoclose_plugin'); ?></strong>
+		<label><strong><?php _e('Close Comments on posts/pages older than ', 'ald_autoclose_plugin'); ?></strong>
 		<input type="text" name="comment_age" id="comment_age" value="<?php echo $acc_settings[comment_age]; ?>" size="5" /><?php _e(' days. (Only effective if above option is checked)', 'ald_autoclose_plugin'); ?>
 		</label>
 	</p>
 	<p>
 		<label><input type="checkbox" name="close_pbtb" id="close_pbtb" value="true" <?php if ($acc_settings[close_pbtb]) { ?> checked="checked" <?php } ?> />
-		<?php _e('Close Pingbacks/Trackbacks?', 'ald_autoclose_plugin'); ?></label>
+		<?php _e('Close Pingbacks/Trackbacks on posts?', 'ald_autoclose_plugin'); ?></label>
+		<label><input type="checkbox" name="close_pbtb_pages" id="close_pbtb_pages" value="true" <?php if ($acc_settings[close_pbtb_pages]) { ?> checked="checked" <?php } ?> />
+		<?php _e('Close Pingbacks/Trackbacks on pages?', 'ald_autoclose_plugin'); ?></label>
 	</p>
 	<p>
-		<label><strong><?php _e('Close Pingbacks/Trackbacks on posts older than ', 'ald_autoclose_plugin'); ?></strong>
+		<label><strong><?php _e('Close Pingbacks/Trackbacks on posts/pages older than ', 'ald_autoclose_plugin'); ?></strong>
 		<input type="text" name="pbtb_age" id="pbtb_age" value="<?php echo $acc_settings[pbtb_age]; ?>" size="5" /><?php _e(' days. (Only effective if above option is checked)', 'ald_autoclose_plugin'); ?>
 		</label>
 	</p>
@@ -173,6 +213,8 @@ function acc_options() {
         <input name="run_once" type="submit" id="run_once" value="Save Options and Run Once" style="border:#FF6600 1px solid" />
 	    <input type="submit" name="acc_save" id="acc_save" value="Save Options" style="border:#00CC00 1px solid" />
         <input name="acc_default" type="submit" id="acc_default" value="Default Options" style="border:#FF0000 1px solid" onclick="if (!confirm('Do you want to set options to Default?')) return false;" />
+        <input name="acc_opencomments" type="submit" id="acc_opencomments" value="Open Comments" style="border:#6600FF 1px solid" onclick="if (!confirm('Do you want to open comments on all posts?')) return false;" />
+        <input name="acc_openpings" type="submit" id="acc_openpings" value="Open Pings" style="border:#6600FF 1px solid" onclick="if (!confirm('Do you want to open pings on all posts?')) return false;" />
 	</p>
     </fieldset>
   </form>

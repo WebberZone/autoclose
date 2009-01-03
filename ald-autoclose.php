@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Auto-Close Comments, Pingbacks and Trackbacks
-Version:     1.2
+Version:     1.3
 Plugin URI:  http://ajaydsouza.com/wordpress/plugins/autoclose/
 Description: Automatically close Comments, Pingbacks and Trackbacks after certain amount of days.  <a href="options-general.php?page=acc_options">Configure...</a>
 Author:      Ajay D'Souza
@@ -32,63 +32,97 @@ function ald_acc() {
     $comment_pids = $acc_settings[comment_pids];
     $pbtb_pids = $acc_settings[pbtb_pids];
 	
-	// Close Comments
+	// Close Comments on posts
 	if ($acc_settings[close_comment]) {
-    $comment_date = $wpdb->get_var("
-        SELECT DATE_ADD(DATE_SUB(CURDATE(), INTERVAL $comment_age), INTERVAL 1 DAY)
-    ");
+		$comment_date = $wpdb->get_var("
+			SELECT DATE_ADD(DATE_SUB(CURDATE(), INTERVAL $comment_age), INTERVAL 1 DAY)
+		");
 
-    $wpdb->query("
-        UPDATE $poststable
-        SET comment_status = 'closed'
-        WHERE comment_status = 'open'
-        AND post_status = 'publish'
-        AND post_date < '$comment_date'
-    ");
+		$wpdb->query("
+			UPDATE $poststable
+			SET comment_status = 'closed'
+			WHERE comment_status = 'open'
+			AND post_status = 'publish'
+			AND post_type = 'post'
+			AND post_date < '$comment_date'
+		");
 	}
 	
-	// Close Pingbacks/Trackbacks
+	// Close Pingbacks/Trackbacks on posts
 	if ($acc_settings[close_pbtb]) {
-    $pbtb_date = $wpdb->get_var("
-        SELECT DATE_ADD(DATE_SUB(CURDATE(), INTERVAL $pbtb_age), INTERVAL 1 DAY)
-    ");
+		$pbtb_date = $wpdb->get_var("
+			SELECT DATE_ADD(DATE_SUB(CURDATE(), INTERVAL $pbtb_age), INTERVAL 1 DAY)
+		");
 
-    $wpdb->query("
-        UPDATE $poststable
-        SET ping_status = 'closed'
-        WHERE ping_status = 'open'
-        AND post_status = 'publish'
-        AND post_date < '$pbtb_date'
-    ");
+		$wpdb->query("
+			UPDATE $poststable
+			SET ping_status = 'closed'
+			WHERE ping_status = 'open'
+			AND post_status = 'publish'
+			AND post_type = 'post'
+			AND post_date < '$pbtb_date'
+		");
+	}
+
+	// Close Comments on pages
+	if ($acc_settings[close_comment]) {
+		$comment_date = $wpdb->get_var("
+			SELECT DATE_ADD(DATE_SUB(CURDATE(), INTERVAL $comment_age), INTERVAL 1 DAY)
+		");
+
+		$wpdb->query("
+			UPDATE $poststable
+			SET comment_status = 'closed'
+			WHERE comment_status = 'open'
+			AND post_status = 'publish'
+			AND post_type = 'page'
+			AND post_date < '$comment_date'
+		");
+	}
+	
+	// Close Pingbacks/Trackbacks on pages
+	if ($acc_settings[close_pbtb]) {
+		$pbtb_date = $wpdb->get_var("
+			SELECT DATE_ADD(DATE_SUB(CURDATE(), INTERVAL $pbtb_age), INTERVAL 1 DAY)
+		");
+
+		$wpdb->query("
+			UPDATE $poststable
+			SET ping_status = 'closed'
+			WHERE ping_status = 'open'
+			AND post_status = 'publish'
+			AND post_type = 'page'
+			AND post_date < '$pbtb_date'
+		");
 	}
 
 	// Open Comments on these posts
 	if ($acc_settings[comment_pids]!='') {
-    $wpdb->query("
-        UPDATE $poststable
-        SET comment_status = 'open'
-        WHERE comment_status = 'closed'
-        AND post_status = 'publish'
-        AND ID IN ($comment_pids)
-    ");
+		$wpdb->query("
+			UPDATE $poststable
+			SET comment_status = 'open'
+			WHERE comment_status = 'closed'
+			AND post_status = 'publish'
+			AND ID IN ($comment_pids)
+		");
 	}
 	// Open Pingbacks / Trackbacks on these posts
 	if ($acc_settings[pbtb_pids]!='') {
-    $wpdb->query("
-        UPDATE $poststable
-        SET ping_status = 'open'
-        WHERE ping_status = 'closed'
-        AND post_status = 'publish'
-        AND ID IN ($pbtb_pids)
-    ");
+		$wpdb->query("
+			UPDATE $poststable
+			SET ping_status = 'open'
+			WHERE ping_status = 'closed'
+			AND post_status = 'publish'
+			AND ID IN ($pbtb_pids)
+		");
 	}
 
 	// Delete Post Revisions (WordPress 2.6 and above)
 	if ($acc_settings[delete_revisions]) {
-    $wpdb->query("
-        DELETE FROM $poststable
-		WHERE post_type = 'revision'
-    ");
+		$wpdb->query("
+			DELETE FROM $poststable
+			WHERE post_type = 'revision'
+		");
 	}
 }
 
@@ -99,8 +133,10 @@ function acc_default_options() {
 						pbtb_age => '90',		// Close pingbacks/trackbacks before these many days
 						comment_pids => '',	// Comments on these Post IDs to open
 						pbtb_pids => '',		// Pingback on these Post IDs to open
-						close_comment => false,	// Close Comments
-						close_pbtb => false,		// Close Pingbacks and Trackbacks
+						close_comment => false,	// Close Comments on posts
+						close_comment_pages => false,	// Close Comments on pages
+						close_pbtb => false,		// Close Pingbacks and Trackbacks on posts
+						close_pbtb_pages => false,		// Close Pingbacks and Trackbacks on pages
 						delete_revisions => true,		// Delete post revisions
 						daily_run => false,		// Run Daily?
 						cron_hour => '0',		// Cron Hour
