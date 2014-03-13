@@ -12,19 +12,18 @@ Close comments, pingbacks and trackbacks on your posts automatically at interval
 
 ## Description
 
-<a href="http://ajaydsouza.com/wordpress/plugins/autoclose/">Auto-Close Comments, Pingbacks and Trackbacks</a> is a powerful plugin for WordPress that allows you to display a list of related posts on your website and in your feed. 
-
-Automatically close comments, pingbacks and trackbacks on your posts. You can choose to keep comments / pingbacks / trackbacks open on certain posts.
+<a href="http://ajaydsouza.com/wordpress/plugins/autoclose/">Auto-Close Comments, Pingbacks and Trackbacks</a> is a simple WordPress plugin that will let you automatically close comments, pingbacks and trackbacks on your posts. You can choose to keep comments / pingbacks / trackbacks open on posts and pages.
 
 An extra feature is the ability to delete post revisions that were introduced in WordPress v2.6 onwards.
 
 
 ### Key features
 
-* **Close comments**: Automatically close comments on posts and pages.
-* **Close pingbacks and trackbacks**: Automatically close pingbacks and trackbacks on posts and pages.
+* **Close comments**: Automatically close comments on posts and pages
+* **Close pingbacks and trackbacks**: Automatically close pingbacks and trackbacks on posts and pages
 * **Choose how old**: Choose a custom time period as to when the comments, pingbacks and trackbacks need to be closed
 * **Scheduling**: You can also schedule a cron job to automatically close comments, pingbacks and trackbacks daily
+* **Exclusions**: Add a comma separated list of posts or pages to prevent comments from being closed on them
 
 
 ## Screenshots
