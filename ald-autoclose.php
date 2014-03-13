@@ -126,29 +126,40 @@ function ald_acc() {
 	}
 }
 
-// Default Options
+
+/**
+ * Default options.
+ * 
+ * @access public
+ * @return void
+ */
 function acc_default_options() {
-	$acc_settings = 	Array (
-						comment_age => '90',	// Close comments before these many days
-						pbtb_age => '90',		// Close pingbacks/trackbacks before these many days
-						comment_pids => '',	// Comments on these Post IDs to open
-						pbtb_pids => '',		// Pingback on these Post IDs to open
-						close_comment => false,	// Close Comments on posts
-						close_comment_pages => false,	// Close Comments on pages
-						close_pbtb => false,		// Close Pingbacks and Trackbacks on posts
-						close_pbtb_pages => false,		// Close Pingbacks and Trackbacks on pages
-						delete_revisions => true,		// Delete post revisions
-						daily_run => false,		// Run Daily?
-						cron_hour => '0',		// Cron Hour
-						cron_min => '0',		// Cron Minute
+	$acc_settings = 	array (
+						'comment_age' => '90',	// Close comments before these many days
+						'pbtb_age' => '90',		// Close pingbacks/trackbacks before these many days
+						'comment_pids' => '',	// Comments on these Post IDs to open
+						'pbtb_pids' => '',		// Pingback on these Post IDs to open
+						'close_comment' => false,	// Close Comments on posts
+						'close_comment_pages' => false,	// Close Comments on pages
+						'close_pbtb' => false,		// Close Pingbacks and Trackbacks on posts
+						'close_pbtb_pages' => false,		// Close Pingbacks and Trackbacks on pages
+						'delete_revisions' => true,		// Delete post revisions
+						'daily_run' => false,		// Run Daily?
+						'cron_hour' => '0',		// Cron Hour
+						'cron_min' => '0',		// Cron Minute
 						);
 	
 	return $acc_settings;
 }
 
-// Function to read options from the database
-function acc_read_options() 
-{
+
+/**
+ * Function to read options from the database.
+ * 
+ * @access public
+ * @return void
+ */
+function acc_read_options() {
 	$acc_settings_changed = false;
 	
 	$defaults = acc_default_options();
@@ -165,26 +176,27 @@ function acc_read_options()
 		update_option('ald_acc_settings', $acc_settings);
 	
 	return $acc_settings;
-
 }
 
-// Function to enable run or actions
-function acc_enable_run($hour, $min)
-{
-	if (function_exists('wp_schedule_event'))
-	{
+
+/**
+ * // Function to enable run or actions.
+ * 
+ * @access public
+ * @param int $hour
+ * @param int $min
+ * @return void
+ */
+function acc_enable_run($hour, $min) {
+	if (function_exists('wp_schedule_event')) {
 		// Invoke WordPress 2.1 internal cron
 		if (!wp_next_scheduled('ald_acc_hook')) {
 			wp_schedule_event( mktime($hour,$min), 'daily', 'ald_acc_hook' );
-		}
-		else
-		{
+		} else {
 			wp_clear_scheduled_hook('ald_acc_hook');
 			wp_schedule_event( mktime($hour,$min), 'daily', 'ald_acc_hook' );
 		}
-	}
-	else
-	{
+	} else	{
 		add_action('publish_post',   'ald_acc', 7);
 		add_action('comment_post',   'ald_acc', 7);
 		add_action('trackback_post', 'ald_acc', 7);
@@ -192,17 +204,19 @@ function acc_enable_run($hour, $min)
 	}
 }
 
-// Function to disable daily run or actions
-function acc_disable_run()
-{
-	if (function_exists('wp_schedule_event'))
-	{
+
+/**
+ * Function to disable daily run or actions.
+ * 
+ * @access public
+ * @return void
+ */
+function acc_disable_run() {
+	if (function_exists('wp_schedule_event')) {
 		if (wp_next_scheduled('ald_acc_hook')) {
 			wp_clear_scheduled_hook('ald_acc_hook');
 		}
-	}
-	else
-	{
+	} else {
 		remove_action('publish_post',   'ald_acc');
 		remove_action('comment_post',   'ald_acc');
 		remove_action('trackback_post', 'ald_acc');
@@ -210,14 +224,29 @@ function acc_disable_run()
 	}
 }
 
-// Function to add weekly and fortnightly recurrences - Sample Code courtesy http://blog.slaven.net.au/archives/2007/02/01/timing-is-everything-scheduling-in-wordpress/
+
 if (!function_exists('ald_more_reccurences')) {
+/**
+ * Function to add weekly and fortnightly recurrences - Sample Code courtesy http://blog.slaven.net.au/archives/2007/02/01/timing-is-everything-scheduling-in-wordpress/.
+ * 
+ * @access public
+ * @return void
+ */
 function ald_more_reccurences() {
-	return array(
-		'weekly' => array('interval' => 604800, 'display' => 'Once Weekly'),
-		'fortnightly' => array('interval' => 1209600, 'display' => 'Once Fortnightly'),
-		'monthly' => array('interval' => 2419200, 'display' => 'Once Monthly'),
+	// add a 'weekly' interval
+	$schedules['weekly'] = array(
+		'interval' => 604800,
+		'display' => __('Once Weekly', TPTN_LOCAL_NAME)
 	);
+	$schedules['fortnightly'] = array(
+		'interval' => 1209600,
+		'display' => __('Once Fortnightly', TPTN_LOCAL_NAME)
+	);
+	$schedules['monthly'] = array(
+		'interval' => 2635200,
+		'display' => __('Once Monthly', TPTN_LOCAL_NAME)
+	);
+	return $schedules;
 }
 add_filter('cron_schedules', 'ald_more_reccurences');
 }
