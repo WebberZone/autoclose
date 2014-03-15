@@ -43,7 +43,7 @@ function acc_options() {
 		if ( isset( $_POST['acc_save'] ) ) {
 			echo '<div id="message" class="updated fade"><p>'. __('Options saved successfully.','ald_autoclose_plugin') .'</p></div>';
 		} else {
-			ald_acc();
+			ald_acc();	// Call the main function 
 			
 			echo '<div id="message" class="updated fade">';
 			if ( $acc_settings['close_comment'] ) {
@@ -127,9 +127,6 @@ function acc_options() {
 	      <h3 class='hndle'><span><?php _e( 'Information', 'ald_autoclose_plugin' ); ?></span></h3>
 	      <div class="inside">
 			<table class="form-table">
-			<tr>
-				<th scope="row" colspan="2"><label for="limit"><?php _e( 'Number of related posts to display: ', 'ald_autoclose_plugin' ); ?></label></th>
-			</tr>
 			<tr>
 				<td colspan="2">
 				<?php if ( wp_next_scheduled( 'ald_acc_hook' ) ) { ?>

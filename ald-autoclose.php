@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Auto-Close Comments, Pingbacks and Trackbacks
-Version:     1.3.1
+Version:     1.3.2
 Plugin URI:  http://ajaydsouza.com/wordpress/plugins/autoclose/
 Description: Automatically close Comments, Pingbacks and Trackbacks after certain amount of days.  <a href="options-general.php?page=acc_options">Configure...</a>
 Author:      Ajay D'Souza
@@ -45,68 +45,64 @@ function ald_acc() {
     $comment_pids = $acc_settings['comment_pids'];
     $pbtb_pids = $acc_settings['pbtb_pids'];
 	
+	// What is the time now?
+	$now = gmdate( "Y-m-d H:i:s", ( time() + ( get_option( 'gmt_offset' ) * 3600 ) ) );
+
+	// Get the date up to which comments and pings will be closed
+	$comment_age = $comment_age - 1;
+	$comment_date = strtotime( '-' . $comment_age . ' DAY' , strtotime( $now ) );
+	$comment_date = date ( 'Y-m-d H:i:s' , $comment_date );
+
+	$pbtb_age = $pbtb_age - 1;
+	$pbtb_date = strtotime( '-' . $pbtb_age . ' DAY' , strtotime( $now ) );
+	$pbtb_date = date ( 'Y-m-d H:i:s' , $pbtb_date );
+	
 	// Close Comments on posts
 	if ($acc_settings['close_comment']) {
-		$comment_date = $wpdb->get_var("
-			SELECT DATE_ADD(DATE_SUB(CURDATE(), INTERVAL $comment_age), INTERVAL 1 DAY)
-		");
-
-		$wpdb->query("
+		$wpdb->query( $wpdb->prepare( "
 			UPDATE $poststable
 			SET comment_status = 'closed'
 			WHERE comment_status = 'open'
 			AND post_status = 'publish'
 			AND post_type = 'post'
-			AND post_date < '$comment_date'
-		");
+			AND post_date < '%s'
+		", $comment_date ) );
 	}
 	
 	// Close Pingbacks/Trackbacks on posts
 	if ($acc_settings['close_pbtb']) {
-		$pbtb_date = $wpdb->get_var("
-			SELECT DATE_ADD(DATE_SUB(CURDATE(), INTERVAL $pbtb_age), INTERVAL 1 DAY)
-		");
-
-		$wpdb->query("
+		$wpdb->query( $wpdb->prepare( "
 			UPDATE $poststable
 			SET ping_status = 'closed'
 			WHERE ping_status = 'open'
 			AND post_status = 'publish'
 			AND post_type = 'post'
-			AND post_date < '$pbtb_date'
-		");
+			AND post_date < '%s'
+		", $pbtb_date ) );
 	}
 
 	// Close Comments on pages
 	if ($acc_settings['close_comment_pages']) {
-		$comment_date = $wpdb->get_var("
-			SELECT DATE_ADD(DATE_SUB(CURDATE(), INTERVAL $comment_age), INTERVAL 1 DAY)
-		");
-
-		$wpdb->query("
+		$wpdb->query( $wpdb->prepare( "
 			UPDATE $poststable
 			SET comment_status = 'closed'
 			WHERE comment_status = 'open'
 			AND post_status = 'publish'
 			AND post_type = 'page'
-			AND post_date < '$comment_date'
-		");
+			AND post_date < '%s'
+		", $comment_date ) );
 	}
 	
 	// Close Pingbacks/Trackbacks on pages
 	if ($acc_settings['close_pbtb_pages']) {
-		$pbtb_date = $wpdb->get_var("
-			SELECT DATE_ADD(DATE_SUB(CURDATE(), INTERVAL $pbtb_age), INTERVAL 1 DAY)
-		");
-
-		$wpdb->query("
+		$wpdb->query( $wpdb->prepare( "
 			UPDATE $poststable
 			SET ping_status = 'closed'
 			WHERE ping_status = 'open'
 			AND post_status = 'publish'
 			AND post_type = 'page'
-			AND post_date < '$pbtb_date'
-		");
+			AND post_date < '%s'
+		", $pbtb_date ) );
 	}
 
 	// Open Comments on these posts
@@ -119,6 +115,7 @@ function ald_acc() {
 			AND ID IN ($comment_pids)
 		");
 	}
+	
 	// Open Pingbacks / Trackbacks on these posts
 	if ($acc_settings['pbtb_pids']!='') {
 		$wpdb->query("
@@ -157,7 +154,7 @@ function acc_default_options() {
 						'close_comment_pages' => false,	// Close Comments on pages
 						'close_pbtb' => false,		// Close Pingbacks and Trackbacks on posts
 						'close_pbtb_pages' => false,		// Close Pingbacks and Trackbacks on pages
-						'delete_revisions' => true,		// Delete post revisions
+						'delete_revisions' => false,		// Delete post revisions
 						'daily_run' => false,		// Run Daily?
 						'cron_hour' => '0',		// Cron Hour
 						'cron_min' => '0',		// Cron Minute
@@ -194,7 +191,7 @@ function acc_read_options() {
 
 
 /**
- * // Function to enable run or actions.
+ * Function to enable run or actions.
  * 
  * @access public
  * @param int $hour
@@ -202,12 +199,11 @@ function acc_read_options() {
  * @return void
  */
 function acc_enable_run($hour, $min) {
-	// Invoke WordPress 2.1 internal cron
 	if (!wp_next_scheduled('ald_acc_hook')) {
-		wp_schedule_event( mktime($hour,$min), 'daily', 'ald_acc_hook' );
+		wp_schedule_event( mktime( $hour, $min, 0, date( "n" ), date( "j" ) + 1, date( "Y" ) ), 'daily', 'ald_acc_hook' );
 	} else {
 		wp_clear_scheduled_hook('ald_acc_hook');
-		wp_schedule_event( mktime($hour,$min), 'daily', 'ald_acc_hook' );
+		wp_schedule_event( mktime( $hour, $min, 0, date( "n" ), date( "j" ) + 1, date( "Y" ) ), 'daily', 'ald_acc_hook' );
 	}
 }
 
@@ -219,22 +215,15 @@ function acc_enable_run($hour, $min) {
  * @return void
  */
 function acc_disable_run() {
-	if (function_exists('wp_schedule_event')) {
-		if (wp_next_scheduled('ald_acc_hook')) {
-			wp_clear_scheduled_hook('ald_acc_hook');
-		}
-	} else {
-		remove_action('publish_post',   'ald_acc');
-		remove_action('comment_post',   'ald_acc');
-		remove_action('trackback_post', 'ald_acc');
-		remove_action('pingback_post',  'ald_acc');
+	if ( wp_next_scheduled( 'ald_acc_hook' ) ) {
+		wp_clear_scheduled_hook( 'ald_acc_hook' );
 	}
 }
 
 
-// This function adds an Options page in WP Admin
-if (is_admin() || strstr($_SERVER['PHP_SELF'], 'wp-admin/')) {
-	require_once(ALD_ACC_DIR . "/admin.inc.php");
+// Process the admin page if we're on the admin screen
+if ( is_admin() || strstr( $_SERVER['PHP_SELF'], 'wp-admin/' ) ) {
+	require_once( ALD_ACC_DIR . "/admin.inc.php" );
 }
 
 ?>
