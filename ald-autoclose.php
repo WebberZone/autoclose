@@ -10,30 +10,43 @@ Author URI:  http://ajaydsouza.com/
 
 if (!defined('ABSPATH')) die("Aren't you supposed to come here via WP-Admin?");
 
-function ald_autoclose_init() {
-     load_plugin_textdomain('ald_autoclose_plugin', PLUGINDIR.'/'.dirname(plugin_basename(__FILE__)));
-}
-add_action('init', 'ald_autoclose_init');
-
 define('ALD_ACC_DIR', dirname(__FILE__));
 
-/*********************************************************************
-*				Main Function (Do not edit)					*
-********************************************************************/
+// Guess the location
+$acc_path = plugin_dir_path(__FILE__);
+$acc_url = plugins_url().'/'.plugin_basename(dirname(__FILE__));
 
-add_action('ald_acc_hook', 'ald_acc');
+
+/**
+ * Initialises text domain for l10n.
+ * 
+ * @access public
+ * @return void
+ */
+function ald_acc_lang_init() {
+	load_plugin_textdomain( 'ald_autoclose_plugin', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
+}
+add_action('plugins_loaded', 'ald_acc_lang_init');
+
+
+/**
+ * Main function.
+ * 
+ * @access public
+ * @return void
+ */
 function ald_acc() {
     global $wpdb;
     $poststable = $wpdb->posts;
 	$acc_settings = acc_read_options();
 
-    $comment_age = $acc_settings[comment_age]. ' DAY';
-    $pbtb_age = $acc_settings[pbtb_age]. ' DAY';
-    $comment_pids = $acc_settings[comment_pids];
-    $pbtb_pids = $acc_settings[pbtb_pids];
+    $comment_age = $acc_settings['comment_age']. ' DAY';
+    $pbtb_age = $acc_settings['pbtb_age']. ' DAY';
+    $comment_pids = $acc_settings['comment_pids'];
+    $pbtb_pids = $acc_settings['pbtb_pids'];
 	
 	// Close Comments on posts
-	if ($acc_settings[close_comment]) {
+	if ($acc_settings['close_comment']) {
 		$comment_date = $wpdb->get_var("
 			SELECT DATE_ADD(DATE_SUB(CURDATE(), INTERVAL $comment_age), INTERVAL 1 DAY)
 		");
@@ -49,7 +62,7 @@ function ald_acc() {
 	}
 	
 	// Close Pingbacks/Trackbacks on posts
-	if ($acc_settings[close_pbtb]) {
+	if ($acc_settings['close_pbtb']) {
 		$pbtb_date = $wpdb->get_var("
 			SELECT DATE_ADD(DATE_SUB(CURDATE(), INTERVAL $pbtb_age), INTERVAL 1 DAY)
 		");
@@ -65,7 +78,7 @@ function ald_acc() {
 	}
 
 	// Close Comments on pages
-	if ($acc_settings[close_comment_pages]) {
+	if ($acc_settings['close_comment_pages']) {
 		$comment_date = $wpdb->get_var("
 			SELECT DATE_ADD(DATE_SUB(CURDATE(), INTERVAL $comment_age), INTERVAL 1 DAY)
 		");
@@ -81,7 +94,7 @@ function ald_acc() {
 	}
 	
 	// Close Pingbacks/Trackbacks on pages
-	if ($acc_settings[close_pbtb_pages]) {
+	if ($acc_settings['close_pbtb_pages']) {
 		$pbtb_date = $wpdb->get_var("
 			SELECT DATE_ADD(DATE_SUB(CURDATE(), INTERVAL $pbtb_age), INTERVAL 1 DAY)
 		");
@@ -97,7 +110,7 @@ function ald_acc() {
 	}
 
 	// Open Comments on these posts
-	if ($acc_settings[comment_pids]!='') {
+	if ($acc_settings['comment_pids']!='') {
 		$wpdb->query("
 			UPDATE $poststable
 			SET comment_status = 'open'
@@ -107,7 +120,7 @@ function ald_acc() {
 		");
 	}
 	// Open Pingbacks / Trackbacks on these posts
-	if ($acc_settings[pbtb_pids]!='') {
+	if ($acc_settings['pbtb_pids']!='') {
 		$wpdb->query("
 			UPDATE $poststable
 			SET ping_status = 'open'
@@ -118,13 +131,14 @@ function ald_acc() {
 	}
 
 	// Delete Post Revisions (WordPress 2.6 and above)
-	if ($acc_settings[delete_revisions]) {
+	if ($acc_settings['delete_revisions']) {
 		$wpdb->query("
 			DELETE FROM $poststable
 			WHERE post_type = 'revision'
 		");
 	}
 }
+add_action('ald_acc_hook', 'ald_acc');
 
 
 /**
@@ -188,19 +202,12 @@ function acc_read_options() {
  * @return void
  */
 function acc_enable_run($hour, $min) {
-	if (function_exists('wp_schedule_event')) {
-		// Invoke WordPress 2.1 internal cron
-		if (!wp_next_scheduled('ald_acc_hook')) {
-			wp_schedule_event( mktime($hour,$min), 'daily', 'ald_acc_hook' );
-		} else {
-			wp_clear_scheduled_hook('ald_acc_hook');
-			wp_schedule_event( mktime($hour,$min), 'daily', 'ald_acc_hook' );
-		}
-	} else	{
-		add_action('publish_post',   'ald_acc', 7);
-		add_action('comment_post',   'ald_acc', 7);
-		add_action('trackback_post', 'ald_acc', 7);
-		add_action('pingback_post',  'ald_acc', 7);
+	// Invoke WordPress 2.1 internal cron
+	if (!wp_next_scheduled('ald_acc_hook')) {
+		wp_schedule_event( mktime($hour,$min), 'daily', 'ald_acc_hook' );
+	} else {
+		wp_clear_scheduled_hook('ald_acc_hook');
+		wp_schedule_event( mktime($hour,$min), 'daily', 'ald_acc_hook' );
 	}
 }
 
@@ -222,33 +229,6 @@ function acc_disable_run() {
 		remove_action('trackback_post', 'ald_acc');
 		remove_action('pingback_post',  'ald_acc');
 	}
-}
-
-
-if (!function_exists('ald_more_reccurences')) {
-/**
- * Function to add weekly and fortnightly recurrences - Sample Code courtesy http://blog.slaven.net.au/archives/2007/02/01/timing-is-everything-scheduling-in-wordpress/.
- * 
- * @access public
- * @return void
- */
-function ald_more_reccurences() {
-	// add a 'weekly' interval
-	$schedules['weekly'] = array(
-		'interval' => 604800,
-		'display' => __('Once Weekly', TPTN_LOCAL_NAME)
-	);
-	$schedules['fortnightly'] = array(
-		'interval' => 1209600,
-		'display' => __('Once Fortnightly', TPTN_LOCAL_NAME)
-	);
-	$schedules['monthly'] = array(
-		'interval' => 2635200,
-		'display' => __('Once Monthly', TPTN_LOCAL_NAME)
-	);
-	return $schedules;
-}
-add_filter('cron_schedules', 'ald_more_reccurences');
 }
 
 

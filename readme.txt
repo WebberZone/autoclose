@@ -36,6 +36,9 @@ An extra feature is the ability to delete post revisions that were introduced in
 
 == Changelog ==
 
+= 1.4 =
+* New: Responsive admin interface
+
 = 1.3.1 =
 * New: Now separately choose to close on posts and pages. Also added buttons to open all comments and open all pings
 
