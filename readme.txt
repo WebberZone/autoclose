@@ -5,7 +5,7 @@ Donate link: http://ajaydsouza.com/donate/
 Stable tag: trunk
 Requires at least: 3.0
 Tested up to: 3.9
-
+License: GPL v2 or later
 
 Close comments, pingbacks and trackbacks on your posts automatically at intervals set by you
 
@@ -21,7 +21,7 @@ An extra feature is the ability to delete post revisions that were introduced in
 * **Close pingbacks and trackbacks**: Automatically close pingbacks and trackbacks on posts and pages.
 * **Choose how old**: Choose a custom time period as to when the comments, pingbacks and trackbacks need to be closed
 * **Scheduling**: You can also schedule a cron job to automatically close comments, pingbacks and trackbacks daily
-* **Bonus**: Automatically delete post revisions
+* **Bonus**: Delete post revisions
 
 
 == Installation ==
@@ -41,6 +41,12 @@ An extra feature is the ability to delete post revisions that were introduced in
 3. Activate the Plugin in WP-Admin. 
 
 4. Goto **Settings &raquo; Auto-Close** to configure
+
+
+== Upgrade Notice ==
+
+= 1.4 =
+* New: Responsive admin interface and compatible with WordPress up to 3.9
 
 
 == Changelog ==
