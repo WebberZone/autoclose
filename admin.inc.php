@@ -38,38 +38,38 @@ function acc_options() {
 			acc_disable_run();
 		}
 			
-		update_option('ald_acc_settings', $acc_settings);
+		update_option( 'ald_acc_settings', $acc_settings );
 		
 		if ( isset( $_POST['acc_save'] ) ) {
-			echo '<div id="message" class="updated fade"><p>'. __('Options saved successfully.',ACC_LOCAL_NAME) .'</p></div>';
+			echo '<div id="message" class="updated fade"><p>'. __( 'Options saved successfully.', ACC_LOCAL_NAME ) .'</p></div>';
 		} else {
 			ald_acc();	// Call the main function 
 			
 			echo '<div id="message" class="updated fade">';
 			if ( $acc_settings['close_comment'] ) {
-			    echo "<p><strong>". __('Comments on posts closed upto',ACC_LOCAL_NAME) .":</strong> ";
-				echo date('F j, Y, g:i a', (time() - $acc_settings['comment_age'] * 86400));
+			    echo "<p><strong>". __( 'Comments on posts closed upto', ACC_LOCAL_NAME ) .":</strong> ";
+				echo date( 'F j, Y, g:i a', ( time() - $acc_settings['comment_age'] * 86400 ) );
 				echo "</p>";
 			}
 			if ( $acc_settings['close_pbtb'] ) {
-				echo "<p><strong>". __('Pingbacks/Trackbacks on posts closed upto',ACC_LOCAL_NAME) .": </strong> ";
-				echo date('F j, Y, g:i a', (time() - $acc_settings['pbtb_age'] * 86400));
+				echo "<p><strong>". __( 'Pingbacks/Trackbacks on posts closed upto', ACC_LOCAL_NAME ) .": </strong> ";
+				echo date( 'F j, Y, g:i a', ( time() - $acc_settings['pbtb_age'] * 86400 ) );
 				echo "</p>";
 			}
 			if ( $acc_settings['close_comment_pages'] ) {
-			    echo "<p><strong>". __('Comments on pages closed upto',ACC_LOCAL_NAME) .":</strong> ";
-				echo date('F j, Y, g:i a', (time() - $acc_settings['comment_age'] * 86400));
+			    echo "<p><strong>". __( 'Comments on pages closed upto', ACC_LOCAL_NAME ) .":</strong> ";
+				echo date( 'F j, Y, g:i a', ( time() - $acc_settings['comment_age'] * 86400 ) );
 				echo "</p>";
 			}
 			if ( $acc_settings['close_pbtb_pages'] ) {
-				echo "<p><strong>". __('Pingbacks/Trackbacks on pages closed upto',ACC_LOCAL_NAME) .": </strong> ";
-				echo date('F j, Y, g:i a', (time() - $acc_settings['pbtb_age'] * 86400));
+				echo "<p><strong>". __( 'Pingbacks/Trackbacks on pages closed upto', ACC_LOCAL_NAME ) .": </strong> ";
+				echo date( 'F j, Y, g:i a', ( time() - $acc_settings['pbtb_age'] * 86400 ) );
 				echo "</p>";
 			}
 			if ( $acc_settings['delete_revisions'] ) {
-				echo "<p><strong>". __('Post revisions deleted',ACC_LOCAL_NAME) ."</strong></p>";
+				echo "<p><strong>". __( 'Post revisions deleted', ACC_LOCAL_NAME ) ."</strong></p>";
 			}
-			echo '<p>'. __('Options saved successfully.',ACC_LOCAL_NAME) .'</p></div>';
+			echo '<p>'. __( 'Options saved successfully.', ACC_LOCAL_NAME ) .'</p></div>';
 		}
 	}
 	
@@ -80,33 +80,33 @@ function acc_options() {
 		update_option('ald_acc_settings', $acc_settings);
 		acc_disable_run();
 		
-		echo '<div id="message" class="updated fade"><p>'. __('Options set to Default.',ACC_LOCAL_NAME) .'</p></div>';
+		echo '<div id="message" class="updated fade"><p>'. __( 'Options set to Default.', ACC_LOCAL_NAME ) .'</p></div>';
 	}
 
 	if ( ( isset( $_POST['acc_opencomments'] ) ) && ( check_admin_referer( 'acc-plugin' ) ) ) {
-		$wpdb->query("
+		$wpdb->query( "
 			UPDATE $poststable
 			SET comment_status = 'open'
 			WHERE comment_status = 'closed'
 			AND post_status = 'publish'
-		");
+		" );
 	
-		echo '<div id="message" class="updated fade"><p>'. __('Comments opened on all posts',ACC_LOCAL_NAME) .'</p></div>';
+		echo '<div id="message" class="updated fade"><p>'. __( 'Comments opened on all posts', ACC_LOCAL_NAME ) .'</p></div>';
 	}
 
 	if ( ( isset( $_POST['acc_openpings'] ) ) && ( check_admin_referer( 'acc-plugin' ) ) ) {
-		$wpdb->query("
+		$wpdb->query( "
 			UPDATE $poststable
 			SET ping_status = 'open'
 			WHERE ping_status = 'closed'
 			AND post_status = 'publish'
-		");
+		" );
 	
 		echo '<div id="message" class="updated fade"><p>'. __( 'Pingbacks/Trackbacks opened on all posts', ACC_LOCAL_NAME ) .'</p></div>';
 	}
 
-	if ( function_exists('wp_schedule_event') ) {
-		if (wp_next_scheduled('ald_acc_hook')) {
+	if ( function_exists( 'wp_schedule_event' ) ) {
+		if ( wp_next_scheduled('ald_acc_hook' ) ) {
 			$ald_acc_info['hook_schedule'] = wp_get_schedule( 'ald_acc_hook' );
 			$ald_acc_info['next_run'] = date( "F j, Y, g:i a", wp_next_scheduled( 'ald_acc_hook' ) );
 			$ald_acc_info['comments_date'] =  date( "F j, Y, g:i a", ( wp_next_scheduled( 'ald_acc_hook' ) - $acc_settings['comment_age'] * 86400 ) );
@@ -132,22 +132,22 @@ function acc_options() {
 				<?php if ( wp_next_scheduled( 'ald_acc_hook' ) ) { ?>
 				    <p><strong><?php _e( 'Schedule:', ACC_LOCAL_NAME ); ?></strong> <?php echo $ald_acc_info['hook_schedule']; ?></p>
 				    <?php if ( $acc_settings['close_comment'] ) { ?>
-						<p><strong><?php _e('Comments closed upto:', ACC_LOCAL_NAME); ?></strong> <?php echo $ald_acc_info['comments_date']; ?></p>
+						<p><strong><?php _e( 'Comments closed upto:', ACC_LOCAL_NAME ); ?></strong> <?php echo $ald_acc_info['comments_date']; ?></p>
 					<?php } ?>
 			
 				    <?php if ( $acc_settings['close_pbtb'] ) { ?>
-						<p><strong><?php _e('Pingbacks/Trackbacks closed upto:', ACC_LOCAL_NAME); ?></strong> <?php echo $ald_acc_info['pbtb_date']; ?></p>
+						<p><strong><?php _e( 'Pingbacks/Trackbacks closed upto:', ACC_LOCAL_NAME ); ?></strong> <?php echo $ald_acc_info['pbtb_date']; ?></p>
 					<?php } ?>
 			
 				    <?php if ( '' != $acc_settings['comment_pids'] ) { ?>
-						<p><strong><?php _e('Comments on the following posts will not be closed:', ACC_LOCAL_NAME); ?></strong> <?php echo $acc_settings['comment_pids']; ?></p>
+						<p><strong><?php _e( 'Comments on the following posts will not be closed:', ACC_LOCAL_NAME ); ?></strong> <?php echo $acc_settings['comment_pids']; ?></p>
 					<?php } ?>
 			
 				    <?php if ( '' != $acc_settings['pbtb_pids'] ) { ?>
-						<p><strong><?php _e('Pingbacks on the following posts will not be closed:', ACC_LOCAL_NAME); ?></strong> <?php echo $acc_settings['pbtb_pids']; ?></p>
+						<p><strong><?php _e( 'Pingbacks on the following posts will not be closed:', ACC_LOCAL_NAME ); ?></strong> <?php echo $acc_settings['pbtb_pids']; ?></p>
 					<?php } ?>
 			
-				    <p><strong><?php _e('Next Run:', ACC_LOCAL_NAME); ?></strong> <?php echo $ald_acc_info['next_run']; ?></p>
+				    <p><strong><?php _e( 'Next Run:', ACC_LOCAL_NAME ); ?></strong> <?php echo $ald_acc_info['next_run']; ?></p>
 				<?php } else { ?>
 				<p><?php _e( 'Comments are not being closed automatically. You can change that by setting the option below.', ACC_LOCAL_NAME ); ?></p>
 				<?php } ?>
@@ -168,8 +168,8 @@ function acc_options() {
 			</tr>
 			<tr><th scope="row"><label for="comment_age"><?php _e( 'Close Comments on posts/pages older than:', ACC_LOCAL_NAME ); ?></label></th>
 				<td>
-					<input type="text" name="comment_age" id="comment_age" value="<?php echo $acc_settings['comment_age']; ?>" size="5" /> <?php _e('days', ACC_LOCAL_NAME); ?>
-					<p class="description"><?php _e('This option is only effective if either of the above options are checked', ACC_LOCAL_NAME); ?></p>
+					<input type="text" name="comment_age" id="comment_age" value="<?php echo $acc_settings['comment_age']; ?>" size="5" /> <?php _e( 'days', ACC_LOCAL_NAME ); ?>
+					<p class="description"><?php _e( 'This option is only effective if either of the above options are checked', ACC_LOCAL_NAME ); ?></p>
 				</td>
 			</tr>
 			<tr><th scope="row"><label for="comment_pids"><?php _e( 'Keep comments on these posts/pages open:', ACC_LOCAL_NAME ); ?></label></th>
@@ -180,14 +180,14 @@ function acc_options() {
 			</tr>
 			<tr><th scope="row"><?php _e( 'Close Pingbacks/Trackbacks:', ACC_LOCAL_NAME ); ?></th>
 				<td>
-					<label><input type="checkbox" name="close_pbtb" id="close_pbtb" value="true" <?php if ($acc_settings['close_pbtb']) { ?> checked="checked" <?php } ?> /> <?php _e( 'posts', ACC_LOCAL_NAME ); ?></label>
-					<label><input type="checkbox" name="close_pbtb_pages" id="close_pbtb_pages" value="true" <?php if ($acc_settings['close_pbtb_pages']) { ?> checked="checked" <?php } ?> /> <?php _e( 'pages', ACC_LOCAL_NAME ); ?></label>
+					<label><input type="checkbox" name="close_pbtb" id="close_pbtb" value="true" <?php if ( $acc_settings['close_pbtb'] ) echo 'checked="checked"' ?> /> <?php _e( 'posts', ACC_LOCAL_NAME ); ?></label>
+					<label><input type="checkbox" name="close_pbtb_pages" id="close_pbtb_pages" value="true" <?php if ( $acc_settings['close_pbtb_pages'] ) echo 'checked="checked"' ?> /> <?php _e( 'pages', ACC_LOCAL_NAME ); ?></label>
 				</td>
 			</tr>
 			<tr><th scope="row"><label for="pbtb_age"><?php _e( 'Close Pingbacks/Trackbacks on posts/pages older than:', ACC_LOCAL_NAME ); ?></label></th>
 				<td>
-					<input type="text" name="pbtb_age" id="pbtb_age" value="<?php echo $acc_settings['pbtb_age']; ?>" size="5" /><?php _e('days', ACC_LOCAL_NAME); ?>
-					<p class="description"><?php _e('This option is only effective if either of the above options are checked', ACC_LOCAL_NAME); ?></p>
+					<input type="text" name="pbtb_age" id="pbtb_age" value="<?php echo $acc_settings['pbtb_age']; ?>" size="5" /><?php _e( 'days', ACC_LOCAL_NAME ); ?>
+					<p class="description"><?php _e( 'This option is only effective if either of the above options are checked', ACC_LOCAL_NAME ); ?></p>
 				</td>
 			</tr>
 			<tr><th scope="row"><label for="pbtb_pids"><?php _e( 'Keep Pingbacks/Trackbacks on these posts/pages open:', ACC_LOCAL_NAME ); ?></label></th>
@@ -198,20 +198,20 @@ function acc_options() {
 			</tr>
 			<tr><th scope="row"><label for="daily_run"><?php _e( 'Run Daily?', ACC_LOCAL_NAME ); ?></label></th>
 				<td>
-					<input type="checkbox" name="daily_run" id="daily_run" value="true" <?php if ($acc_settings['daily_run']) { ?> checked="checked" <?php } ?> />
-					<p class="description"><?php _e('This will create a daily cron job. Comments and/or pingbacks/trackbacks will be closed at this time specified. The options above will be used when running the job.', ACC_LOCAL_NAME); ?></p>
+					<input type="checkbox" name="daily_run" id="daily_run" value="true" <?php if ( $acc_settings['daily_run'] ) echo 'checked="checked"' ?> />
+					<p class="description"><?php _e( 'This will create a daily cron job. Comments and/or pingbacks/trackbacks will be closed at this time specified. The options above will be used when running the job.', ACC_LOCAL_NAME ); ?></p>
 				</td>
 			</tr>
 			<tr><th scope="row"><label for="daily_run"><?php _e( 'Run at:', ACC_LOCAL_NAME ); ?></label></th>
 				<td>
 					<input type="text" name="cron_hour" id="cron_hour" value="<?php echo $acc_settings['cron_hour']; ?>" size="2" maxlength="2" /> : <input type="text" name="cron_min" id="cron_min" value="<?php echo $acc_settings['cron_min']; ?>" size="2" maxlength="2" />
-					<p class="description"><?php _e('Enter in 24-hour format. e.g. to run at 1:30pm, enter 13 and 30 respectively', ACC_LOCAL_NAME); ?></p>
+					<p class="description"><?php _e( 'Enter in 24-hour format. e.g. to run at 1:30pm, enter 13 and 30 respectively', ACC_LOCAL_NAME ); ?></p>
 				</td>
 			</tr>
 			<tr><th scope="row"><label for="pbtb_age"><?php _e( 'Delete Post Revisions?', ACC_LOCAL_NAME ); ?></label></th>
 				<td>
-					<input type="checkbox" name="delete_revisions" id="delete_revisions" value="true" <?php if ($acc_settings['delete_revisions']) { ?> checked="checked" <?php } ?> />
-					<p class="description"><?php _e('The WordPress revisions system stores a record of each saved draft or published update. This can gather up a lot of overhead in the long run. Use this option to delete old post revisions.', ACC_LOCAL_NAME); ?></p>
+					<input type="checkbox" name="delete_revisions" id="delete_revisions" value="true" <?php if ( $acc_settings['delete_revisions'] ) echo 'checked="checked"' ?> />
+					<p class="description"><?php _e( 'The WordPress revisions system stores a record of each saved draft or published update. This can gather up a lot of overhead in the long run. Use this option to delete old post revisions.', ACC_LOCAL_NAME ); ?></p>
 				</td>
 			</tr>
 			</table>
@@ -267,7 +267,7 @@ function acc_options() {
 				<ul>
 					<li><a href="http://ajaydsouza.com/wordpress/plugins/autoclose/"><?php _e( 'Auto-Close plugin page', ACC_LOCAL_NAME ); ?></a></li>
 					<li><a href="http://ajaydsouza.com/wordpress/plugins/"><?php _e( 'Other plugins', ACC_LOCAL_NAME ); ?></a></li>
-					<li><a href="http://ajaydsouza.com/"><?php _e( 'Ajay\'s blog', ACC_LOCAL_NAME ); ?></a></li>
+					<li><a href="http://ajaydsouza.com/"><?php _e( "Ajay's blog", ACC_LOCAL_NAME ); ?></a></li>
 					<li><a href="https://wordpress.org/plugins/autoclose/faq/"><?php _e( 'FAQ', ACC_LOCAL_NAME ); ?></a></li>
 					<li><a href="http://wordpress.org/support/plugin/autoclose"><?php _e( 'Support', ACC_LOCAL_NAME ); ?></a></li>
 					<li><a href="https://wordpress.org/support/view/plugin-reviews/autoclose"><?php _e( 'Reviews', ACC_LOCAL_NAME ); ?></a></li>
@@ -307,7 +307,6 @@ add_action( 'admin_menu', 'acc_adminmenu' );
  * @return void
  */
 function acc_adminhead() {
-	global $acc_url;
 	wp_enqueue_script( 'common' );
 	wp_enqueue_script( 'wp-lists' );
 	wp_enqueue_script( 'postbox' );
@@ -347,6 +346,16 @@ function acc_adminhead() {
 			// postboxes setup
 			postboxes.add_postbox_toggles('acc_options');
 		});
+		//]]>
+	</script>
+	<script type="text/javascript" language="JavaScript">
+		//<![CDATA[
+		function checkForm() {
+		answer = true;
+		if (siw && siw.selectingSomething)
+			answer = false;
+		return answer;
+		}//
 		//]]>
 	</script>
 	

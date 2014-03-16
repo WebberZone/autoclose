@@ -38,6 +38,7 @@ An extra feature is the ability to delete post revisions that were introduced in
 
 = 1.4 =
 * New: Responsive admin interface
+* New: Plugin is now ready to be translated
 * Modified: Massive code rewrite and cleanup
 
 = 1.3.1 =
