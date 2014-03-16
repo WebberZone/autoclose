@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Auto-Close\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-03-16 10:17-0000\n"
+"POT-Creation-Date: 2014-03-16 22:23-0000\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Ajay D'Souza <me@ajaydsouza.com>\n"
 "Language-Team:  <me@ajaydsouza.com>\n"
@@ -56,27 +56,27 @@ msgid "Information"
 msgstr ""
 
 #: admin.inc.php:133
-msgid "Schedule: "
+msgid "Schedule:"
 msgstr ""
 
 #: admin.inc.php:135
-msgid "Comments closed upto: "
+msgid "Comments closed upto:"
 msgstr ""
 
 #: admin.inc.php:139
-msgid "Pingbacks/Trackbacks closed upto: "
+msgid "Pingbacks/Trackbacks closed upto:"
 msgstr ""
 
 #: admin.inc.php:143
-msgid "Comments on the following posts will not be closed: "
+msgid "Comments on the following posts will not be closed:"
 msgstr ""
 
 #: admin.inc.php:147
-msgid "Pingbacks on the following posts will not be closed: "
+msgid "Pingbacks on the following posts will not be closed:"
 msgstr ""
 
 #: admin.inc.php:150
-msgid "Next Run: "
+msgid "Next Run:"
 msgstr ""
 
 #: admin.inc.php:152
@@ -190,7 +190,7 @@ msgid "Support the development"
 msgstr ""
 
 #: admin.inc.php:243
-msgid "Enter amount in USD: "
+msgid "Enter amount in USD:"
 msgstr ""
 
 #: admin.inc.php:247
@@ -221,7 +221,7 @@ msgstr ""
 msgid "FAQ"
 msgstr ""
 
-#: admin.inc.php:272
+#: admin.inc.php:272 ald-autoclose.php:260
 msgid "Support"
 msgstr ""
 
@@ -231,4 +231,12 @@ msgstr ""
 
 #: admin.inc.php:296
 msgid "Auto-Close"
+msgstr ""
+
+#: ald-autoclose.php:240
+msgid "Settings"
+msgstr ""
+
+#: ald-autoclose.php:261
+msgid "Donate"
 msgstr ""
