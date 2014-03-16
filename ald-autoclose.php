@@ -3,7 +3,7 @@
 Plugin Name: Auto-Close Comments, Pingbacks and Trackbacks
 Version:     1.4
 Plugin URI:  http://ajaydsouza.com/wordpress/plugins/autoclose/
-Description: Automatically close Comments, Pingbacks and Trackbacks after certain amount of days.  <a href="options-general.php?page=acc_options">Configure...</a>
+Description: Automatically close Comments, Pingbacks and Trackbacks after certain amount of days.
 Author:      Ajay D'Souza
 Author URI:  http://ajaydsouza.com/
 */
