@@ -15,23 +15,32 @@ Automatically close comments, pingbacks and trackbacks on your posts. You can ch
 
 An extra feature is the ability to delete post revisions that were introduced in WordPress v2.6 onwards.
 
-=== Key features ===
+= Key features =
 
 * **Close comments**: Automatically close comments on posts and pages.
 * **Close pingbacks and trackbacks**: Automatically close pingbacks and trackbacks on posts and pages.
 * **Choose how old**: Choose a custom time period as to when the comments, pingbacks and trackbacks need to be closed
 * **Scheduling**: You can also schedule a cron job to automatically close comments, pingbacks and trackbacks daily
+* **Bonus**: Automatically delete post revisions
 
 
 == Installation ==
 
+= WordPress install =
+1. Navigate to Plugins within your WordPress Admin Area
+
+2. Click "Add new" and in the search box enter "autoclose"
+
+3. Find the plugin in the list (usually the first result) and click "Install Now"
+
+= Manual install =
 1. Download the plugin
 
 2. Extract the contents of autoclose.zip to wp-content/plugins/ folder. You should get a folder called autoclose.
 
-4. Activate the Plugin in WP-Admin. 
+3. Activate the Plugin in WP-Admin. 
 
-5. Goto Settings > Auto-Close to configure
+4. Goto **Settings &raquo; Auto-Close** to configure
 
 
 == Changelog ==
@@ -63,3 +72,8 @@ An extra feature is the ability to delete post revisions that were introduced in
 
 If your question isn't listed here, please post a comment at the <a href="http://wordpress.org/support/plugin/contextual-related-posts">WordPress.org support forum</a>. I monitor the forums on an ongoing basis. If you're looking for more advanced support, please see <a href="http://ajaydsouza.com/support/">details here</a>.
 
+= What does "Delete Post Revisions" do?  =
+
+The WordPress revisions system stores a record of each saved draft or published update. This can gather up a lot of overhead in the long run. Use this option to delete old post revisions.
+
+If you enable this option and turn on the cron job then any new revisions will be automatically deleted on a daily basis.
