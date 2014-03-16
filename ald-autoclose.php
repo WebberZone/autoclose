@@ -11,6 +11,7 @@ Author URI:  http://ajaydsouza.com/
 if (!defined('ABSPATH')) die("Aren't you supposed to come here via WP-Admin?");
 
 define('ALD_ACC_DIR', dirname(__FILE__));
+define('ACC_LOCAL_NAME', 'autoclose');
 
 // Guess the location
 $acc_path = plugin_dir_path(__FILE__);
@@ -24,7 +25,7 @@ $acc_url = plugins_url().'/'.plugin_basename(dirname(__FILE__));
  * @return void
  */
 function ald_acc_lang_init() {
-	load_plugin_textdomain( 'ald_autoclose_plugin', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
+	load_plugin_textdomain( ACC_LOCAL_NAME, false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 }
 add_action('plugins_loaded', 'ald_acc_lang_init');
 
