@@ -1,10 +1,10 @@
 === Auto-Close Comments, Pingbacks and Trackbacks ===
 Tags: autoclose, comments, pingback, trackback, spam, anti-spam
-Contributors: Ajay D'Souza
+Contributors: Ajay
 Donate link: http://ajaydsouza.com/donate/
 Stable tag: trunk
 Requires at least: 3.0
-Tested up to: 3.9
+Tested up to: 4.0
 License: GPL v2 or later
 
 Close comments, pingbacks and trackbacks on your posts automatically at intervals set by you
@@ -38,18 +38,21 @@ An extra feature is the ability to delete post revisions that were introduced in
 
 2. Extract the contents of autoclose.zip to wp-content/plugins/ folder. You should get a folder called autoclose.
 
-3. Activate the Plugin in WP-Admin. 
+3. Activate the Plugin in WP-Admin.
 
 4. Goto **Settings &raquo; Auto-Close** to configure
 
 
 == Upgrade Notice ==
 
-= 1.4 =
-* New: Responsive admin interface and compatible with WordPress up to 3.9
+= 1.5 =
+* Modified: Language initialisation
 
 
 == Changelog ==
+
+= 1.5 =
+* Modified: Language initialisation
 
 = 1.4 =
 * New: Responsive admin interface
@@ -76,7 +79,7 @@ An extra feature is the ability to delete post revisions that were introduced in
 
 == Frequently Asked Questions ==
 
-If your question isn't listed here, please post a comment at the <a href="http://wordpress.org/support/plugin/contextual-related-posts">WordPress.org support forum</a>. I monitor the forums on an ongoing basis. If you're looking for more advanced support, please see <a href="http://ajaydsouza.com/support/">details here</a>.
+If your question isn't listed here, please post a comment at the <a href="http://wordpress.org/support/plugin/autoclose">WordPress.org support forum</a>. I monitor the forums on an ongoing basis. If you're looking for more advanced support, please see <a href="http://ajaydsouza.com/support/">details here</a>.
 
 = What does "Delete Post Revisions" do?  =
 

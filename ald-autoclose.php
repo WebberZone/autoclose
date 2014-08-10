@@ -11,7 +11,6 @@ Author URI:  http://ajaydsouza.com/
 if ( ! defined( 'ABSPATH' ) ) die( "Aren't you supposed to come here via WP-Admin?" );
 
 define( 'ALD_ACC_DIR', dirname( __FILE__ ) );
-define( 'ACC_LOCAL_NAME', 'autoclose' );
 
 // Guess the location
 $acc_path = plugin_dir_path( __FILE__ );
@@ -20,19 +19,19 @@ $acc_url = plugins_url() . '/' . plugin_basename( dirname( __FILE__ ) );
 
 /**
  * Initialises text domain for l10n.
- * 
+ *
  * @access public
  * @return void
  */
 function ald_acc_lang_init() {
-	load_plugin_textdomain( ACC_LOCAL_NAME, false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
+	load_plugin_textdomain( 'autoclose', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 }
 add_action( 'plugins_loaded', 'ald_acc_lang_init' );
 
 
 /**
  * Main function.
- * 
+ *
  * @access public
  * @return void
  */
@@ -45,7 +44,7 @@ function ald_acc() {
     $pbtb_age = $acc_settings['pbtb_age']. ' DAY';
     $comment_pids = $acc_settings['comment_pids'];
     $pbtb_pids = $acc_settings['pbtb_pids'];
-	
+
 	// What is the time now?
 	$now = gmdate( "Y-m-d H:i:s", ( time() + ( get_option( 'gmt_offset' ) * 3600 ) ) );
 
@@ -57,7 +56,7 @@ function ald_acc() {
 	$pbtb_age = $pbtb_age - 1;
 	$pbtb_date = strtotime( '-' . $pbtb_age . ' DAY' , strtotime( $now ) );
 	$pbtb_date = date( 'Y-m-d H:i:s' , $pbtb_date );
-	
+
 	// Close Comments on posts
 	if ( $acc_settings['close_comment'] ) {
 		$wpdb->query( $wpdb->prepare( "
@@ -69,7 +68,7 @@ function ald_acc() {
 			AND post_date < '%s'
 		", $comment_date ) );
 	}
-	
+
 	// Close Pingbacks/Trackbacks on posts
 	if ( $acc_settings['close_pbtb'] ) {
 		$wpdb->query( $wpdb->prepare( "
@@ -93,7 +92,7 @@ function ald_acc() {
 			AND post_date < '%s'
 		", $comment_date ) );
 	}
-	
+
 	// Close Pingbacks/Trackbacks on pages
 	if ( $acc_settings['close_pbtb_pages'] ) {
 		$wpdb->query( $wpdb->prepare( "
@@ -116,7 +115,7 @@ function ald_acc() {
 			AND ID IN ($comment_pids)
 		" );
 	}
-	
+
 	// Open Pingbacks / Trackbacks on these posts
 	if ( '' != $acc_settings['pbtb_pids'] ) {
 		$wpdb->query( "
@@ -141,7 +140,7 @@ add_action( 'ald_acc_hook', 'ald_acc' );
 
 /**
  * Default options.
- * 
+ *
  * @access public
  * @return void
  */
@@ -160,42 +159,42 @@ function acc_default_options() {
 						'cron_hour' => '0',		// Cron Hour
 						'cron_min' => '0',		// Cron Minute
 					);
-	
+
 	return $acc_settings;
 }
 
 
 /**
  * Function to read options from the database.
- * 
+ *
  * @access public
  * @return void
  */
 function acc_read_options() {
 	$acc_settings_changed = false;
-	
+
 	$defaults = acc_default_options();
-	
+
 	$acc_settings = array_map( 'stripslashes', (array)get_option( 'ald_acc_settings' ) );
 	unset( $acc_settings[0] ); // produced by the (array) casting when there's nothing in the DB
-	
+
 	foreach ( $defaults as $k=>$v ) {
 		if ( ! isset( $acc_settings[$k] ) ) {
 			$acc_settings[$k] = $v;
 		}
-		$acc_settings_changed = true;	
+		$acc_settings_changed = true;
 	}
 	if ( true == $acc_settings_changed ) {
 		update_option( 'ald_acc_settings', $acc_settings );
 	}
-	
+
 	return $acc_settings;
 }
 
 
 /**
  * Function to enable run or actions.
- * 
+ *
  * @access public
  * @param int $hour
  * @param int $min
@@ -213,7 +212,7 @@ function acc_enable_run( $hour, $min ) {
 
 /**
  * Function to disable daily run or actions.
- * 
+ *
  * @access public
  * @return void
  */
@@ -229,23 +228,23 @@ if ( is_admin() || strstr( $_SERVER['PHP_SELF'], 'wp-admin/' ) ) {
 	require_once( ALD_ACC_DIR . "/admin.inc.php" );
 	/**
 	 * Filter to add link to WordPress plugin action links.
-	 * 
+	 *
 	 * @access public
 	 * @param array $links
 	 * @return array
 	 */
 	function acc_plugin_actions_links( $links ) {
-	
+
 		return array_merge( array(
-				'settings' => '<a href="' . admin_url( 'options-general.php?page=acc_options' ) . '">' . __( 'Settings', ACC_LOCAL_NAME ) . '</a>'
+				'settings' => '<a href="' . admin_url( 'options-general.php?page=acc_options' ) . '">' . __( 'Settings', 'autoclose' ) . '</a>'
 			), $links );
-	
+
 	}
 	add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'acc_plugin_actions_links' );
 
 	/**
 	 * Filter to add links to the plugin action row.
-	 * 
+	 *
 	 * @access public
 	 * @param array $links
 	 * @param array $file
@@ -254,22 +253,22 @@ if ( is_admin() || strstr( $_SERVER['PHP_SELF'], 'wp-admin/' ) ) {
 	function acc_plugin_actions( $links, $file ) {
 		static $plugin;
 		if ( ! $plugin ) $plugin = plugin_basename( __FILE__ );
-	 
+
 		// create link
 		if ( $file == $plugin ) {
-			$links[] = '<a href="http://wordpress.org/support/plugin/autoclose">' . __( 'Support', ACC_LOCAL_NAME ) . '</a>';
-			$links[] = '<a href="http://ajaydsouza.com/donate/">' . __( 'Donate', ACC_LOCAL_NAME ) . '</a>';
+			$links[] = '<a href="http://wordpress.org/support/plugin/autoclose">' . __( 'Support', 'autoclose' ) . '</a>';
+			$links[] = '<a href="http://ajaydsouza.com/donate/">' . __( 'Donate', 'autoclose' ) . '</a>';
 		}
 		return $links;
 	}
-	
+
 	global $wp_version;
 	if ( version_compare( $wp_version, '2.8alpha', '>' ) ) {
 		add_filter( 'plugin_row_meta', 'acc_plugin_actions', 10, 2 ); // only 2.8 and higher
 	} else {
 		add_filter( 'plugin_action_links', 'acc_plugin_actions', 10, 2 );
 	}
-	
+
 } // End admin.inc
 
 ?>
