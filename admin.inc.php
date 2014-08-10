@@ -1,14 +1,17 @@
 <?php
-/**********************************************************************
-*					Admin Page										*
-*********************************************************************/
-if ( ! defined( 'ABSPATH' ) ) die( "Aren't you supposed to come here via WP-Admin?" );
+/**
+ * Generates the settings page in the Admin
+ *
+ * @package AutoClose
+ */
+
+// If this file is called directly, then abort execution.
+if ( ! defined( 'WPINC' ) ) {
+	die( "Aren't you supposed to come here via WP-Admin?" );
+}
 
 /**
  * Plugin settings page.
- *
- * @access public
- * @return void
  */
 function acc_options() {
 

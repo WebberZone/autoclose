@@ -53,6 +53,7 @@ An extra feature is the ability to delete post revisions that were introduced in
 
 = 1.5 =
 * Modified: Language initialisation
+* Modified: More code cleaning
 
 = 1.4 =
 * New: Responsive admin interface

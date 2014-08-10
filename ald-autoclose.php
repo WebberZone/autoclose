@@ -1,18 +1,35 @@
 <?php
-/*
-Plugin Name: Auto-Close Comments, Pingbacks and Trackbacks
-Version:     1.4
-Plugin URI:  http://ajaydsouza.com/wordpress/plugins/autoclose/
-Description: Automatically close Comments, Pingbacks and Trackbacks after certain amount of days.
-Author:      Ajay D'Souza
-Author URI:  http://ajaydsouza.com/
+/**
+ * Automatically close Comments, Pingbacks and Trackbacks after certain amount of days.
+ *
+ * @package AutoClose
+ *
+ * @wordpress-plugin
+ * Plugin Name: Auto-Close Comments, Pingbacks and Trackbacks
+ * Version:     1.4
+ * Plugin URI:  http://ajaydsouza.com/wordpress/plugins/autoclose/
+ * Description: Automatically close Comments, Pingbacks and Trackbacks after certain amount of days.
+ * Author:      Ajay D'Souza
+ * Author URI:  http://ajaydsouza.com/
+ * Text Domain:	twittercounter
+ * License:		GPL-2.0+
+ * License URI:	http://www.gnu.org/licenses/gpl-2.0.txt
+ * Domain Path:	/languages
 */
 
-if ( ! defined( 'ABSPATH' ) ) die( "Aren't you supposed to come here via WP-Admin?" );
+// If this file is called directly, then abort execution.
+if ( ! defined( 'WPINC' ) ) {
+	die( "Aren't you supposed to come here via WP-Admin?" );
+}
 
+/**
+ * Holds the filesystem directory path.
+ */
 define( 'ALD_ACC_DIR', dirname( __FILE__ ) );
 
-// Guess the location
+/**
+ * Set the global variables for autoclose path and URL
+ */
 $acc_path = plugin_dir_path( __FILE__ );
 $acc_url = plugins_url() . '/' . plugin_basename( dirname( __FILE__ ) );
 
@@ -31,9 +48,6 @@ add_action( 'plugins_loaded', 'ald_acc_lang_init' );
 
 /**
  * Main function.
- *
- * @access public
- * @return void
  */
 function ald_acc() {
     global $wpdb;
