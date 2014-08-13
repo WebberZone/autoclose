@@ -19,6 +19,16 @@ function acc_options() {
     $poststable = $wpdb->posts;
 	$acc_settings = acc_read_options();
 
+	// Get the Post types
+	$wp_post_types	= get_post_types( array(
+		'public'	=> true,
+	) );
+	parse_str( $acc_settings['comment_post_types'], $comment_post_types );
+	$comment_posts_types_inc = array_intersect( $wp_post_types, $comment_post_types );
+
+	parse_str( $acc_settings['pbtb_post_types'], $pbtb_post_types );
+	$pbtb_posts_types_inc = array_intersect( $wp_post_types, $pbtb_post_types );
+
 	if ( ( isset( $_POST['acc_save'] ) || isset( $_POST['run_once'] ) ) && ( check_admin_referer( 'acc-plugin' ) ) ) {
 
 		$acc_settings['comment_age'] = intval( $_POST['comment_age'] );
@@ -33,6 +43,18 @@ function acc_options() {
 		$acc_settings['cron_hour'] = min( 23, intval( $_POST['cron_hour'] ) );
 		$acc_settings['cron_min'] = min( 59, intval( $_POST['cron_min'] ) );
 
+		// Post types to include
+		$wp_post_types	= get_post_types( array(
+			'public'	=> true,
+		) );
+		$comment_post_types_arr = ( isset( $_POST['comment_post_types'] ) && is_array( $_POST['comment_post_types'] ) ) ? $_POST['comment_post_types'] : array( 'post' => 'post' );
+		$comment_post_types = array_intersect( $wp_post_types, $comment_post_types_arr );
+		$acc_settings['comment_post_types'] = http_build_query( $comment_post_types, '', '&' );
+
+		$pbtb_post_types_arr = ( isset( $_POST['pbtb_post_types'] ) && is_array( $_POST['pbtb_post_types'] ) ) ? $_POST['pbtb_post_types'] : array( 'post' => 'post' );
+		$pbtb_post_types = array_intersect( $wp_post_types, $pbtb_post_types_arr );
+		$acc_settings['pbtb_post_types'] = http_build_query( $pbtb_post_types, '', '&' );
+
 		if ( isset( $_POST['daily_run'] ) ) {
 			$acc_settings['daily_run'] = true;
 			acc_enable_run( $acc_settings['cron_hour'], $acc_settings['cron_min'] );
@@ -42,6 +64,16 @@ function acc_options() {
 		}
 
 		update_option( 'ald_acc_settings', $acc_settings );
+
+		// Get the Post types
+		$wp_post_types	= get_post_types( array(
+			'public'	=> true,
+		) );
+		parse_str( $acc_settings['comment_post_types'], $comment_post_types );
+		$comment_posts_types_inc = array_intersect( $wp_post_types, $comment_post_types );
+
+		parse_str( $acc_settings['pbtb_post_types'], $pbtb_post_types );
+		$pbtb_posts_types_inc = array_intersect( $wp_post_types, $pbtb_post_types );
 
 		if ( isset( $_POST['acc_save'] ) ) {
 			echo '<div id="message" class="updated fade"><p>'. __( 'Options saved successfully.', 'autoclose' ) .'</p></div>';
@@ -83,6 +115,16 @@ function acc_options() {
 		update_option('ald_acc_settings', $acc_settings);
 		acc_disable_run();
 
+		// Get the Post types
+		$wp_post_types	= get_post_types( array(
+			'public'	=> true,
+		) );
+		parse_str( $acc_settings['comment_post_types'], $comment_post_types );
+		$comment_posts_types_inc = array_intersect( $wp_post_types, $comment_post_types );
+
+		parse_str( $acc_settings['pbtb_post_types'], $pbtb_post_types );
+		$pbtb_posts_types_inc = array_intersect( $wp_post_types, $pbtb_post_types );
+
 		echo '<div id="message" class="updated fade"><p>'. __( 'Options set to Default.', 'autoclose' ) .'</p></div>';
 	}
 
@@ -121,7 +163,7 @@ function acc_options() {
 
 
 <div class="wrap">
-	<h2>Auto-Close Comments, Pingbacks and Trackbacks</h2>
+	<h2><?php _e( 'Auto-Close Comments, Pingbacks and Trackbacks', 'autoclose' ); ?></h2>
 	<div id="poststuff">
 	<div id="post-body" class="metabox-holder columns-2">
 	<div id="post-body-content">
@@ -163,10 +205,22 @@ function acc_options() {
 	      <h3 class='hndle'><span><?php _e( 'Options', 'autoclose' ); ?></span></h3>
 	      <div class="inside">
 			<table class="form-table">
+			<tr><th scope="row"><?php _e( 'Close Comments?', 'autoclose' ); ?></th>
+				<td>
+					<label><input type="checkbox" name="close_comment" id="close_comment" value="true" <?php if ( $acc_settings['close_comment'] ) echo 'checked="checked"' ?> /></label>
+				</td>
+			</tr>
 			<tr><th scope="row"><?php _e( 'Close Comments on:', 'autoclose' ); ?></th>
 				<td>
-					<label><input type="checkbox" name="close_comment" id="close_comment" value="true" <?php if ( $acc_settings['close_comment'] ) echo 'checked="checked"' ?> /> <?php _e( 'posts', 'autoclose' ); ?></label>
-					<label><input type="checkbox" name="close_comment_pages" id="close_comment_pages" value="true" <?php if ( $acc_settings['close_comment_pages'] ) echo 'checked="checked"' ?> /> <?php _e( 'pages', 'autoclose' ); ?></label>
+					<?php foreach ( $wp_post_types as $wp_post_type ) {
+						$post_type_op = '<label><input type="checkbox" name="comment_post_types[]" value="' . $wp_post_type . '" ';
+						if ( in_array( $wp_post_type, $comment_posts_types_inc ) ) {
+							$post_type_op .= ' checked="checked" ';
+						}
+						$post_type_op .= ' />'.$wp_post_type.'</label>&nbsp;&nbsp;';
+						echo $post_type_op;
+					}
+					?>
 				</td>
 			</tr>
 			<tr><th scope="row"><label for="comment_age"><?php _e( 'Close Comments on posts/pages older than:', 'autoclose' ); ?></label></th>
@@ -181,10 +235,25 @@ function acc_options() {
 					<p class="description"><?php _e( 'Comma separated list of post IDs', 'autoclose' ); ?></p>
 				</td>
 			</tr>
-			<tr><th scope="row"><?php _e( 'Close Pingbacks/Trackbacks:', 'autoclose' ); ?></th>
+			</table>
+			<hr />
+			<table class="form-table">
+			<tr><th scope="row"><?php _e( 'Close Pingbacks/Trackbacks?', 'autoclose' ); ?></th>
 				<td>
-					<label><input type="checkbox" name="close_pbtb" id="close_pbtb" value="true" <?php if ( $acc_settings['close_pbtb'] ) echo 'checked="checked"' ?> /> <?php _e( 'posts', 'autoclose' ); ?></label>
-					<label><input type="checkbox" name="close_pbtb_pages" id="close_pbtb_pages" value="true" <?php if ( $acc_settings['close_pbtb_pages'] ) echo 'checked="checked"' ?> /> <?php _e( 'pages', 'autoclose' ); ?></label>
+					<label><input type="checkbox" name="close_pbtb" id="close_pbtb" value="true" <?php if ( $acc_settings['close_pbtb'] ) echo 'checked="checked"' ?> /></label>
+				</td>
+			</tr>
+			<tr><th scope="row"><?php _e( 'Close Pingbacks/Trackbacks on:', 'autoclose' ); ?></th>
+				<td>
+					<?php foreach ( $wp_post_types as $wp_post_type ) {
+						$post_type_op = '<label><input type="checkbox" name="pbtb_post_types[]" value="' . $wp_post_type . '" ';
+						if ( in_array( $wp_post_type, $pbtb_posts_types_inc ) ) {
+							$post_type_op .= ' checked="checked" ';
+						}
+						$post_type_op .= ' />'.$wp_post_type.'</label>&nbsp;&nbsp;';
+						echo $post_type_op;
+					}
+					?>
 				</td>
 			</tr>
 			<tr><th scope="row"><label for="pbtb_age"><?php _e( 'Close Pingbacks/Trackbacks on posts/pages older than:', 'autoclose' ); ?></label></th>
@@ -199,6 +268,9 @@ function acc_options() {
 					<p class="description"><?php _e( 'Comma separated list of post IDs', 'autoclose' ); ?></p>
 				</td>
 			</tr>
+			</table>
+			<hr />
+			<table class="form-table">
 			<tr><th scope="row"><label for="daily_run"><?php _e( 'Run Daily?', 'autoclose' ); ?></label></th>
 				<td>
 					<input type="checkbox" name="daily_run" id="daily_run" value="true" <?php if ( $acc_settings['daily_run'] ) echo 'checked="checked"' ?> />

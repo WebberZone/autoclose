@@ -59,6 +59,10 @@ function ald_acc() {
     $comment_pids = $acc_settings['comment_pids'];
     $pbtb_pids = $acc_settings['pbtb_pids'];
 
+	// Get the post types
+	parse_str( $acc_settings['comment_post_types'], $comment_post_types );	// Save post types in $comment_post_types variable
+	parse_str( $acc_settings['pbtb_post_types'], $pbtb_post_types );	// Save post types in $comment_post_types variable
+
 	// What is the time now?
 	$now = gmdate( "Y-m-d H:i:s", ( time() + ( get_option( 'gmt_offset' ) * 3600 ) ) );
 
@@ -73,50 +77,54 @@ function ald_acc() {
 
 	// Close Comments on posts
 	if ( $acc_settings['close_comment'] ) {
-		$wpdb->query( $wpdb->prepare( "
-			UPDATE $poststable
-			SET comment_status = 'closed'
-			WHERE comment_status = 'open'
-			AND post_status = 'publish'
-			AND post_type = 'post'
-			AND post_date < '%s'
-		", $comment_date ) );
+		// Prepare the query
+		$args = array(
+			$comment_date,
+		);
+		$sql = "
+				UPDATE $poststable
+				SET comment_status = 'closed'
+				WHERE comment_status = 'open'
+				AND post_status = 'publish'
+				AND post_date < '%s'
+		";
+		$sql .= " AND ( ";
+		$multiple = false;
+		foreach ( $comment_post_types as $post_type ) {
+			if ( $multiple ) $sql .= ' OR ';
+			$sql .= " post_type = '%s'";
+			$multiple = true;
+			$args[] = $post_type;	// Add the post types to the $args array
+		}
+		$sql .= " ) ";
+
+		$results = $wpdb->get_results( $wpdb->prepare( $sql, $args ) );
 	}
 
 	// Close Pingbacks/Trackbacks on posts
 	if ( $acc_settings['close_pbtb'] ) {
-		$wpdb->query( $wpdb->prepare( "
-			UPDATE $poststable
-			SET ping_status = 'closed'
-			WHERE ping_status = 'open'
-			AND post_status = 'publish'
-			AND post_type = 'post'
-			AND post_date < '%s'
-		", $pbtb_date ) );
-	}
+		// Prepare the query
+		$args = array(
+			$pbtb_date,
+		);
+		$sql = "
+				UPDATE $poststable
+				SET ping_status = 'closed'
+				WHERE ping_status = 'open'
+				AND post_status = 'publish'
+				AND post_date < '%s'
+		";
+		$sql .= " AND ( ";
+		$multiple = false;
+		foreach ( $pbtb_post_types as $post_type ) {
+			if ( $multiple ) $sql .= ' OR ';
+			$sql .= " post_type = '%s'";
+			$multiple = true;
+			$args[] = $post_type;	// Add the post types to the $args array
+		}
+		$sql .= " ) ";
 
-	// Close Comments on pages
-	if ( $acc_settings['close_comment_pages'] ) {
-		$wpdb->query( $wpdb->prepare( "
-			UPDATE $poststable
-			SET comment_status = 'closed'
-			WHERE comment_status = 'open'
-			AND post_status = 'publish'
-			AND post_type = 'page'
-			AND post_date < '%s'
-		", $comment_date ) );
-	}
-
-	// Close Pingbacks/Trackbacks on pages
-	if ( $acc_settings['close_pbtb_pages'] ) {
-		$wpdb->query( $wpdb->prepare( "
-			UPDATE $poststable
-			SET ping_status = 'closed'
-			WHERE ping_status = 'open'
-			AND post_status = 'publish'
-			AND post_type = 'page'
-			AND post_date < '%s'
-		", $pbtb_date ) );
+		$results = $wpdb->get_results( $wpdb->prepare( $sql, $args ) );
 	}
 
 	// Open Comments on these posts
@@ -159,20 +167,26 @@ add_action( 'ald_acc_hook', 'ald_acc' );
  * @return void
  */
 function acc_default_options() {
+
+	$comment_post_types	= http_build_query( array( 'post' => 'post' ), '', '&' );
+	$pbtb_post_types = $comment_post_types;
+
 	$acc_settings = array (
-						'comment_age' => '90',	// Close comments before these many days
-						'pbtb_age' => '90',		// Close pingbacks/trackbacks before these many days
-						'comment_pids' => '',	// Comments on these Post IDs to open
-						'pbtb_pids' => '',		// Pingback on these Post IDs to open
-						'close_comment' => false,	// Close Comments on posts
-						'close_comment_pages' => false,	// Close Comments on pages
-						'close_pbtb' => false,		// Close Pingbacks and Trackbacks on posts
-						'close_pbtb_pages' => false,		// Close Pingbacks and Trackbacks on pages
-						'delete_revisions' => false,		// Delete post revisions
-						'daily_run' => false,		// Run Daily?
-						'cron_hour' => '0',		// Cron Hour
-						'cron_min' => '0',		// Cron Minute
-					);
+		'comment_age' => '90',	// Close comments before these many days
+		'pbtb_age' => '90',		// Close pingbacks/trackbacks before these many days
+		'comment_pids' => '',	// Comments on these Post IDs to open
+		'pbtb_pids' => '',		// Pingback on these Post IDs to open
+		'close_comment' => false,	// Close Comments on posts
+		'close_comment_pages' => false,	// Close Comments on pages
+		'close_pbtb' => false,		// Close Pingbacks and Trackbacks on posts
+		'close_pbtb_pages' => false,		// Close Pingbacks and Trackbacks on pages
+		'delete_revisions' => false,		// Delete post revisions
+		'daily_run' => false,		// Run Daily?
+		'cron_hour' => '0',		// Cron Hour
+		'cron_min' => '0',		// Cron Minute
+		'comment_post_types' => $comment_post_types,		// WordPress custom post types
+		'pbtb_post_types' => $pbtb_post_types,		// WordPress custom post types
+	);
 
 	return $acc_settings;
 }

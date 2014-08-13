@@ -11,14 +11,17 @@ Close comments, pingbacks and trackbacks on your posts automatically at interval
 
 == Description ==
 
-Automatically close comments, pingbacks and trackbacks on your posts. You can choose to keep comments / pingbacks / trackbacks open on certain posts.
+Spammers target old posts in a hope that you won't notice the comments on them. Why not stop them in their tracks by just shutting off comments and pingbacks? Auto-Close let's you automatically close comments, pingbacks and trackbacks on your posts, pages and custom post types.
+
+You can also choose to keep comments / pingbacks / trackbacks open on certain posts, page or custom post types. Just enter a comma-separated list of post IDs in the Settings page.
 
 An extra feature is the ability to delete post revisions that were introduced in WordPress v2.6 onwards.
 
+
 = Key features =
 
-* **Close comments**: Automatically close comments on posts and pages.
-* **Close pingbacks and trackbacks**: Automatically close pingbacks and trackbacks on posts and pages.
+* **Close comments**: Automatically close comments on posts, pages, attachments and even Custom Post Types!
+* **Close pingbacks and trackbacks**: Automatically close pingbacks and trackbacks as well
 * **Choose how old**: Choose a custom time period as to when the comments, pingbacks and trackbacks need to be closed
 * **Scheduling**: You can also schedule a cron job to automatically close comments, pingbacks and trackbacks daily
 * **Bonus**: Delete post revisions
@@ -46,12 +49,14 @@ An extra feature is the ability to delete post revisions that were introduced in
 == Upgrade Notice ==
 
 = 1.5 =
-* Modified: Language initialisation
+* Custom post type support, Modified Language initialisation;
+Check the ChangeLog for details
 
 
 == Changelog ==
 
 = 1.5 =
+* New: Custom post type support. Now close comments on posts, pages, attachments and your custom post types!
 * Modified: Language initialisation
 * Modified: More code cleaning
 

@@ -8,22 +8,24 @@ __License:__ [GPL-2.0+](http://www.gnu.org/licenses/gpl-2.0.html)
 
 __Plugin page:__ <a href="http://ajaydsouza.com/wordpress/plugins/autoclose/">Auto-Close Comments, Pingbacks and Trackbacks</a>
 
-Close comments, pingbacks and trackbacks on your posts automatically at intervals set by you
+Close comments, pingbacks and trackbacks on your WordPress posts automatically at intervals set by you
 
 ## Description
 
-<a href="http://ajaydsouza.com/wordpress/plugins/autoclose/">Auto-Close Comments, Pingbacks and Trackbacks</a> is a simple WordPress plugin that will let you automatically close comments, pingbacks and trackbacks on your posts. You can choose to keep comments / pingbacks / trackbacks open on posts and pages.
+Spammers target old posts in a hope that you won't notice the comments on them. Why not stop them in their tracks by just shutting off comments and pingbacks? <a href="http://ajaydsouza.com/wordpress/plugins/autoclose/">Auto-Close Comments, Pingbacks and Trackbacks</a> let's you automatically close comments, pingbacks and trackbacks on your posts, pages and custom post types.
+
+You can also choose to keep comments / pingbacks / trackbacks open on certain posts, page or custom post types. Just enter a comma-separated list of post IDs in the Settings page.
 
 An extra feature is the ability to delete post revisions that were introduced in WordPress v2.6 onwards.
 
 
 ### Key features
 
-* **Close comments**: Automatically close comments on posts and pages
-* **Close pingbacks and trackbacks**: Automatically close pingbacks and trackbacks on posts and pages
+* **Close comments**: Automatically close comments on posts, pages, attachments and even Custom Post Types!
+* **Close pingbacks and trackbacks**: Automatically close pingbacks and trackbacks as well
 * **Choose how old**: Choose a custom time period as to when the comments, pingbacks and trackbacks need to be closed
 * **Scheduling**: You can also schedule a cron job to automatically close comments, pingbacks and trackbacks daily
-* **Exclusions**: Add a comma separated list of posts or pages to prevent comments from being closed on them
+* **Bonus**: Delete post revisions
 
 
 ## Screenshots
