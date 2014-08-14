@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Auto-Close\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-03-16 22:23-0000\n"
+"POT-Creation-Date: 2014-08-14 23:12-0000\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Ajay D'Souza <me@ajaydsouza.com>\n"
 "Language-Team:  <me@ajaydsouza.com>\n"
@@ -12,231 +12,235 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Poedit-KeywordsList: __;_e;_c;__ngettext\n"
 "X-Poedit-Basepath: ../\n"
-"X-Generator: Poedit 1.6.4\n"
+"X-Generator: Poedit 1.6.5\n"
 "X-Poedit-SearchPath-0: .\n"
 
-#: admin.inc.php:44 admin.inc.php:72
+#: admin.inc.php:79 admin.inc.php:107
 msgid "Options saved successfully."
 msgstr ""
 
-#: admin.inc.php:50
+#: admin.inc.php:85
 msgid "Comments on posts closed upto"
 msgstr ""
 
-#: admin.inc.php:55
+#: admin.inc.php:90
 msgid "Pingbacks/Trackbacks on posts closed upto"
 msgstr ""
 
-#: admin.inc.php:60
+#: admin.inc.php:95
 msgid "Comments on pages closed upto"
 msgstr ""
 
-#: admin.inc.php:65
+#: admin.inc.php:100
 msgid "Pingbacks/Trackbacks on pages closed upto"
 msgstr ""
 
-#: admin.inc.php:70
+#: admin.inc.php:105
 msgid "Post revisions deleted"
 msgstr ""
 
-#: admin.inc.php:83
+#: admin.inc.php:128
 msgid "Options set to Default."
 msgstr ""
 
-#: admin.inc.php:94
+#: admin.inc.php:139
 msgid "Comments opened on all posts"
 msgstr ""
 
-#: admin.inc.php:105
+#: admin.inc.php:150
 msgid "Pingbacks/Trackbacks opened on all posts"
 msgstr ""
 
-#: admin.inc.php:127
+#: admin.inc.php:166
+msgid "Auto-Close Comments, Pingbacks and Trackbacks"
+msgstr ""
+
+#: admin.inc.php:172
 msgid "Information"
 msgstr ""
 
-#: admin.inc.php:133
+#: admin.inc.php:178
 msgid "Schedule:"
 msgstr ""
 
-#: admin.inc.php:135
+#: admin.inc.php:180
 msgid "Comments closed upto:"
 msgstr ""
 
-#: admin.inc.php:139
+#: admin.inc.php:184
 msgid "Pingbacks/Trackbacks closed upto:"
 msgstr ""
 
-#: admin.inc.php:143
+#: admin.inc.php:188
 msgid "Comments on the following posts will not be closed:"
 msgstr ""
 
-#: admin.inc.php:147
+#: admin.inc.php:192
 msgid "Pingbacks on the following posts will not be closed:"
 msgstr ""
 
-#: admin.inc.php:150
+#: admin.inc.php:195
 msgid "Next Run:"
 msgstr ""
 
-#: admin.inc.php:152
+#: admin.inc.php:197
 msgid ""
 "Comments are not being closed automatically. You can change that by setting "
 "the option below."
 msgstr ""
 
-#: admin.inc.php:160
+#: admin.inc.php:205
 msgid "Options"
 msgstr ""
 
-#: admin.inc.php:163
+#: admin.inc.php:208
+msgid "Close Comments?"
+msgstr ""
+
+#: admin.inc.php:213
 msgid "Close Comments on:"
 msgstr ""
 
-#: admin.inc.php:165 admin.inc.php:183
-msgid "posts"
-msgstr ""
-
-#: admin.inc.php:166 admin.inc.php:184
-msgid "pages"
-msgstr ""
-
-#: admin.inc.php:169
+#: admin.inc.php:226
 msgid "Close Comments on posts/pages older than:"
 msgstr ""
 
-#: admin.inc.php:171 admin.inc.php:189
+#: admin.inc.php:228 admin.inc.php:261
 msgid "days"
 msgstr ""
 
-#: admin.inc.php:172 admin.inc.php:190
+#: admin.inc.php:229 admin.inc.php:262
 msgid ""
 "This option is only effective if either of the above options are checked"
 msgstr ""
 
-#: admin.inc.php:175
+#: admin.inc.php:232
 msgid "Keep comments on these posts/pages open:"
 msgstr ""
 
-#: admin.inc.php:178 admin.inc.php:196
+#: admin.inc.php:235 admin.inc.php:268
 msgid "Comma separated list of post IDs"
 msgstr ""
 
-#: admin.inc.php:181
-msgid "Close Pingbacks/Trackbacks:"
+#: admin.inc.php:241
+msgid "Close Pingbacks/Trackbacks?"
 msgstr ""
 
-#: admin.inc.php:187
+#: admin.inc.php:246
+msgid "Close Pingbacks/Trackbacks on:"
+msgstr ""
+
+#: admin.inc.php:259
 msgid "Close Pingbacks/Trackbacks on posts/pages older than:"
 msgstr ""
 
-#: admin.inc.php:193
+#: admin.inc.php:265
 msgid "Keep Pingbacks/Trackbacks on these posts/pages open:"
 msgstr ""
 
-#: admin.inc.php:199
+#: admin.inc.php:274
 msgid "Run Daily?"
 msgstr ""
 
-#: admin.inc.php:202
+#: admin.inc.php:277
 msgid ""
 "This will create a daily cron job. Comments and/or pingbacks/trackbacks will "
 "be closed at this time specified. The options above will be used when "
 "running the job."
 msgstr ""
 
-#: admin.inc.php:205
+#: admin.inc.php:280
 msgid "Run at:"
 msgstr ""
 
-#: admin.inc.php:208
+#: admin.inc.php:283
 msgid ""
 "Enter in 24-hour format. e.g. to run at 1:30pm, enter 13 and 30 respectively"
 msgstr ""
 
-#: admin.inc.php:211
+#: admin.inc.php:286
 msgid "Delete Post Revisions?"
 msgstr ""
 
-#: admin.inc.php:214
+#: admin.inc.php:289
 msgid ""
 "The WordPress revisions system stores a record of each saved draft or "
 "published update. This can gather up a lot of overhead in the long run. Use "
 "this option to delete old post revisions."
 msgstr ""
 
-#: admin.inc.php:222
+#: admin.inc.php:297
 msgid "Save Options and Run Once"
 msgstr ""
 
-#: admin.inc.php:223
+#: admin.inc.php:298
 msgid "Save Options"
 msgstr ""
 
-#: admin.inc.php:224
+#: admin.inc.php:299
 msgid "Default Options"
 msgstr ""
 
-#: admin.inc.php:225
+#: admin.inc.php:300
 msgid "Open Comments"
 msgstr ""
 
-#: admin.inc.php:226
+#: admin.inc.php:301
 msgid "Open Pings"
 msgstr ""
 
-#: admin.inc.php:234
+#: admin.inc.php:309
 msgid "Support the development"
 msgstr ""
 
-#: admin.inc.php:243
+#: admin.inc.php:318
 msgid "Enter amount in USD:"
 msgstr ""
 
-#: admin.inc.php:247
+#: admin.inc.php:322
 msgid "Send your donation to the author of"
 msgstr ""
 
-#: admin.inc.php:254
+#: admin.inc.php:329
 msgid "Follow me"
 msgstr ""
 
-#: admin.inc.php:264
+#: admin.inc.php:339
 msgid "Quick links"
 msgstr ""
 
-#: admin.inc.php:268
+#: admin.inc.php:343
 msgid "Auto-Close plugin page"
 msgstr ""
 
-#: admin.inc.php:269
+#: admin.inc.php:344
 msgid "Other plugins"
 msgstr ""
 
-#: admin.inc.php:270
+#: admin.inc.php:345
 msgid "Ajay's blog"
 msgstr ""
 
-#: admin.inc.php:271
+#: admin.inc.php:346
 msgid "FAQ"
 msgstr ""
 
-#: admin.inc.php:272 ald-autoclose.php:260
+#: admin.inc.php:347 ald-autoclose.php:287
 msgid "Support"
 msgstr ""
 
-#: admin.inc.php:273
+#: admin.inc.php:348
 msgid "Reviews"
 msgstr ""
 
-#: admin.inc.php:296
+#: admin.inc.php:371
 msgid "Auto-Close"
 msgstr ""
 
-#: ald-autoclose.php:240
+#: ald-autoclose.php:267
 msgid "Settings"
 msgstr ""
 
-#: ald-autoclose.php:261
+#: ald-autoclose.php:288
 msgid "Donate"
 msgstr ""

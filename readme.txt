@@ -59,6 +59,7 @@ Check the ChangeLog for details
 * New: Custom post type support. Now close comments on posts, pages, attachments and your custom post types!
 * Modified: Language initialisation
 * Modified: More code cleaning
+* New: Spanish and Serbian languages thanks to <a href="http://firstsiteguide.com/">Ogi Djuraskovic</a>
 
 = 1.4 =
 * New: Responsive admin interface
