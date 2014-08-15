@@ -362,24 +362,16 @@ function acc_options() {
 
 /**
  * Add a link under Settings to the plugins settings page.
- *
- * @access public
- * @return void
  */
 function acc_adminmenu() {
-	if ( ( function_exists( 'add_options_page' ) ) ) {
-		$plugin_page = add_options_page( __( "Auto-Close", 'autoclose' ), __( "Auto-Close", 'autoclose' ), 'manage_options', 'acc_options', 'acc_options' );
-		add_action( 'admin_head-'. $plugin_page, 'acc_adminhead' );
-	}
+	$plugin_page = add_options_page( __( "Auto-Close", 'autoclose' ), __( "Auto-Close", 'autoclose' ), 'manage_options', 'acc_options', 'acc_options' );
+	add_action( 'admin_head-'. $plugin_page, 'acc_adminhead' );
 }
 add_action( 'admin_menu', 'acc_adminmenu' );
 
 
 /**
  * Function to add CSS and JS to the Admin header.
- *
- * @access public
- * @return void
  */
 function acc_adminhead() {
 	wp_enqueue_script( 'common' );

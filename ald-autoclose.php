@@ -36,9 +36,6 @@ $acc_url = plugins_url() . '/' . plugin_basename( dirname( __FILE__ ) );
 
 /**
  * Initialises text domain for l10n.
- *
- * @access public
- * @return void
  */
 function ald_acc_lang_init() {
 	load_plugin_textdomain( 'autoclose', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
@@ -163,8 +160,7 @@ add_action( 'ald_acc_hook', 'ald_acc' );
 /**
  * Default options.
  *
- * @access public
- * @return void
+ * @return array Default settings
  */
 function acc_default_options() {
 
@@ -188,15 +184,14 @@ function acc_default_options() {
 		'pbtb_post_types' => $pbtb_post_types,		// WordPress custom post types
 	);
 
-	return $acc_settings;
+	return apply_filters( 'acc_default_options', $acc_settings );
 }
 
 
 /**
  * Function to read options from the database.
  *
- * @access public
- * @return void
+ * @return array Options for the database. Will add any missing options.
  */
 function acc_read_options() {
 	$acc_settings_changed = false;
@@ -216,17 +211,15 @@ function acc_read_options() {
 		update_option( 'ald_acc_settings', $acc_settings );
 	}
 
-	return $acc_settings;
+	return apply_filters( 'acc_read_options', $acc_settings );
 }
 
 
 /**
  * Function to enable run or actions.
  *
- * @access public
- * @param int $hour
- * @param int $min
- * @return void
+ * @param int $hour Hour
+ * @param int $min Min
  */
 function acc_enable_run( $hour, $min ) {
 	if ( ! wp_next_scheduled( 'ald_acc_hook' ) ) {
@@ -240,9 +233,6 @@ function acc_enable_run( $hour, $min ) {
 
 /**
  * Function to disable daily run or actions.
- *
- * @access public
- * @return void
  */
 function acc_disable_run() {
 	if ( wp_next_scheduled( 'ald_acc_hook' ) ) {
@@ -254,10 +244,10 @@ function acc_disable_run() {
 // Process the admin page if we're on the admin screen
 if ( is_admin() || strstr( $_SERVER['PHP_SELF'], 'wp-admin/' ) ) {
 	require_once( ALD_ACC_DIR . "/admin.inc.php" );
+
 	/**
 	 * Filter to add link to WordPress plugin action links.
 	 *
-	 * @access public
 	 * @param array $links
 	 * @return array
 	 */
@@ -273,10 +263,8 @@ if ( is_admin() || strstr( $_SERVER['PHP_SELF'], 'wp-admin/' ) ) {
 	/**
 	 * Filter to add links to the plugin action row.
 	 *
-	 * @access public
 	 * @param array $links
 	 * @param array $file
-	 * @return void
 	 */
 	function acc_plugin_actions( $links, $file ) {
 		static $plugin;
@@ -289,13 +277,7 @@ if ( is_admin() || strstr( $_SERVER['PHP_SELF'], 'wp-admin/' ) ) {
 		}
 		return $links;
 	}
-
-	global $wp_version;
-	if ( version_compare( $wp_version, '2.8alpha', '>' ) ) {
-		add_filter( 'plugin_row_meta', 'acc_plugin_actions', 10, 2 ); // only 2.8 and higher
-	} else {
-		add_filter( 'plugin_action_links', 'acc_plugin_actions', 10, 2 );
-	}
+	add_filter( 'plugin_row_meta', 'acc_plugin_actions', 10, 2 ); // only 2.8 and higher
 
 } // End admin.inc
 
