@@ -4,7 +4,7 @@ Contributors: Ajay
 Donate link: http://ajaydsouza.com/donate/
 Stable tag: trunk
 Requires at least: 3.0
-Tested up to: 4.0
+Tested up to: 4.2
 License: GPL v2 or later
 
 Close comments, pingbacks and trackbacks on your posts automatically at intervals set by you
@@ -48,12 +48,15 @@ An extra feature is the ability to delete post revisions that were introduced in
 
 == Upgrade Notice ==
 
-= 1.5 =
-* Custom post type support, Modified Language initialisation;
+= 1.6 =
+* New: Fixed a bug where comments on attachments did not get closed;
 Check the ChangeLog for details
 
 
 == Changelog ==
+
+= 1.6 =
+* New: Fixed a bug where comments on attachments did not get closed
 
 = 1.5 =
 * New: Custom post type support. Now close comments on posts, pages, attachments and your custom post types!
