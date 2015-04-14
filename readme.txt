@@ -3,7 +3,7 @@ Tags: autoclose, comments, pingback, trackback, spam, anti-spam
 Contributors: Ajay
 Donate link: http://ajaydsouza.com/donate/
 Stable tag: trunk
-Requires at least: 3.0
+Requires at least: 3.5
 Tested up to: 4.2
 License: GPL v2 or later
 
