@@ -1,8 +1,15 @@
 <?php
 /**
+ * Auto-Close Admin interface.
+ *
  * Generates the settings page in the Admin
  *
- * @package AutoClose
+ * @package	AutoClose
+ * @author	Ajay D'Souza <me@ajaydsouza.com>
+ * @license	GPL-2.0+
+ * @link	http://ajaydsouza.com
+ * @copyright	2008-2015 Ajay D'Souza
+ *
  */
 
 // If this file is called directly, then abort execution.
@@ -12,6 +19,8 @@ if ( ! defined( 'WPINC' ) ) {
 
 /**
  * Plugin settings page.
+ *
+ * @since	1.0
  */
 function acc_options() {
 
@@ -63,6 +72,7 @@ function acc_options() {
 			acc_disable_run();
 		}
 
+		// Now update the options
 		update_option( 'ald_acc_settings', $acc_settings );
 
 		// Get the Post types
@@ -110,9 +120,9 @@ function acc_options() {
 
 	if ( ( isset( $_POST['acc_default'] ) ) && ( check_admin_referer( 'acc-plugin' ) ) ) {
 
-		delete_option('ald_acc_settings');
+		delete_option( 'ald_acc_settings' );
 		$acc_settings = acc_default_options();
-		update_option('ald_acc_settings', $acc_settings);
+		update_option( 'ald_acc_settings', $acc_settings );
 		acc_disable_run();
 
 		// Get the Post types
@@ -133,7 +143,6 @@ function acc_options() {
 			UPDATE $poststable
 			SET comment_status = 'open'
 			WHERE comment_status = 'closed'
-			AND post_status = 'publish'
 		" );
 
 		echo '<div id="message" class="updated fade"><p>'. __( 'Comments opened on all posts', 'autoclose' ) .'</p></div>';
@@ -144,7 +153,6 @@ function acc_options() {
 			UPDATE $poststable
 			SET ping_status = 'open'
 			WHERE ping_status = 'closed'
-			AND post_status = 'publish'
 		" );
 
 		echo '<div id="message" class="updated fade"><p>'. __( 'Pingbacks/Trackbacks opened on all posts', 'autoclose' ) .'</p></div>';
@@ -167,8 +175,8 @@ function acc_options() {
 	<div id="poststuff">
 	<div id="post-body" class="metabox-holder columns-2">
 	<div id="post-body-content">
-	  <form method="post" id="acc_options" name="acc_options" onsubmit="return checkForm()">
-	    <div id="genopdiv" class="postbox"><div class="handlediv" title="Click to toggle"><br /></div>
+	  <form method="post" id="acc_options" name="acc_options">
+	    <div id="genopdiv" class="postbox"><div class="handlediv" title="<?php _e( 'Click to toggle', 'autoclose' ); ?>"><br /></div>
 	      <h3 class='hndle'><span><?php _e( 'Information', 'autoclose' ); ?></span></h3>
 	      <div class="inside">
 			<table class="form-table">
@@ -201,7 +209,7 @@ function acc_options() {
 			</table>
 	      </div>
 	    </div>
-	    <div id="outputopdiv" class="postbox"><div class="handlediv" title="Click to toggle"><br /></div>
+	    <div id="outputopdiv" class="postbox"><div class="handlediv" title="<?php _e( 'Click to toggle', 'autoclose' ); ?>"><br /></div>
 	      <h3 class='hndle'><span><?php _e( 'Options', 'autoclose' ); ?></span></h3>
 	      <div class="inside">
 			<table class="form-table">
@@ -294,18 +302,18 @@ function acc_options() {
 	    </div>
 
 		<p>
-	        <input name="run_once" type="submit" id="run_once" value="<?php _e( 'Save Options and Run Once', 'autoclose' ); ?>" class="button button-primary" />
+	        <input type="submit" name="run_once" id="run_once" value="<?php _e( 'Save Options and Run Once', 'autoclose' ); ?>" class="button button-primary" />
 		    <input type="submit" name="acc_save" id="acc_save" value="<?php _e( 'Save Options', 'autoclose' ); ?>" class="button button-primary" />
 	        <input name="acc_default" type="submit" id="acc_default" value="<?php _e( 'Default Options', 'autoclose' ); ?>" class="button button-secondary" onclick="if (!confirm('Do you want to set options to Default?')) return false;" />
-	        <input name="acc_opencomments" type="submit" id="acc_opencomments" value="<?php _e( 'Open Comments', 'autoclose' ); ?>" class="button button-secondary" onclick="if (!confirm('Do you want to open comments on all posts?')) return false;" />
-	        <input name="acc_openpings" type="submit" id="acc_openpings" value="<?php _e( 'Open Pings', 'autoclose' ); ?>" class="button button-secondary" onclick="if (!confirm('Do you want to open pings on all posts?')) return false;" />
+	        <input name="acc_opencomments" type="submit" id="acc_opencomments" value="<?php _e( 'Open Comments', 'autoclose' ); ?>" class="button button-secondary" onclick="if (!confirm('Do you want to open comments on all posts and post types?')) return false;" />
+	        <input name="acc_openpings" type="submit" id="acc_openpings" value="<?php _e( 'Open Pings', 'autoclose' ); ?>" class="button button-secondary" onclick="if (!confirm('Do you want to open pings on all posts and post types?')) return false;" />
 		</p>
 		<?php wp_nonce_field( 'acc-plugin' ) ?>
 	  </form>
 	</div><!-- /post-body-content -->
 	<div id="postbox-container-1" class="postbox-container">
 	  <div id="side-sortables" class="meta-box-sortables ui-sortable">
-	    <div id="donatediv" class="postbox"><div class="handlediv" title="Click to toggle"><br /></div>
+	    <div id="donatediv" class="postbox"><div class="handlediv" title="<?php _e( 'Click to toggle', 'autoclose' ); ?>"><br /></div>
 	      <h3 class='hndle'><span><?php _e( 'Support the development', 'autoclose' ); ?></span></h3>
 	      <div class="inside">
 			<div id="donate-form">
@@ -325,7 +333,7 @@ function acc_options() {
 			</div>
 	      </div>
 	    </div>
-	    <div id="followdiv" class="postbox"><div class="handlediv" title="Click to toggle"><br /></div>
+	    <div id="followdiv" class="postbox"><div class="handlediv" title="<?php _e( 'Click to toggle', 'autoclose' ); ?>"><br /></div>
 	      <h3 class='hndle'><span><?php _e( 'Follow me', 'autoclose' ); ?></span></h3>
 	      <div class="inside">
 			<div id="follow-us">
@@ -335,12 +343,13 @@ function acc_options() {
 			</div>
 	      </div>
 	    </div>
-	    <div id="qlinksdiv" class="postbox"><div class="handlediv" title="Click to toggle"><br /></div>
+	    <div id="qlinksdiv" class="postbox"><div class="handlediv" title="<?php _e( 'Click to toggle', 'autoclose' ); ?>"><br /></div>
 	      <h3 class='hndle'><span><?php _e( 'Quick links', 'autoclose' ); ?></span></h3>
 	      <div class="inside">
 	        <div id="quick-links">
 				<ul>
 					<li><a href="http://ajaydsouza.com/wordpress/plugins/autoclose/"><?php _e( 'Auto-Close plugin page', 'autoclose' ); ?></a></li>
+				<li><a href="https://github.com/ajaydsouza/autoclose" target="_blank"><?php _e( 'Auto-Close Github page', 'autoclose' ); ?></a></li>
 					<li><a href="http://ajaydsouza.com/wordpress/plugins/"><?php _e( 'Other plugins', 'autoclose' ); ?></a></li>
 					<li><a href="http://ajaydsouza.com/"><?php _e( "Ajay's blog", 'autoclose' ); ?></a></li>
 					<li><a href="https://wordpress.org/plugins/autoclose/faq/"><?php _e( 'FAQ', 'autoclose' ); ?></a></li>
@@ -362,6 +371,8 @@ function acc_options() {
 
 /**
  * Add a link under Settings to the plugins settings page.
+ *
+ * @since	1.0
  */
 function acc_adminmenu() {
 	$plugin_page = add_options_page( __( "Auto-Close", 'autoclose' ), __( "Auto-Close", 'autoclose' ), 'manage_options', 'acc_options', 'acc_options' );
@@ -372,6 +383,8 @@ add_action( 'admin_menu', 'acc_adminmenu' );
 
 /**
  * Function to add CSS and JS to the Admin header.
+ *
+ * @since	1.4
  */
 function acc_adminhead() {
 	wp_enqueue_script( 'common' );
@@ -418,10 +431,10 @@ function acc_adminhead() {
 	<script type="text/javascript" language="JavaScript">
 		//<![CDATA[
 		function checkForm() {
-		answer = true;
-		if (siw && siw.selectingSomething)
-			answer = false;
-		return answer;
+			answer = true;
+			if (siw && siw.selectingSomething)
+				answer = false;
+			return answer;
 		}//
 		//]]>
 	</script>

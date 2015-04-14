@@ -49,14 +49,15 @@ An extra feature is the ability to delete post revisions that were introduced in
 == Upgrade Notice ==
 
 = 1.6 =
-* New: Fixed a bug where comments on attachments did not get closed;
+* New: Fixed a bug where comments on attachments did not get closed; Other bug fixes;
 Check the ChangeLog for details
 
 
 == Changelog ==
 
 = 1.6 =
-* New: Fixed a bug where comments on attachments did not get closed
+* Fixed: Bug where comments on attachments did not get closed
+* Fixed: JavaScript bug when saving options in Admin area
 
 = 1.5 =
 * New: Custom post type support. Now close comments on posts, pages, attachments and your custom post types!

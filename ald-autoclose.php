@@ -1,41 +1,67 @@
 <?php
 /**
+ * Auto-Close Comments, Pingbacks and Trackbacks
+ *
  * Automatically close Comments, Pingbacks and Trackbacks after certain amount of days.
  *
- * @package AutoClose
+ * @package	AutoClose
+ * @author	Ajay D'Souza <me@ajaydsouza.com>
+ * @license	GPL-2.0+
+ * @link	http://ajaydsouza.com
+ * @copyright	2008-2015 Ajay D'Souza
  *
  * @wordpress-plugin
- * Plugin Name: Auto-Close Comments, Pingbacks and Trackbacks
- * Version:     1.6-beta1
+ * Plugin Name:	Auto-Close Comments, Pingbacks and Trackbacks
  * Plugin URI:  http://ajaydsouza.com/wordpress/plugins/autoclose/
  * Description: Automatically close Comments, Pingbacks and Trackbacks after certain amount of days.
+ * Version:     1.6-beta2
  * Author:      Ajay D'Souza
  * Author URI:  http://ajaydsouza.com/
- * Text Domain:	twittercounter
+ * Text Domain:	autoclose
  * License:		GPL-2.0+
  * License URI:	http://www.gnu.org/licenses/gpl-2.0.txt
  * Domain Path:	/languages
-*/
+ * GitHub Plugin URI: https://github.com/ajaydsouza/autoclose/
+ */
 
 // If this file is called directly, then abort execution.
 if ( ! defined( 'WPINC' ) ) {
 	die( "Aren't you supposed to come here via WP-Admin?" );
 }
 
+
 /**
  * Holds the filesystem directory path.
+ *
+ * @since	1.0
  */
 define( 'ALD_ACC_DIR', dirname( __FILE__ ) );
 
+
 /**
- * Set the global variables for autoclose path and URL
+ * Holds the filesystem directory path (with trailing slash) for AutoClose
+ *
+ * @since	1.4
+ *
+ * @var string
  */
 $acc_path = plugin_dir_path( __FILE__ );
+
+
+/**
+ * Holds the URL for Top 10
+ *
+ * @since	1.4
+ *
+ * @var string
+ */
 $acc_url = plugins_url() . '/' . plugin_basename( dirname( __FILE__ ) );
 
 
 /**
  * Initialises text domain for l10n.
+ *
+ * @since	1.4
  */
 function ald_acc_lang_init() {
 	load_plugin_textdomain( 'autoclose', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
@@ -45,6 +71,8 @@ add_action( 'plugins_loaded', 'ald_acc_lang_init' );
 
 /**
  * Main function.
+ *
+ * @since	1.0
  */
 function ald_acc() {
     global $wpdb;
@@ -156,6 +184,8 @@ add_action( 'ald_acc_hook', 'ald_acc' );
 /**
  * Default options.
  *
+ * @since	1.0
+ *
  * @return array Default settings
  */
 function acc_default_options() {
@@ -187,6 +217,8 @@ function acc_default_options() {
 /**
  * Function to read options from the database.
  *
+ * @since	1.0
+ *
  * @return array Options for the database. Will add any missing options.
  */
 function acc_read_options() {
@@ -214,6 +246,8 @@ function acc_read_options() {
 /**
  * Function to enable run or actions.
  *
+ * @since	1.0
+ *
  * @param int $hour Hour
  * @param int $min Min
  */
@@ -229,6 +263,8 @@ function acc_enable_run( $hour, $min ) {
 
 /**
  * Function to disable daily run or actions.
+ *
+ * @since	1.0
  */
 function acc_disable_run() {
 	if ( wp_next_scheduled( 'ald_acc_hook' ) ) {
@@ -243,6 +279,8 @@ if ( is_admin() || strstr( $_SERVER['PHP_SELF'], 'wp-admin/' ) ) {
 
 	/**
 	 * Filter to add link to WordPress plugin action links.
+	 *
+	 * @since	1.4
 	 *
 	 * @param array $links
 	 * @return array
@@ -259,12 +297,16 @@ if ( is_admin() || strstr( $_SERVER['PHP_SELF'], 'wp-admin/' ) ) {
 	/**
 	 * Filter to add links to the plugin action row.
 	 *
+	 * @since	1.4
+	 *
 	 * @param array $links
 	 * @param array $file
 	 */
 	function acc_plugin_actions( $links, $file ) {
 		static $plugin;
-		if ( ! $plugin ) $plugin = plugin_basename( __FILE__ );
+		if ( ! $plugin ) {
+			$plugin = plugin_basename( __FILE__ );
+		}
 
 		// create link
 		if ( $file == $plugin ) {
