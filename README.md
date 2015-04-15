@@ -29,7 +29,7 @@ An extra feature is the ability to delete post revisions that were introduced in
 
 
 ## Screenshots
-![General Options](https://raw.github.com/ajaydsouza/autoclose/master/screenshot-1.png)
+![General Options](https://raw.github.com/ajaydsouza/autoclose/master/assets/screenshot-1.png)
 
 _Auto-Close Comments, Pingbacks and Trackbacks - General Options_
 
