@@ -31,6 +31,40 @@ if ( ! defined( 'WPINC' ) ) {
 
 
 /**
+ * Holds the filesystem directory path (with trailing slash) for Top 10
+ *
+ * @since 2.0.0
+ *
+ * @var string Plugin folder path
+ */
+if ( ! defined( 'ACC_PLUGIN_DIR' ) ) {
+	define( 'ACC_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+}
+
+/**
+ * Holds the filesystem directory path (with trailing slash) for Top 10
+ *
+ * @since 2.0.0
+ *
+ * @var string Plugin folder URL
+ */
+if ( ! defined( 'ACC_PLUGIN_URL' ) ) {
+	define( 'ACC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+}
+
+/**
+ * Holds the filesystem directory path (with trailing slash) for Top 10
+ *
+ * @since 2.0.0
+ *
+ * @var string Plugin Root File
+ */
+if ( ! defined( 'ACC_PLUGIN_FILE' ) ) {
+	define( 'ACC_PLUGIN_FILE', __FILE__ );
+}
+
+
+/**
  * Holds the filesystem directory path.
  *
  * @since   1.0
