@@ -31,9 +31,9 @@ activate_plugin( 'autoclose/autoclose.php' );
 
 echo "Installing Top 10...\n";
 
-global $tptn_db_version, $tptn_settings, $current_user;
-$tptn_db_version = '5.0';
+global $acc_settings, $current_user;
 
-tptn_activation_hook( true );
+//acc_activation_hook( true );
 
-$tptn_settings = tptn_get_settings();
+$acc_settings = acc_read_options();
+

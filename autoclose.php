@@ -8,7 +8,7 @@
  * @author  Ajay D'Souza
  * @license GPL-2.0+
  * @link    http://ajaydsouza.com
- * @copyright   2008-2015 Ajay D'Souza
+ * @copyright   2008-2019 Ajay D'Souza
  *
  * @wordpress-plugin
  * Plugin Name: Auto-Close Comments, Pingbacks and Trackbacks
@@ -49,7 +49,7 @@ $acc_path = plugin_dir_path( __FILE__ );
 
 
 /**
- * Holds the URL for Top 10
+ * Holds the URL for AutoClose
  *
  * @since   1.4
  *
