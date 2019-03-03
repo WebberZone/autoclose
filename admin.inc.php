@@ -5,7 +5,7 @@
  * Generates the settings page in the Admin
  *
  * @package AutoClose
- * @author  Ajay D'Souza <me@ajaydsouza.com>
+ * @author  Ajay D'Souza
  * @license GPL-2.0+
  * @link    http://ajaydsouza.com
  * @copyright   2008-2015 Ajay D'Souza
@@ -226,7 +226,7 @@ function acc_options() {
 			<table class="form-table">
 			<tr><th scope="row"><?php _e( 'Close Comments?', 'autoclose' ); ?></th>
 				<td>
-					<label><input type="checkbox" name="close_comment" id="close_comment" value="true" 
+					<label><input type="checkbox" name="close_comment" id="close_comment" value="true"
 					<?php
 					if ( $acc_settings['close_comment'] ) {
 						echo 'checked="checked"'; }
@@ -265,7 +265,7 @@ function acc_options() {
 			<table class="form-table">
 			<tr><th scope="row"><?php _e( 'Close Pingbacks/Trackbacks?', 'autoclose' ); ?></th>
 				<td>
-					<label><input type="checkbox" name="close_pbtb" id="close_pbtb" value="true" 
+					<label><input type="checkbox" name="close_pbtb" id="close_pbtb" value="true"
 					<?php
 					if ( $acc_settings['close_pbtb'] ) {
 						echo 'checked="checked"'; }
@@ -304,7 +304,7 @@ function acc_options() {
 			<table class="form-table">
 			<tr><th scope="row"><label for="daily_run"><?php _e( 'Run Daily?', 'autoclose' ); ?></label></th>
 				<td>
-					<input type="checkbox" name="daily_run" id="daily_run" value="true" 
+					<input type="checkbox" name="daily_run" id="daily_run" value="true"
 					<?php
 					if ( $acc_settings['daily_run'] ) {
 						echo 'checked="checked"'; }
@@ -321,7 +321,7 @@ function acc_options() {
 			</tr>
 			<tr><th scope="row"><label for="pbtb_age"><?php _e( 'Delete Post Revisions?', 'autoclose' ); ?></label></th>
 				<td>
-					<input type="checkbox" name="delete_revisions" id="delete_revisions" value="true" 
+					<input type="checkbox" name="delete_revisions" id="delete_revisions" value="true"
 					<?php
 					if ( $acc_settings['delete_revisions'] ) {
 						echo 'checked="checked"'; }

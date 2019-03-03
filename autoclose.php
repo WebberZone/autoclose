@@ -5,7 +5,7 @@
  * Automatically close Comments, Pingbacks and Trackbacks after certain amount of days.
  *
  * @package AutoClose
- * @author  Ajay D'Souza <me@ajaydsouza.com>
+ * @author  Ajay D'Souza
  * @license GPL-2.0+
  * @link    http://ajaydsouza.com
  * @copyright   2008-2015 Ajay D'Souza
