@@ -3,7 +3,7 @@
 [![WordPress Plugin Version](https://img.shields.io/wordpress/plugin/v/autoclose.svg?style=flat-square)](https://wordpress.org/plugins/autoclose/)
 [![License](https://img.shields.io/badge/license-GPL_v2%2B-orange.svg?style=flat-square)](http://opensource.org/licenses/GPL-2.0)
 [![WordPress Tested](https://img.shields.io/wordpress/v/autoclose.svg?style=flat-square)](https://wordpress.org/plugins/autoclose/)
-[![Build Status](https://travis-ci.org/WebberZone/autoclose.svg?branch=master)](https://travis-ci.org/WebberZone/autoclose)
+[![Build Status](https://travis-ci.org/ajaydsouza/autoclose.svg?branch=master)](https://travis-ci.org/ajaydsouza/autoclose)
 
 __Requires:__ 4.5
 
@@ -33,7 +33,7 @@ An extra feature is the ability to delete post revisions that were introduced in
 
 ## Screenshots
 
-![General Options](https://raw.github.com/ajaydsouza/autoclose/master/assets/screenshot-1.png)
+![General Options](https://raw.github.com/ajaydsouza/autoclose/master/wporg-assets/screenshot-1.png)
 _Auto-Close Comments, Pingbacks and Trackbacks - General Options_
 
 For more screenshots visit the [WordPress plugin page](http://wordpress.org/plugins/autoclose/screenshots/).
@@ -66,4 +66,4 @@ If your question isn't listed there, please create a new post at the [WordPress.
 
 ## About this repository
 
-This GitHub repository always holds the latest development version of the plugin. If you're looking for an official WordPress release, you can find this on the [WordPress.org repository](http://wordpress.org/plugins/autoclose). In addition to stable releases, latest beta versions are made available under [releases](https://github.com/WebberZone/autoclose/releases).
+This GitHub repository always holds the latest development version of the plugin. If you're looking for an official WordPress release, you can find this on the [WordPress.org repository](http://wordpress.org/plugins/autoclose). In addition to stable releases, latest beta versions are made available under [releases](https://github.com/ajaydsouza/autoclose/releases).
