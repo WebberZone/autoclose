@@ -34,7 +34,6 @@ matrix:
   allow_failures:
     # Allow failures for unstable builds.
     - php: nightly
-    - env: WP_VERSION=master
     - env: SNIFF=1
 
 before_script:
