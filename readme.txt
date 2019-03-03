@@ -3,15 +3,15 @@ Tags: autoclose, comments, pingback, trackback, spam, anti-spam
 Contributors: Ajay
 Donate link: http://ajaydsouza.com/donate/
 Stable tag: trunk
-Requires at least: 3.5
-Tested up to: 4.2
+Requires at least: 4.5
+Tested up to: 5.1
 License: GPL v2 or later
 
 Close comments, pingbacks and trackbacks on your posts automatically at intervals set by you
 
 == Description ==
 
-Spammers target old posts in a hope that you won't notice the comments on them. Why not stop them in their tracks by just shutting off comments and pingbacks? Auto-Close let's you automatically close comments, pingbacks and trackbacks on your posts, pages and custom post types.
+Spammers target old posts in a hope that you won't notice the comments on them. Why not stop them in their tracks by just shutting off comments and pingbacks? [Auto-Close Comments, Pingbacks and Trackbacks](http://ajaydsouza.com/wordpress/plugins/autoclose/) let's you automatically close comments, pingbacks and trackbacks on your posts, pages and custom post types.
 
 You can also choose to keep comments / pingbacks / trackbacks open on certain posts, page or custom post types. Just enter a comma-separated list of post IDs in the Settings page.
 
@@ -48,40 +48,19 @@ An extra feature is the ability to delete post revisions that were introduced in
 
 == Upgrade Notice ==
 
-= 1.6 =
-* New: Fixed a bug where comments on attachments did not get closed; Other bug fixes;
+= 2.0 =
+Major upgrade. Plugin has been rewritten for the latest WordPress standards.
 Check the ChangeLog for details
 
 
 == Changelog ==
 
-= 1.6 =
-* Fixed: Bug where comments on attachments did not get closed
-* Fixed: JavaScript bug when saving options in Admin area
+= 2.0 =
 
-= 1.5 =
-* New: Custom post type support. Now close comments on posts, pages, attachments and your custom post types!
-* Modified: Language initialisation
-* Modified: More code cleaning
-* New: Spanish and Serbian languages thanks to <a href="http://firstsiteguide.com/">Ogi Djuraskovic</a>
+* Enhancements:
+	* Main plugin file has been renamed to autoclose.php
 
-= 1.4 =
-* New: Responsive admin interface
-* New: Plugin is now ready to be translated
-* Modified: Massive code rewrite and cleanup
-
-= 1.3.1 =
-* New: Now separately choose to close on posts and pages. Also added buttons to open all comments and open all pings
-
-= 1.2 =
-* New: Option to delete post revisions. Minor bug fix. Includes plugin uninstaller.
-
-= 1.1 =
-* New: Option to keep comments / pingbacks / trackbacks on certain posts open
-
-= 1.0 =
-* Release
-
+For older changes, refer to changelog.txt
 
 == Screenshots ==
 
@@ -90,7 +69,7 @@ Check the ChangeLog for details
 
 == Frequently Asked Questions ==
 
-If your question isn't listed here, please post a comment at the <a href="http://wordpress.org/support/plugin/autoclose">WordPress.org support forum</a>. I monitor the forums on an ongoing basis. If you're looking for more advanced support, please see <a href="http://ajaydsouza.com/support/">details here</a>.
+If your question isn't listed there, please create a new post at the [WordPress.org support forum](http://wordpress.org/support/plugin/autoclose). It is the fastest way to get support as I monitor the forums regularly. I also provide [premium *paid* support via email](https://ajaydsouza.com/support/).
 
 = What does "Delete Post Revisions" do?  =
 
