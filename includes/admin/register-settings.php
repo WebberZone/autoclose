@@ -65,9 +65,9 @@ function acc_get_option( $key = '', $default = null ) {
 /**
  * Update an option
  *
- * Updates an acc setting value in both the db and the global variable.
+ * Updates an AutoClose setting value in both the db and the global variable.
  * Warning: Passing a null value will remove
- *          the key from the acc_options array.
+ *          the key from the acc_settings array.
  *
  * @since 2.0.0
  *
@@ -117,7 +117,7 @@ function acc_update_option( $key = '', $value = null ) {
 /**
  * Remove an option
  *
- * Removes an acc setting value in both the db and the global variable.
+ * Removes an AutoClose setting value in both the db and the global variable.
  *
  * @since 2.0.0
  *
@@ -267,6 +267,12 @@ function acc_settings_defaults() {
 				$options[ $option['id'] ] = $option['default'];
 			}
 		}
+	}
+
+	$upgraded_settings = acc_upgrade_settings();
+
+	if ( false !== $upgraded_settings ) {
+		$options = array_merge( $options, $upgraded_settings );
 	}
 
 	/**
