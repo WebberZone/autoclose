@@ -29,36 +29,35 @@ function acc_settings_help() {
 		return;
 	}
 
-	$screen->set_help_sidebar(
-		/* translators: 1: Support link. */
-		'<p>' . sprintf( __( 'For more information or how to get support visit the <a href="%1$s">WebberZone support site</a>.', 'autoclose' ), esc_url( 'https://ajaydsouza.com/support/' ) ) . '</p>' .
-		/* translators: 1: Forum link. */
-		'<p>' . sprintf( __( 'Support queries should be posted in the <a href="%1$s">WordPress.org support forums</a>.', 'autoclose' ), esc_url( 'https://wordpress.org/support/plugin/autoclose' ) ) . '</p>' .
-		'<p>' . sprintf(
-			/* translators: 1: Github Issues link, 2: Github page. */
-			__( '<a href="%1$s">Post an issue</a> on <a href="%2$s">GitHub</a> (bug reports only).', 'autoclose' ),
-			esc_url( 'https://github.com/ajaydsouza/autoclose/issues' ),
-			esc_url( 'https://github.com/ajaydsouza/autoclose' )
-		) . '</p>'
-	);
+	$screen->set_help_sidebar( acc_get_help_sidebar() );
 
 	$screen->add_help_tab(
 		array(
 			'id'      => 'acc-settings-general',
 			'title'   => __( 'General', 'autoclose' ),
 			'content' =>
-			'<p>' . __( 'This screen provides the basic settings for configuring your knowledge base.', 'autoclose' ) . '</p>' .
-				'<p>' . __( 'Set the knowledge base slugs which drive what the urls are for the knowledge base homepage, articles, categories and tags.', 'autoclose' ) . '</p>',
+			'<p>' . __( 'This screen provides the basic settings for configuring AutoClose.', 'autoclose' ) . '</p>' .
+				'<p>' . __( 'Enable closing of comments, pingbacks/trackbacks and/or deleting revisions. You can also set up the schedule at which this will take place automatically.', 'autoclose' ) . '</p>',
 		)
 	);
 
 	$screen->add_help_tab(
 		array(
-			'id'      => 'acc-settings-styles',
-			'title'   => __( 'Styles', 'autoclose' ),
+			'id'      => 'acc-settings-comments',
+			'title'   => __( 'Comments', 'autoclose' ),
 			'content' =>
-			'<p>' . __( 'This screen provides options to control the look and feel of the knowledge base.', 'autoclose' ) . '</p>' .
-				'<p>' . __( 'Disable the styles included within the plugin and/or add your own CSS styles to customize this.', 'autoclose' ) . '</p>',
+			'<p>' . __( 'This screen provides options to configure options for Comments specifically.', 'autoclose' ) . '</p>' .
+				'<p>' . __( 'Select the post types on which comments will be closed, period to close and exceptions.', 'autoclose' ) . '</p>',
+		)
+	);
+
+	$screen->add_help_tab(
+		array(
+			'id'      => 'acc-settings-pingtracks',
+			'title'   => __( 'Pingbacks / Trackbacks', 'autoclose' ),
+			'content' =>
+			'<p>' . __( 'This screen provides options to configure options for Pingbacks/Trackbacks specifically.', 'autoclose' ) . '</p>' .
+				'<p>' . __( 'Select the post types on which pingbacks/trackbacks will be closed, period to close and exceptions.', 'autoclose' ) . '</p>',
 		)
 	);
 
@@ -80,39 +79,42 @@ function acc_settings_tools_help() {
 		return;
 	}
 
-	$screen->set_help_sidebar(
-		/* translators: 1: Support link. */
-		'<p>' . sprintf( __( 'For more information or how to get support visit the <a href="%1$s">WebberZone support site</a>.', 'autoclose' ), esc_url( 'https://ajaydsouza.com/support/' ) ) . '</p>' .
-		/* translators: 1: Forum link. */
-		'<p>' . sprintf( __( 'Support queries should be posted in the <a href="%1$s">WordPress.org support forums</a>.', 'autoclose' ), esc_url( 'https://wordpress.org/support/plugin/autoclose' ) ) . '</p>' .
-		'<p>' . sprintf(
-			/* translators: 1: Github Issues link, 2: Github page. */
-			__( '<a href="%1$s">Post an issue</a> on <a href="%2$s">GitHub</a> (bug reports only).', 'autoclose' ),
-			esc_url( 'https://github.com/ajaydsouza/autoclose/issues' ),
-			esc_url( 'https://github.com/ajaydsouza/autoclose' )
-		) . '</p>'
-	);
+	$screen->set_help_sidebar( acc_get_help_sidebar() );
 
 	$screen->add_help_tab(
 		array(
 			'id'      => 'acc-settings-general',
-			'title'   => __( 'General', 'autoclose' ),
+			'title'   => __( 'Tools', 'autoclose' ),
 			'content' =>
-			'<p>' . __( 'This screen provides the basic settings for configuring your knowledge base.', 'autoclose' ) . '</p>' .
-				'<p>' . __( 'Set the knowledge base slugs which drive what the urls are for the knowledge base homepage, articles, categories and tags.', 'autoclose' ) . '</p>',
-		)
-	);
-
-	$screen->add_help_tab(
-		array(
-			'id'      => 'acc-settings-styles',
-			'title'   => __( 'Styles', 'autoclose' ),
-			'content' =>
-			'<p>' . __( 'This screen provides options to control the look and feel of the knowledge base.', 'autoclose' ) . '</p>' .
-				'<p>' . __( 'Disable the styles included within the plugin and/or add your own CSS styles to customize this.', 'autoclose' ) . '</p>',
+			'<p>' . __( 'This screen gives you a few tools namely one click buttons to run the closing algorithm or open comments, pingbacks/trackbacks.', 'autoclose' ) . '</p>' .
+				'<p>' . __( 'You can also delete the old settings from prior to v2.0.0', 'autoclose' ) . '</p>',
 		)
 	);
 
 	do_action( 'acc_settings_help', $screen );
+
+}
+
+
+/**
+ * Get the sidebar for the help.
+ *
+ * @since 2.0.0
+ */
+function acc_get_help_sidebar() {
+	/* translators: 1: Support link. */
+	$message = '<p>' . sprintf( __( 'For more information or how to get support visit the <a href="%1$s" target="_blank">Support site</a>.', 'autoclose' ), esc_url( 'https://ajaydsouza.com/support/' ) ) . '</p>';
+
+	/* translators: 1: Forum link. */
+	$message .= '<p>' . sprintf( __( 'Support queries should be posted in the <a href="%1$s" target="_blank">WordPress.org support forums</a>.', 'autoclose' ), esc_url( 'https://wordpress.org/support/plugin/autoclose' ) ) . '</p>';
+
+	$message .= '<p>' . sprintf(
+		/* translators: 1: Github Issues link, 2: Github page. */
+		__( '<a href="%1$s" target="_blank">Post an issue</a> on <a href="%2$s" target="_blank">GitHub</a> (bug reports only).', 'autoclose' ),
+		esc_url( 'https://github.com/ajaydsouza/autoclose/issues' ),
+		esc_url( 'https://github.com/ajaydsouza/autoclose' )
+	) . '</p>';
+
+	return $message;
 
 }
