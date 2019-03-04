@@ -290,15 +290,16 @@ function acc_read_options() {
  *
  * @since   1.0
  *
- * @param int $hour Hour
- * @param int $min Min
+ * @param   int $hour       Hour.
+ * @param   int $min        Minute.
+ * @param   int $recurrence Frequency.
  */
-function acc_enable_run( $hour, $min ) {
+function acc_enable_run( $hour, $min, $recurrence ) {
 	if ( ! wp_next_scheduled( 'ald_acc_hook' ) ) {
-		wp_schedule_event( mktime( $hour, $min, 0, date( 'n' ), date( 'j' ) + 1, date( 'Y' ) ), 'daily', 'ald_acc_hook' );
+		wp_schedule_event( mktime( $hour, $min, 0 ), $recurrence, 'ald_acc_hook' );
 	} else {
 		wp_clear_scheduled_hook( 'ald_acc_hook' );
-		wp_schedule_event( mktime( $hour, $min, 0, date( 'n' ), date( 'j' ) + 1, date( 'Y' ) ), 'daily', 'ald_acc_hook' );
+		wp_schedule_event( mktime( $hour, $min, 0 ), $recurrence, 'ald_acc_hook' );
 	}
 }
 
