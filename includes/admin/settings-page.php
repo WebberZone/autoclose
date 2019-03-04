@@ -28,7 +28,7 @@ function acc_options_page() {
 	ob_start();
 	?>
 	<div class="wrap">
-		<h1><?php esc_html_e( 'AutoClose Settings', 'autoclose' ); ?></h1>
+		<h1><?php esc_html_e( 'Automatically Close Comments, Pingbacks and Trackbacks Settings', 'autoclose' ); ?></h1>
 
 		<?php settings_errors(); ?>
 
@@ -121,9 +121,9 @@ function acc_options_page() {
  */
 function acc_get_settings_sections() {
 	$acc_settings_sections = array(
-		'general' => __( 'General', 'autoclose' ),
-		'output'  => __( 'Output', 'autoclose' ),
-		'styles'  => __( 'Styles', 'autoclose' ),
+		'general'    => __( 'General', 'autoclose' ),
+		'comments'   => __( 'Comments', 'autoclose' ),
+		'pingtracks' => __( 'Pingbacks/Trackbacks', 'autoclose' ),
 	);
 
 	/**
