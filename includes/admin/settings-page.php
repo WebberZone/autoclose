@@ -29,6 +29,11 @@ function acc_options_page() {
 	?>
 	<div class="wrap">
 		<h1><?php esc_html_e( 'Automatically Close Comments, Pingbacks and Trackbacks Settings', 'autoclose' ); ?></h1>
+		<p>
+			<a href="<?php echo admin_url( 'options-general.php?page=acc_tools_page' ) ?>">
+				<?php esc_html_e( 'Visit the Tools page', 'autoclose' ); ?>
+			</a>
+		<p>
 
 		<div id="poststuff">
 		<div id="post-body" class="metabox-holder columns-2">

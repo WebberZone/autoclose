@@ -17,7 +17,6 @@ if ( ! defined( 'WPINC' ) ) {
  * Function to read options from the database.
  *
  * @since   1.0
- * @deprecated 2.0.0
  *
  * @param mixed $post_types_input Post types array or csv string.
  * @return array Options for the database. Will add any missing options.
@@ -45,4 +44,43 @@ function acc_parse_post_types( $post_types_input ) {
 	return $post_types;
 }
 
+
+/**
+ * Function to read options from the database.
+ *
+ * @since 2.0.0
+ *
+ * @return int|bool Number of rows affected/selected for all other queries. Boolean false on error.
+ */
+function acc_open_comments() {
+	global $wpdb;
+
+	$result = $wpdb->query( "
+		UPDATE {$wpdb->posts}
+		SET comment_status = 'open'
+		WHERE comment_status = 'closed'
+	" );
+
+	return $result;
+}
+
+
+/**
+ * Open pingbacks/trackbacks.
+ *
+ * @since 2.0.0
+ *
+ * @return int|bool Number of rows affected/selected for all other queries. Boolean false on error.
+ */
+function acc_open_pingtracks() {
+	global $wpdb;
+
+	$result = $wpdb->query( "
+		UPDATE {$wpdb->posts}
+		SET ping_status = 'open'
+		WHERE ping_status = 'closed'
+	" );
+
+	return $result;
+}
 

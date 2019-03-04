@@ -227,6 +227,7 @@ require_once ACC_PLUGIN_DIR . 'includes/admin/default-settings.php';
 require_once ACC_PLUGIN_DIR . 'includes/admin/register-settings.php';
 require_once ACC_PLUGIN_DIR . 'includes/cron.php';
 require_once ACC_PLUGIN_DIR . 'includes/l10n.php';
+require_once ACC_PLUGIN_DIR . 'includes/helpers.php';
 
 
 /*
@@ -241,6 +242,7 @@ if ( is_admin() || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
 	require_once ACC_PLUGIN_DIR . 'includes/admin/settings-page.php';
 	require_once ACC_PLUGIN_DIR . 'includes/admin/save-settings.php';
 	require_once ACC_PLUGIN_DIR . 'includes/admin/help-tab.php';
+	require_once ACC_PLUGIN_DIR . 'includes/admin/tools.php';
 
 }
 
