@@ -29,13 +29,13 @@ function acc_tools_page() {
 		// Execute the main function.
 		acc_main();
 
-		$date_time_format = get_option('date_format') . ',' . get_option('time_format');
+		$date_time_format = get_option( 'date_format' ) . ', ' . get_option( 'time_format' );
 		$current_time     = current_time( 'timestamp', 0 );
 
 		$message = '';
 
 		if ( $acc_settings['close_comment'] ) {
-			/* translators: 1: Code. */
+			/* translators: 1: Date. */
 			$message .= sprintf(
 				esc_html__( 'Comments closed up to %1$s', 'autoclose' ),
 				date( $date_time_format, ( $current_time - $acc_settings['comment_age'] * DAY_IN_SECONDS ) )
@@ -44,7 +44,7 @@ function acc_tools_page() {
 		}
 
 		if ( $acc_settings['close_pbtb'] ) {
-			/* translators: 1: Code. */
+			/* translators: 1: Date. */
 			$message .= sprintf(
 				esc_html__( 'Pingbacks/Trackbacks closed up to %1$s', 'autoclose' ),
 				date( $date_time_format, ( $current_time - $acc_settings['pbtb_age'] * DAY_IN_SECONDS ) )
@@ -57,7 +57,11 @@ function acc_tools_page() {
 			$message .= '<br />';
 		}
 
-		add_settings_error( 'acc-notices', '', $message, 'updated' );
+		if ( ! empty( $message ) ) {
+			add_settings_error( 'acc-notices', '', $message, 'updated' );
+		} else {
+			add_settings_error( 'acc-notices', '', esc_html__( 'Nothing to process. Visit the Settings page to select what to close/delete.', 'autoclose' ) . '<br />', 'error' );
+		}
 	}
 
 	/* Delete old settings */
@@ -92,7 +96,7 @@ function acc_tools_page() {
 		<h1><?php esc_html_e( 'Automatically Close Comments, Pingbacks and Trackbacks Tools', 'autoclose' ); ?></h1>
 
 		<p>
-			<a href="<?php echo admin_url( 'options-general.php?page=acc_options_page' ) ?>">
+			<a href="<?php echo admin_url( 'options-general.php?page=acc_options_page' ); ?>">
 				<?php esc_html_e( 'Visit the Settings page', 'autoclose' ); ?>
 			</a>
 		<p>

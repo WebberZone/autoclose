@@ -30,7 +30,7 @@ function acc_add_admin_pages_links() {
 	add_action( "load-$acc_settings_page", 'acc_settings_help' ); // Load the settings contextual help.
 	add_action( "admin_head-$acc_settings_page", 'acc_adminhead' ); // Load the admin head.
 
-	$acc_settings_tools = add_submenu_page( null, esc_html__( 'AutoClose Tools', 'autoclose' ), esc_html__( 'Tools', 'autoclose' ), 'manage_options', 'acc_tools_page', 'acc_tools_page' );
+	$acc_settings_tools = add_submenu_page( $acc_settings_page, esc_html__( 'AutoClose Tools', 'autoclose' ), esc_html__( 'Tools', 'autoclose' ), 'manage_options', 'acc_tools_page', 'acc_tools_page' );
 	add_action( "load-$acc_settings_tools", 'acc_settings_tools_help' );
 	add_action( "admin_head-$acc_settings_tools", 'acc_adminhead' );
 

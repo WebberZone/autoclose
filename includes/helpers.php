@@ -55,11 +55,13 @@ function acc_parse_post_types( $post_types_input ) {
 function acc_open_comments() {
 	global $wpdb;
 
-	$result = $wpdb->query( "
+	$result = $wpdb->query(
+		"
 		UPDATE {$wpdb->posts}
 		SET comment_status = 'open'
 		WHERE comment_status = 'closed'
-	" );
+	"
+	);
 
 	return $result;
 }
@@ -75,11 +77,13 @@ function acc_open_comments() {
 function acc_open_pingtracks() {
 	global $wpdb;
 
-	$result = $wpdb->query( "
+	$result = $wpdb->query(
+		"
 		UPDATE {$wpdb->posts}
 		SET ping_status = 'open'
 		WHERE ping_status = 'closed'
-	" );
+	"
+	);
 
 	return $result;
 }
