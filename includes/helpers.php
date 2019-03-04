@@ -42,7 +42,7 @@ function acc_parse_post_types( $post_types_input ) {
 		);
 	}
 
-	return apply_filters( 'acc_read_options', $post_types );
+	return $post_types;
 }
 
 
