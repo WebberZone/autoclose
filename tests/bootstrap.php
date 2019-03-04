@@ -33,7 +33,6 @@ echo "Installing Top 10...\n";
 
 global $acc_settings, $current_user;
 
-//acc_activation_hook( true );
-
-$acc_settings = acc_read_options();
+// acc_activation_hook( true );
+$acc_settings = acc_get_settings();
 

@@ -31,62 +31,91 @@ if ( ! defined( 'WPINC' ) ) {
 
 
 /**
- * Holds the filesystem directory path.
+ * Holds the filesystem directory path (with trailing slash) for AutoClose
  *
- * @since   1.0
+ * @since 2.0.0
+ *
+ * @var string Plugin folder path
  */
-define( 'ALD_ACC_DIR', dirname( __FILE__ ) );
-
+if ( ! defined( 'ACC_PLUGIN_DIR' ) ) {
+	define( 'ACC_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+}
 
 /**
  * Holds the filesystem directory path (with trailing slash) for AutoClose
  *
- * @since   1.4
+ * @since 2.0.0
  *
- * @var string
+ * @var string Plugin folder URL
  */
-$acc_path = plugin_dir_path( __FILE__ );
-
-
-/**
- * Holds the URL for AutoClose
- *
- * @since   1.4
- *
- * @var string
- */
-$acc_url = plugins_url() . '/' . plugin_basename( dirname( __FILE__ ) );
-
-
-/**
- * Initialises text domain for l10n.
- *
- * @since   1.4
- */
-function ald_acc_lang_init() {
-	load_plugin_textdomain( 'autoclose', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
+if ( ! defined( 'ACC_PLUGIN_URL' ) ) {
+	define( 'ACC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 }
-add_action( 'plugins_loaded', 'ald_acc_lang_init' );
+
+/**
+ * Holds the filesystem directory path (with trailing slash) for AutoClose
+ *
+ * @since 2.0.0
+ *
+ * @var string Plugin Root File
+ */
+if ( ! defined( 'ACC_PLUGIN_FILE' ) ) {
+	define( 'ACC_PLUGIN_FILE', __FILE__ );
+}
+
+/**
+ * Global variable holding the current settings for AutoClose
+ *
+ * @since 2.0.0
+ *
+ * @var array
+ */
+global $acc_settings;
+$acc_settings = acc_get_settings();
+
+
+/**
+ * Get Settings.
+ *
+ * Retrieves all plugin settings
+ *
+ * @since  2.5.0
+ * @return array AutoClose settings
+ */
+function acc_get_settings() {
+
+	$settings = get_option( 'acc_settings' );
+
+	/**
+	 * Settings array
+	 *
+	 * Retrieves all plugin settings
+	 *
+	 * @since 2.0.0
+	 * @param array $settings Settings array
+	 */
+	return apply_filters( 'acc_get_settings', $settings );
+}
 
 
 /**
  * Main function.
  *
- * @since   1.0
+ * @since 2.0.0
  */
-function ald_acc() {
-	global $wpdb;
-	$poststable   = $wpdb->posts;
-	$acc_settings = acc_read_options();
+function acc_main() {
+	global $wpdb, $acc_settings;
 
-	$comment_age  = $acc_settings['comment_age'] . ' DAY';
-	$pbtb_age     = $acc_settings['pbtb_age'] . ' DAY';
+	$acc_settings = acc_get_settings();
+
+	$comment_age  = $acc_settings['comment_age'];
+	$pbtb_age     = $acc_settings['pbtb_age'];
 	$comment_pids = $acc_settings['comment_pids'];
 	$pbtb_pids    = $acc_settings['pbtb_pids'];
 
-	// Get the post types
-	parse_str( $acc_settings['comment_post_types'], $comment_post_types );  // Save post types in $comment_post_types variable
-	parse_str( $acc_settings['pbtb_post_types'], $pbtb_post_types );    // Save post types in $comment_post_types variable
+	// Get the post types.
+	$comment_post_types = acc_parse_post_types( $acc_settings['comment_post_types'] );
+	$pbtb_post_types    = acc_parse_post_types( $acc_settings['pbtb_post_types'] );
 
 	// What is the time now?
 	$now = gmdate( 'Y-m-d H:i:s', ( time() + ( get_option( 'gmt_offset' ) * 3600 ) ) );
@@ -103,60 +132,60 @@ function ald_acc() {
 	// Close Comments on posts
 	if ( $acc_settings['close_comment'] ) {
 		// Prepare the query
-		$args     = array(
+		$acc_settings = array(
 			$comment_date,
 		);
-		$sql      = "
-                UPDATE $poststable
+		$sql          = "
+                UPDATE $wpdb->posts
                 SET comment_status = 'closed'
                 WHERE comment_status = 'open'
                 AND post_date < '%s'
 		";
-		$sql     .= ' AND ( ';
-		$multiple = false;
+		$sql         .= ' AND ( ';
+		$multiple     = false;
 		foreach ( $comment_post_types as $post_type ) {
 			if ( $multiple ) {
 				$sql .= ' OR '; }
-			$sql     .= " post_type = '%s'";
-			$multiple = true;
-			$args[]   = $post_type;   // Add the post types to the $args array
+			$sql           .= " post_type = '%s'";
+			$multiple       = true;
+			$acc_settings[] = $post_type;   // Add the post types to the $acc_settings array
 		}
 		$sql .= ' ) ';
 
-		$results = $wpdb->get_results( $wpdb->prepare( $sql, $args ) );
+		$results = $wpdb->get_results( $wpdb->prepare( $sql, $acc_settings ) );
 	}
 
 	// Close Pingbacks/Trackbacks on posts
 	if ( $acc_settings['close_pbtb'] ) {
 		// Prepare the query
-		$args     = array(
+		$acc_settings = array(
 			$pbtb_date,
 		);
-		$sql      = "
-                UPDATE $poststable
+		$sql          = "
+                UPDATE $wpdb->posts
                 SET ping_status = 'closed'
                 WHERE ping_status = 'open'
                 AND post_date < '%s'
 		";
-		$sql     .= ' AND ( ';
-		$multiple = false;
+		$sql         .= ' AND ( ';
+		$multiple     = false;
 		foreach ( $pbtb_post_types as $post_type ) {
 			if ( $multiple ) {
 				$sql .= ' OR '; }
-			$sql     .= " post_type = '%s'";
-			$multiple = true;
-			$args[]   = $post_type;   // Add the post types to the $args array
+			$sql           .= " post_type = '%s'";
+			$multiple       = true;
+			$acc_settings[] = $post_type;   // Add the post types to the $acc_settings array
 		}
 		$sql .= ' ) ';
 
-		$results = $wpdb->get_results( $wpdb->prepare( $sql, $args ) );
+		$results = $wpdb->get_results( $wpdb->prepare( $sql, $acc_settings ) );
 	}
 
 	// Open Comments on these posts
 	if ( '' != $acc_settings['comment_pids'] ) {
 		$wpdb->query(
 			"
-            UPDATE $poststable
+            UPDATE $wpdb->posts
             SET comment_status = 'open'
             WHERE comment_status = 'closed'
             AND ID IN ($comment_pids)
@@ -168,7 +197,7 @@ function ald_acc() {
 	if ( '' != $acc_settings['pbtb_pids'] ) {
 		$wpdb->query(
 			"
-            UPDATE $poststable
+            UPDATE $wpdb->posts
             SET ping_status = 'open'
             WHERE ping_status = 'closed'
             AND ID IN ($pbtb_pids)
@@ -180,153 +209,46 @@ function ald_acc() {
 	if ( $acc_settings['delete_revisions'] ) {
 		$wpdb->query(
 			"
-            DELETE FROM $poststable
+            DELETE FROM $wpdb->posts
             WHERE post_type = 'revision'
 		"
 		);
 	}
 }
-add_action( 'ald_acc_hook', 'ald_acc' );
 
 
-/**
- * Default options.
- *
- * @since   1.0
- *
- * @return array Default settings
+/*
+ *---------------------------------------------------------------------------*
+ * AutoClose modules
+ *---------------------------------------------------------------------------*
  */
-function acc_default_options() {
 
-	$comment_post_types = http_build_query( array( 'post' => 'post' ), '', '&' );
-	$pbtb_post_types    = $comment_post_types;
+require_once ACC_PLUGIN_DIR . 'includes/admin/default-settings.php';
+require_once ACC_PLUGIN_DIR . 'includes/admin/register-settings.php';
+require_once ACC_PLUGIN_DIR . 'includes/cron.php';
+require_once ACC_PLUGIN_DIR . 'includes/l10n.php';
 
-	$acc_settings = array(
-		'comment_age'         => '90',  // Close comments before these many days
-		'pbtb_age'            => '90',     // Close pingbacks/trackbacks before these many days
-		'comment_pids'        => '',   // Comments on these Post IDs to open
-		'pbtb_pids'           => '',      // Pingback on these Post IDs to open
-		'close_comment'       => false,   // Close Comments on posts
-		'close_comment_pages' => false, // Close Comments on pages
-		'close_pbtb'          => false,      // Close Pingbacks and Trackbacks on posts
-		'close_pbtb_pages'    => false,        // Close Pingbacks and Trackbacks on pages
-		'delete_revisions'    => false,        // Delete post revisions
-		'daily_run'           => false,       // Run Daily?
-		'cron_hour'           => '0',     // Cron Hour
-		'cron_min'            => '0',      // Cron Minute
-		'comment_post_types'  => $comment_post_types,        // WordPress custom post types
-		'pbtb_post_types'     => $pbtb_post_types,      // WordPress custom post types
-	);
 
-	return apply_filters( 'acc_default_options', $acc_settings );
+/*
+ *---------------------------------------------------------------------------*
+ * Dashboard and Administrative Functionality
+ *---------------------------------------------------------------------------*
+ */
+
+if ( is_admin() || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+
+	require_once ACC_PLUGIN_DIR . 'includes/admin/admin.php';
+	require_once ACC_PLUGIN_DIR . 'includes/admin/settings-page.php';
+	require_once ACC_PLUGIN_DIR . 'includes/admin/save-settings.php';
+	require_once ACC_PLUGIN_DIR . 'includes/admin/help-tab.php';
+
 }
 
-
-/**
- * Function to read options from the database.
- *
- * @since   1.0
- *
- * @return array Options for the database. Will add any missing options.
+/*
+ *---------------------------------------------------------------------------*
+ * Deprecated functions
+ *---------------------------------------------------------------------------*
  */
-function acc_read_options() {
-	$acc_settings_changed = false;
 
-	$defaults = acc_default_options();
-
-	$acc_settings = array_map( 'stripslashes', (array) get_option( 'ald_acc_settings' ) );
-	unset( $acc_settings[0] ); // produced by the (array) casting when there's nothing in the DB
-
-	foreach ( $defaults as $k => $v ) {
-		if ( ! isset( $acc_settings[ $k ] ) ) {
-			$acc_settings[ $k ] = $v;
-		}
-		$acc_settings_changed = true;
-	}
-	if ( true == $acc_settings_changed ) {
-		update_option( 'ald_acc_settings', $acc_settings );
-	}
-
-	return apply_filters( 'acc_read_options', $acc_settings );
-}
-
-
-/**
- * Function to enable run or actions.
- *
- * @since   1.0
- *
- * @param int $hour Hour
- * @param int $min Min
- */
-function acc_enable_run( $hour, $min ) {
-	if ( ! wp_next_scheduled( 'ald_acc_hook' ) ) {
-		wp_schedule_event( mktime( $hour, $min, 0, date( 'n' ), date( 'j' ) + 1, date( 'Y' ) ), 'daily', 'ald_acc_hook' );
-	} else {
-		wp_clear_scheduled_hook( 'ald_acc_hook' );
-		wp_schedule_event( mktime( $hour, $min, 0, date( 'n' ), date( 'j' ) + 1, date( 'Y' ) ), 'daily', 'ald_acc_hook' );
-	}
-}
-
-
-/**
- * Function to disable daily run or actions.
- *
- * @since   1.0
- */
-function acc_disable_run() {
-	if ( wp_next_scheduled( 'ald_acc_hook' ) ) {
-		wp_clear_scheduled_hook( 'ald_acc_hook' );
-	}
-}
-
-
-// Process the admin page if we're on the admin screen
-if ( is_admin() || strstr( $_SERVER['PHP_SELF'], 'wp-admin/' ) ) {
-	require_once ALD_ACC_DIR . '/admin.inc.php';
-
-	/**
-	 * Filter to add link to WordPress plugin action links.
-	 *
-	 * @since   1.4
-	 *
-	 * @param array $links
-	 * @return array
-	 */
-	function acc_plugin_actions_links( $links ) {
-
-		return array_merge(
-			array(
-				'settings' => '<a href="' . admin_url( 'options-general.php?page=acc_options' ) . '">' . __( 'Settings', 'autoclose' ) . '</a>',
-			),
-			$links
-		);
-
-	}
-	add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'acc_plugin_actions_links' );
-
-	/**
-	 * Filter to add links to the plugin action row.
-	 *
-	 * @since   1.4
-	 *
-	 * @param array $links
-	 * @param array $file
-	 */
-	function acc_plugin_actions( $links, $file ) {
-		static $plugin;
-		if ( ! $plugin ) {
-			$plugin = plugin_basename( __FILE__ );
-		}
-
-		// create link
-		if ( $file == $plugin ) {
-			$links[] = '<a href="http://wordpress.org/support/plugin/autoclose">' . __( 'Support', 'autoclose' ) . '</a>';
-			$links[] = '<a href="http://ajaydsouza.com/donate/">' . __( 'Donate', 'autoclose' ) . '</a>';
-		}
-		return $links;
-	}
-	add_filter( 'plugin_row_meta', 'acc_plugin_actions', 10, 2 ); // only 2.8 and higher
-
-} // End admin.inc
+require_once ACC_PLUGIN_DIR . 'includes/deprecated.php';
 
