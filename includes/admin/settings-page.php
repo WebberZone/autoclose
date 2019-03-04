@@ -30,8 +30,6 @@ function acc_options_page() {
 	<div class="wrap">
 		<h1><?php esc_html_e( 'Automatically Close Comments, Pingbacks and Trackbacks Settings', 'autoclose' ); ?></h1>
 
-		<?php settings_errors(); ?>
-
 		<div id="poststuff">
 		<div id="post-body" class="metabox-holder columns-2">
 		<div id="post-body-content">
