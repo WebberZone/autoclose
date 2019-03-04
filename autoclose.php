@@ -108,10 +108,11 @@ function acc_main() {
 
 	$acc_settings = acc_get_settings();
 
-	$comment_age  = $acc_settings['comment_age'];
-	$pbtb_age     = $acc_settings['pbtb_age'];
-	$comment_pids = $acc_settings['comment_pids'];
-	$pbtb_pids    = $acc_settings['pbtb_pids'];
+	$comment_age      = $acc_settings['comment_age'];
+	$pbtb_age         = $acc_settings['pbtb_age'];
+	$comment_pids     = $acc_settings['comment_pids'];
+	$pbtb_pids        = $acc_settings['pbtb_pids'];
+	$delete_revisions = $acc_settings['delete_revisions'];
 
 	// Get the post types.
 	$comment_post_types = acc_parse_post_types( $acc_settings['comment_post_types'] );
@@ -182,7 +183,7 @@ function acc_main() {
 	}
 
 	// Open Comments on these posts
-	if ( '' != $acc_settings['comment_pids'] ) {
+	if ( '' != $comment_pids ) {
 		$wpdb->query(
 			"
             UPDATE $wpdb->posts
@@ -194,7 +195,7 @@ function acc_main() {
 	}
 
 	// Open Pingbacks / Trackbacks on these posts
-	if ( '' != $acc_settings['pbtb_pids'] ) {
+	if ( '' != $pbtb_pids ) {
 		$wpdb->query(
 			"
             UPDATE $wpdb->posts
@@ -206,7 +207,7 @@ function acc_main() {
 	}
 
 	// Delete Post Revisions (WordPress 2.6 and above)
-	if ( $acc_settings['delete_revisions'] ) {
+	if ( $delete_revisions ) {
 		$wpdb->query(
 			"
             DELETE FROM $wpdb->posts
