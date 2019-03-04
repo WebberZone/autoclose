@@ -104,7 +104,7 @@ function acc_settings_sanitize( $input = array() ) {
 		$output[ $key ] = apply_filters( 'acc_settings_sanitize' . $key, $output[ $key ], $key );
 
 		// Delete any key that is not present when we submit the input array.
-		if ( empty( $input[ $key ] ) ) {
+		if ( ! isset( $input[ $key ] ) ) {
 			unset( $output[ $key ] );
 		}
 	}
