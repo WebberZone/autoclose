@@ -48,17 +48,18 @@ An extra feature is the ability to delete post revisions that were introduced in
 
 == Upgrade Notice ==
 
-= 2.0 =
+= 2.0.0 =
 Major upgrade. Plugin has been rewritten for the latest WordPress standards.
 Check the ChangeLog for details
 
 
 == Changelog ==
 
-= 2.0 =
+= 2.0.0 =
 
 * Enhancements:
 	* Main plugin file has been renamed to autoclose.php
+	* Migrated options to the Settings API
 
 For older changes, refer to changelog.txt
 

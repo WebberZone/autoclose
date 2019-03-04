@@ -132,23 +132,23 @@ function acc_main() {
 	// Close Comments on posts
 	if ( $acc_settings['close_comment'] ) {
 		// Prepare the query
-		$acc_settings     = array(
+		$acc_settings = array(
 			$comment_date,
 		);
-		$sql      = "
+		$sql          = "
                 UPDATE $wpdb->posts
                 SET comment_status = 'closed'
                 WHERE comment_status = 'open'
                 AND post_date < '%s'
 		";
-		$sql     .= ' AND ( ';
-		$multiple = false;
+		$sql         .= ' AND ( ';
+		$multiple     = false;
 		foreach ( $comment_post_types as $post_type ) {
 			if ( $multiple ) {
 				$sql .= ' OR '; }
-			$sql     .= " post_type = '%s'";
-			$multiple = true;
-			$acc_settings[]   = $post_type;   // Add the post types to the $acc_settings array
+			$sql           .= " post_type = '%s'";
+			$multiple       = true;
+			$acc_settings[] = $post_type;   // Add the post types to the $acc_settings array
 		}
 		$sql .= ' ) ';
 
@@ -158,23 +158,23 @@ function acc_main() {
 	// Close Pingbacks/Trackbacks on posts
 	if ( $acc_settings['close_pbtb'] ) {
 		// Prepare the query
-		$acc_settings     = array(
+		$acc_settings = array(
 			$pbtb_date,
 		);
-		$sql      = "
+		$sql          = "
                 UPDATE $wpdb->posts
                 SET ping_status = 'closed'
                 WHERE ping_status = 'open'
                 AND post_date < '%s'
 		";
-		$sql     .= ' AND ( ';
-		$multiple = false;
+		$sql         .= ' AND ( ';
+		$multiple     = false;
 		foreach ( $pbtb_post_types as $post_type ) {
 			if ( $multiple ) {
 				$sql .= ' OR '; }
-			$sql     .= " post_type = '%s'";
-			$multiple = true;
-			$acc_settings[]   = $post_type;   // Add the post types to the $acc_settings array
+			$sql           .= " post_type = '%s'";
+			$multiple       = true;
+			$acc_settings[] = $post_type;   // Add the post types to the $acc_settings array
 		}
 		$sql .= ' ) ';
 
@@ -242,7 +242,7 @@ if ( is_admin() || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
 	require_once ACC_PLUGIN_DIR . 'includes/admin/save-settings.php';
 	require_once ACC_PLUGIN_DIR . 'includes/admin/help-tab.php';
 
-} // End admin.inc
+}
 
 /*
  *---------------------------------------------------------------------------*
