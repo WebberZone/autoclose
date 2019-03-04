@@ -106,7 +106,7 @@ function acc_get_settings() {
 function acc_main() {
 	global $wpdb, $acc_settings;
 
-	$acc_settings = acc_read_options();
+	$acc_settings = acc_get_settings();
 
 	$comment_age  = $acc_settings['comment_age'];
 	$pbtb_age     = $acc_settings['pbtb_age'];
