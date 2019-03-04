@@ -235,7 +235,7 @@ function acc_sanitize_textarea_field( $value ) {
 	$allowedtags = array_merge( $allowedposttags, $moretags );
 
 	/**
-	 * Filter allowed tags allowed when sanitizing text and textarea fields.
+	 * Filter allowed tags when sanitizing text and textarea fields.
 	 *
 	 * @since 2.0.0
 	 *
@@ -282,5 +282,29 @@ function acc_sanitize_posttypes_field( $value ) {
 	return implode( ',', $post_types );
 }
 add_filter( 'acc_settings_sanitize_posttypes', 'acc_sanitize_posttypes_field' );
+
+
+/**
+ * Enable/disable cron on save.
+ *
+ * @since 2.0.0
+ *
+ * @param  array $settings Settings array.
+ * @return string  $settings  Sanitizied settings array.
+ */
+function acc_sanitize_cron( $settings ) {
+
+	$settings['cron_hour'] = min( 23, absint( $settings['cron_hour'] ) );
+	$settings['cron_min']  = min( 59, absint( $settings['cron_min'] ) );
+
+	if ( ! empty( $settings['cron_on'] ) ) {
+		acc_enable_run( $settings['cron_hour'], $settings['cron_min'], $settings['cron_recurrence'] );
+	} else {
+		acc_disable_run();
+	}
+
+	return $settings;
+}
+add_filter( 'acc_settings_sanitize', 'acc_sanitize_cron' );
 
 
