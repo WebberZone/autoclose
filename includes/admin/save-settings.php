@@ -48,10 +48,6 @@ function acc_settings_sanitize( $input = array() ) {
 
 		add_settings_error( 'acc-notices', '', __( 'Settings have been reset to their default values. Reload this page to view the updated settings', 'autoclose' ), 'error' );
 
-		// Re-register post type and flush the rewrite rules.
-		acc_register_post_type();
-		flush_rewrite_rules();
-
 		return $acc_settings;
 	}
 
@@ -119,10 +115,6 @@ function acc_settings_sanitize( $input = array() ) {
 	}
 
 	add_settings_error( 'acc-notices', '', __( 'Settings updated.', 'autoclose' ), 'updated' );
-
-	// Re-register post type and flush the rewrite rules.
-	acc_register_post_type();
-	flush_rewrite_rules();
 
 	/**
 	 * Filter the settings array before it is returned.
