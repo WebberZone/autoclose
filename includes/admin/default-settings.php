@@ -88,7 +88,7 @@ function acc_settings_general() {
 		'cron_range_desc'  => array(
 			'id'   => 'cron_range_desc',
 			'name' => '<strong>' . esc_html__( 'Time to run closing', 'autoclose' ) . '</strong>',
-			'desc' => esc_html__( 'The next two options allow you to set the time to run the cron.', 'autoclose' ),
+			'desc' => esc_html__( 'The next two options allow you to set the time to run the cron. The cron job will run now if the hour:min set below if before the current time. e.g. if the time now is 20:30 hours and you set the schedule to 9:00. Else it will run later today at the scheduled time.', 'autoclose' ),
 			'type' => 'descriptive_text',
 		),
 		'cron_hour'        => array(
@@ -245,6 +245,14 @@ function acc_upgrade_settings() {
 	$settings = $old_settings;
 
 	$settings['cron_on'] = $old_settings['daily_run'];
+
+	// Rename the cron job.
+	if ( wp_next_scheduled( 'ald_acc_hook' ) ) {
+		$next_event = wp_get_scheduled_event( 'ald_acc_hook' );
+		wp_schedule_event( $next_event->timestamp, $next_event->schedule, 'acc_cron_hook' );
+		wp_clear_scheduled_hook( 'ald_acc_hook' );
+	}
+
 
 	return $settings;
 }

@@ -24,11 +24,11 @@ if ( ! defined( 'WPINC' ) ) {
  * @param int $recurrence Frequency.
  */
 function acc_enable_run( $hour, $min, $recurrence ) {
-	if ( ! wp_next_scheduled( 'ald_acc_hook' ) ) {
-		wp_schedule_event( mktime( $hour, $min, 0 ), $recurrence, 'ald_acc_hook' );
+	if ( ! wp_next_scheduled( 'acc_cron_hook' ) ) {
+		wp_schedule_event( mktime( $hour, $min, 0 ), $recurrence, 'acc_cron_hook' );
 	} else {
-		wp_clear_scheduled_hook( 'ald_acc_hook' );
-		wp_schedule_event( mktime( $hour, $min, 0 ), $recurrence, 'ald_acc_hook' );
+		wp_clear_scheduled_hook( 'acc_cron_hook' );
+		wp_schedule_event( mktime( $hour, $min, 0 ), $recurrence, 'acc_cron_hook' );
 	}
 }
 
@@ -39,8 +39,8 @@ function acc_enable_run( $hour, $min, $recurrence ) {
  * @since 1.0
  */
 function acc_disable_run() {
-	if ( wp_next_scheduled( 'ald_acc_hook' ) ) {
-		wp_clear_scheduled_hook( 'ald_acc_hook' );
+	if ( wp_next_scheduled( 'acc_cron_hook' ) ) {
+		wp_clear_scheduled_hook( 'acc_cron_hook' );
 	}
 }
 

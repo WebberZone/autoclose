@@ -73,5 +73,6 @@ function acc_main() {
 		acc_delete_revisions();
 	}
 }
+add_action( 'acc_cron_hook', 'acc_main' );
 
 
