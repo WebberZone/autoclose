@@ -90,6 +90,20 @@ function acc_tools_page() {
 		add_settings_error( 'acc-notices', '', esc_html__( 'Pingbacks/Trackbacks opened on all post types', 'autoclose' ), 'updated' );
 	}
 
+	/* Close comments */
+	if ( ( isset( $_POST['acc_closecomments'] ) ) && ( check_admin_referer( 'acc-tools-settings' ) ) ) {
+		acc_close_comments();
+
+		add_settings_error( 'acc-notices', '', esc_html__( 'Comments closed on all post types', 'autoclose' ), 'updated' );
+	}
+
+	/* Close pingbacks/trackbacks */
+	if ( ( isset( $_POST['acc_closepings'] ) ) && ( check_admin_referer( 'acc-tools-settings' ) ) ) {
+		acc_close_pingtracks();
+
+		add_settings_error( 'acc-notices', '', esc_html__( 'Pingbacks/Trackbacks closed on all post types', 'autoclose' ), 'updated' );
+	}
+
 	ob_start();
 	?>
 	<div class="wrap">
@@ -111,17 +125,23 @@ function acc_tools_page() {
 
 				<h2 style="padding-left:0px"><?php esc_html_e( 'Close Comments, Pingbacks and Trackbacks', 'autoclose' ); ?></h2>
 				<p>
-					<input type="submit" name="close_all" id="close_all"  value="<?php esc_attr_e( 'Close All', 'autoclose' ); ?>" class="button button-primary" />
+					<input type="submit" name="close_all" id="close_all"  value="<?php esc_attr_e( 'Run closing algorithm', 'autoclose' ); ?>" class="button button-primary" />
 				</p>
 				<p class="description">
 					<?php esc_html_e( 'Clicking this button will execute the closing algorithm respecting the various options in the Settings page.', 'autoclose' ); ?>
 				</p>
 
-				<h2 style="padding-left:0px"><?php esc_html_e( 'Open Comments, Pingbacks and Trackbacks', 'autoclose' ); ?></h2>
+				<h2 style="padding-left:0px"><?php esc_html_e( 'Open or close Comments, Pingbacks and Trackbacks', 'autoclose' ); ?></h2>
 				<p>
 					<input name="acc_opencomments" type="submit" id="acc_opencomments" value="<?php _e( 'Open Comments', 'autoclose' ); ?>" class="button button-secondary" onclick="if (!confirm('Do you want to open comments on all posts and post types?')) return false;" />
 
 					<input name="acc_openpings" type="submit" id="acc_openpings" value="<?php _e( 'Open Pings', 'autoclose' ); ?>" class="button button-secondary" onclick="if (!confirm('Do you want to open pings on all posts and post types?')) return false;" />
+				</p>
+
+				<p>
+					<input name="acc_closecomments" type="submit" id="acc_closecomments" value="<?php _e( 'Close Comments', 'autoclose' ); ?>" class="button button-secondary" onclick="if (!confirm('Do you want to close comments on all posts and post types?')) return false;" />
+
+					<input name="acc_closepings" type="submit" id="acc_closepings" value="<?php _e( 'Close Pings', 'autoclose' ); ?>" class="button button-secondary" onclick="if (!confirm('Do you want to close pings on all posts and post types?')) return false;" />
 				</p>
 
 				<h2 style="padding-left:0px"><?php esc_html_e( 'Other tools', 'autoclose' ); ?></h2>
