@@ -98,126 +98,6 @@ function acc_get_settings() {
 }
 
 
-/**
- * Main function.
- *
- * @since 2.0.0
- */
-function acc_main() {
-	global $wpdb, $acc_settings;
-
-	$acc_settings = acc_get_settings();
-
-	$comment_age      = $acc_settings['comment_age'];
-	$pbtb_age         = $acc_settings['pbtb_age'];
-	$comment_pids     = $acc_settings['comment_pids'];
-	$pbtb_pids        = $acc_settings['pbtb_pids'];
-	$delete_revisions = $acc_settings['delete_revisions'];
-
-	// Get the post types.
-	$comment_post_types = acc_parse_post_types( $acc_settings['comment_post_types'] );
-	$pbtb_post_types    = acc_parse_post_types( $acc_settings['pbtb_post_types'] );
-
-	// What is the time now?
-	$now = gmdate( 'Y-m-d H:i:s', ( time() + ( get_option( 'gmt_offset' ) * 3600 ) ) );
-
-	// Get the date up to which comments and pings will be closed
-	$comment_age  = $comment_age - 1;
-	$comment_date = strtotime( '-' . $comment_age . ' DAY', strtotime( $now ) );
-	$comment_date = date( 'Y-m-d H:i:s', $comment_date );
-
-	$pbtb_age  = $pbtb_age - 1;
-	$pbtb_date = strtotime( '-' . $pbtb_age . ' DAY', strtotime( $now ) );
-	$pbtb_date = date( 'Y-m-d H:i:s', $pbtb_date );
-
-	// Close Comments on posts
-	if ( $acc_settings['close_comment'] ) {
-		// Prepare the query
-		$acc_settings = array(
-			$comment_date,
-		);
-		$sql          = "
-                UPDATE $wpdb->posts
-                SET comment_status = 'closed'
-                WHERE comment_status = 'open'
-                AND post_date < '%s'
-		";
-		$sql         .= ' AND ( ';
-		$multiple     = false;
-		foreach ( $comment_post_types as $post_type ) {
-			if ( $multiple ) {
-				$sql .= ' OR '; }
-			$sql           .= " post_type = '%s'";
-			$multiple       = true;
-			$acc_settings[] = $post_type;   // Add the post types to the $acc_settings array
-		}
-		$sql .= ' ) ';
-
-		$results = $wpdb->get_results( $wpdb->prepare( $sql, $acc_settings ) );
-	}
-
-	// Close Pingbacks/Trackbacks on posts
-	if ( $acc_settings['close_pbtb'] ) {
-		// Prepare the query
-		$acc_settings = array(
-			$pbtb_date,
-		);
-		$sql          = "
-                UPDATE $wpdb->posts
-                SET ping_status = 'closed'
-                WHERE ping_status = 'open'
-                AND post_date < '%s'
-		";
-		$sql         .= ' AND ( ';
-		$multiple     = false;
-		foreach ( $pbtb_post_types as $post_type ) {
-			if ( $multiple ) {
-				$sql .= ' OR '; }
-			$sql           .= " post_type = '%s'";
-			$multiple       = true;
-			$acc_settings[] = $post_type;   // Add the post types to the $acc_settings array
-		}
-		$sql .= ' ) ';
-
-		$results = $wpdb->get_results( $wpdb->prepare( $sql, $acc_settings ) );
-	}
-
-	// Open Comments on these posts
-	if ( '' != $comment_pids ) {
-		$wpdb->query(
-			"
-            UPDATE $wpdb->posts
-            SET comment_status = 'open'
-            WHERE comment_status = 'closed'
-            AND ID IN ($comment_pids)
-		"
-		);
-	}
-
-	// Open Pingbacks / Trackbacks on these posts
-	if ( '' != $pbtb_pids ) {
-		$wpdb->query(
-			"
-            UPDATE $wpdb->posts
-            SET ping_status = 'open'
-            WHERE ping_status = 'closed'
-            AND ID IN ($pbtb_pids)
-		"
-		);
-	}
-
-	// Delete Post Revisions (WordPress 2.6 and above)
-	if ( $delete_revisions ) {
-		$wpdb->query(
-			"
-            DELETE FROM $wpdb->posts
-            WHERE post_type = 'revision'
-		"
-		);
-	}
-}
-
-
 /*
  *---------------------------------------------------------------------------*
  * AutoClose modules
@@ -226,6 +106,9 @@ function acc_main() {
 
 require_once ACC_PLUGIN_DIR . 'includes/admin/default-settings.php';
 require_once ACC_PLUGIN_DIR . 'includes/admin/register-settings.php';
+require_once ACC_PLUGIN_DIR . 'includes/main.php';
+require_once ACC_PLUGIN_DIR . 'includes/comments.php';
+require_once ACC_PLUGIN_DIR . 'includes/revisions.php';
 require_once ACC_PLUGIN_DIR . 'includes/cron.php';
 require_once ACC_PLUGIN_DIR . 'includes/l10n.php';
 require_once ACC_PLUGIN_DIR . 'includes/helpers.php';
