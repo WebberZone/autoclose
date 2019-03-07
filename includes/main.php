@@ -6,11 +6,11 @@
  * @package AutoClose
  */
 
- /**
-  * Main function.
-  *
-  * @since 2.0.0
-  */
+/**
+ * Main function.
+ *
+ * @since 2.0.0
+ */
 function acc_main() {
 	global $wpdb, $acc_settings;
 
@@ -48,7 +48,7 @@ function acc_main() {
 		);
 	}
 
-	// Open Comments on these posts
+	// Open Comments on these posts.
 	if ( ! empty( $comment_pids ) ) {
 		acc_open_discussions(
 			'comment',
@@ -58,7 +58,7 @@ function acc_main() {
 		);
 	}
 
-	// Open Pingbacks / Trackbacks on these posts
+	// Open Pingbacks / Trackbacks on these posts.
 	if ( ! empty( $pbtb_pids ) ) {
 		acc_open_discussions(
 			'comment',
@@ -68,7 +68,7 @@ function acc_main() {
 		);
 	}
 
-	// Delete Post Revisions (WordPress 2.6 and above)
+	// Delete Post Revisions (WordPress 2.6 and above).
 	if ( $delete_revisions ) {
 		acc_delete_revisions();
 	}

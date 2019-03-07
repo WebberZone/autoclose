@@ -23,7 +23,7 @@ if ( ! defined( 'WPINC' ) ) {
 function acc_delete_revisions() {
 	global $wpdb;
 
-	$result = $wpdb->query(
+	$result = $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		"
 		DELETE FROM {$wpdb->posts}
 		WHERE post_type = 'revision'

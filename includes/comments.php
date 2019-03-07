@@ -68,8 +68,8 @@ function acc_edit_discussions( $type = 'comment', $action = 'open', $args = arra
 
 	$sql = "UPDATE {$wpdb->posts} ";
 
-	$sql .= $wpdb->prepare( " SET {$type}_status = %s ", $new_status );
-	$sql .= $wpdb->prepare( " WHERE {$type}_status = %s ", $old_status );
+	$sql .= $wpdb->prepare( " SET {$type}_status = %s ", $new_status ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	$sql .= $wpdb->prepare( " WHERE {$type}_status = %s ", $old_status ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 	if ( $args['age'] > 0 ) {
 		$sql .= $wpdb->prepare( " AND $wpdb->posts.post_date < %s ", $close_date );
@@ -87,7 +87,7 @@ function acc_edit_discussions( $type = 'comment', $action = 'open', $args = arra
 
 	}
 
-	$result = $wpdb->query( $sql );
+	$result = $wpdb->query( $sql ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
 
 	return $result;
 }
@@ -192,7 +192,7 @@ function acc_close_pingtracks() {
 function acc_delete_pingtracks() {
 	global $wpdb;
 
-	$comments = $wpdb->get_results(
+	$comments = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
 		"
 		SELECT comment_ID FROM {$wpdb->comments}
 		WHERE comment_type IN ('pingback', 'trackback')
@@ -202,18 +202,17 @@ function acc_delete_pingtracks() {
 
 	$comment_ids = wp_list_pluck( $comments, 'comment_ID' );
 
-	$deleted_comments = $wpdb->query(
+	$deleted_comments = $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
 		"
 		DELETE FROM {$wpdb->comments}
 		WHERE comment_type IN ('pingback', 'trackback')
 		"
 	);
 
-	$wpdb->query(
+	$wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
 		"
 		DELETE FROM {$wpdb->commentmeta}
-		WHERE comment_ID IN ('" . join( "', '", $comment_ids ) . "')
-		"
+		WHERE comment_ID IN ('" . join( "', '", $comment_ids ) . "') " // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 	);
 
 	return $deleted_comments;

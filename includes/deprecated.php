@@ -77,20 +77,20 @@ function acc_default_options() {
 	$pbtb_post_types    = $comment_post_types;
 
 	$acc_settings = array(
-		'comment_age'         => '90',  // Close comments before these many days
-		'pbtb_age'            => '90',     // Close pingbacks/trackbacks before these many days
-		'comment_pids'        => '',   // Comments on these Post IDs to open
-		'pbtb_pids'           => '',      // Pingback on these Post IDs to open
-		'close_comment'       => false,   // Close Comments on posts
-		'close_comment_pages' => false, // Close Comments on pages
-		'close_pbtb'          => false,      // Close Pingbacks and Trackbacks on posts
-		'close_pbtb_pages'    => false,        // Close Pingbacks and Trackbacks on pages
-		'delete_revisions'    => false,        // Delete post revisions
+		'comment_age'         => '90',  // Close comments before these many days.
+		'pbtb_age'            => '90',     // Close pingbacks/trackbacks before these many days.
+		'comment_pids'        => '',   // Comments on these Post IDs to open.
+		'pbtb_pids'           => '',      // Pingback on these Post IDs to open.
+		'close_comment'       => false,   // Close Comments on posts.
+		'close_comment_pages' => false, // Close Comments on pages.
+		'close_pbtb'          => false,      // Close Pingbacks and Trackbacks on posts.
+		'close_pbtb_pages'    => false,        // Close Pingbacks and Trackbacks on pages.
+		'delete_revisions'    => false,        // Delete post revisions.
 		'daily_run'           => false,       // Run Daily?
-		'cron_hour'           => '0',     // Cron Hour
-		'cron_min'            => '0',      // Cron Minute
-		'comment_post_types'  => $comment_post_types,        // WordPress custom post types
-		'pbtb_post_types'     => $pbtb_post_types,      // WordPress custom post types
+		'cron_hour'           => '0',     // Cron Hour.
+		'cron_min'            => '0',      // Cron Minute.
+		'comment_post_types'  => $comment_post_types,        // WordPress custom post types.
+		'pbtb_post_types'     => $pbtb_post_types,      // WordPress custom post types.
 	);
 
 	return apply_filters( 'acc_default_options', $acc_settings );
@@ -107,26 +107,10 @@ function acc_default_options() {
  */
 function acc_read_options() {
 
-	_deprecated_function( __FUNCTION__, '2.0.0' );
+	_deprecated_function( __FUNCTION__, '2.0.0', 'acc_get_settings' );
 
-	$acc_settings_changed = false;
-
-	$defaults = acc_default_options();
-
-	$acc_settings = array_map( 'stripslashes', (array) get_option( 'ald_acc_settings' ) );
-	unset( $acc_settings[0] ); // produced by the (array) casting when there's nothing in the DB
-
-	foreach ( $defaults as $k => $v ) {
-		if ( ! isset( $acc_settings[ $k ] ) ) {
-			$acc_settings[ $k ] = $v;
-		}
-		$acc_settings_changed = true;
-	}
-	if ( true == $acc_settings_changed ) {
-		update_option( 'ald_acc_settings', $acc_settings );
-	}
+	$acc_settings = acc_get_settings();
 
 	return apply_filters( 'acc_read_options', $acc_settings );
 }
-
 
