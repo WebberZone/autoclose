@@ -253,7 +253,6 @@ function acc_upgrade_settings() {
 		wp_clear_scheduled_hook( 'ald_acc_hook' );
 	}
 
-
 	return $settings;
 }
 

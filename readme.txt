@@ -57,9 +57,17 @@ Check the ChangeLog for details
 
 = 2.0.0 =
 
+* Features:
+	* New Tools page with several buttons to open, close and delete comments, pingbacks and trackbacks. You can find the link in the Settings page under the main header
+	* New button to delete all pingbacks and trackbacks in the Tools page
+	* Uninstalling the plugin on Multisite will delete the settings from all sites
+
 * Enhancements:
-	* Main plugin file has been renamed to autoclose.php
 	* Migrated options to the Settings API
+
+* Modifications:
+	* Main plugin file has been renamed to autoclose.php
+	* Cron hook renamed from `ald_acc_hook` to `acc_cron_hook`
 
 For older changes, refer to changelog.txt
 
