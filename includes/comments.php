@@ -182,3 +182,41 @@ function acc_close_pingtracks() {
 }
 
 
+/**
+ * Delete pingbacks/trackbacks.
+ *
+ * @since 2.0.0
+ *
+ * @return int|bool Number of rows affected/selected for all other queries. Boolean false on error.
+ */
+function acc_delete_pingtracks() {
+	global $wpdb;
+
+	$comments = $wpdb->get_results(
+		"
+		SELECT comment_ID FROM {$wpdb->comments}
+		WHERE comment_type IN ('pingback', 'trackback')
+		",
+		ARRAY_A
+	);
+
+	$comment_ids = wp_list_pluck( $comments, 'comment_ID' );
+
+	$deleted_comments = $wpdb->query(
+		"
+		DELETE FROM {$wpdb->comments}
+		WHERE comment_type IN ('pingback', 'trackback')
+		"
+	);
+
+	$wpdb->query(
+		"
+		DELETE FROM {$wpdb->commentmeta}
+		WHERE comment_ID IN ('" . join( "', '", $comment_ids ) . "')
+		"
+	);
+
+	return $deleted_comments;
+}
+
+
