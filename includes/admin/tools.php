@@ -37,6 +37,7 @@ function acc_tools_page() {
 		if ( $acc_settings['close_comment'] ) {
 			/* translators: 1: Date. */
 			$message .= sprintf(
+				/* translators: 1. Date */
 				esc_html__( 'Comments closed up to %1$s', 'autoclose' ),
 				date( $date_time_format, ( $current_time - $acc_settings['comment_age'] * DAY_IN_SECONDS ) )
 			);
@@ -46,6 +47,7 @@ function acc_tools_page() {
 		if ( $acc_settings['close_pbtb'] ) {
 			/* translators: 1: Date. */
 			$message .= sprintf(
+				/* translators: 1. Date */
 				esc_html__( 'Pingbacks/Trackbacks closed up to %1$s', 'autoclose' ),
 				date( $date_time_format, ( $current_time - $acc_settings['pbtb_age'] * DAY_IN_SECONDS ) )
 			);
@@ -104,13 +106,20 @@ function acc_tools_page() {
 		add_settings_error( 'acc-notices', '', esc_html__( 'Pingbacks/Trackbacks closed on all post types', 'autoclose' ), 'updated' );
 	}
 
+	/* Close pingbacks/trackbacks */
+	if ( ( isset( $_POST['acc_delete_pingtracks'] ) ) && ( check_admin_referer( 'acc-tools-settings' ) ) ) {
+		acc_delete_pingtracks();
+
+		add_settings_error( 'acc-notices', '', esc_html__( 'Pingbacks/Trackbacks deleted on all post types', 'autoclose' ), 'updated' );
+	}
+
 	ob_start();
 	?>
 	<div class="wrap">
 		<h1><?php esc_html_e( 'Automatically Close Comments, Pingbacks and Trackbacks Tools', 'autoclose' ); ?></h1>
 
 		<p>
-			<a href="<?php echo admin_url( 'options-general.php?page=acc_options_page' ); ?>">
+			<a href="<?php echo admin_url( 'options-general.php?page=acc_options_page' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>">
 				<?php esc_html_e( 'Visit the Settings page', 'autoclose' ); ?>
 			</a>
 		<p>
@@ -133,15 +142,23 @@ function acc_tools_page() {
 
 				<h2 style="padding-left:0px"><?php esc_html_e( 'Open or close Comments, Pingbacks and Trackbacks', 'autoclose' ); ?></h2>
 				<p>
-					<input name="acc_opencomments" type="submit" id="acc_opencomments" value="<?php _e( 'Open Comments', 'autoclose' ); ?>" class="button button-secondary" onclick="if (!confirm('Do you want to open comments on all posts and post types?')) return false;" />
+					<input name="acc_opencomments" type="submit" id="acc_opencomments" value="<?php esc_html_e( 'Open Comments', 'autoclose' ); ?>" class="button button-secondary" onclick="if (!confirm('Do you want to open comments on all posts and post types?')) return false;" />
 
-					<input name="acc_openpings" type="submit" id="acc_openpings" value="<?php _e( 'Open Pings', 'autoclose' ); ?>" class="button button-secondary" onclick="if (!confirm('Do you want to open pings on all posts and post types?')) return false;" />
+					<input name="acc_openpings" type="submit" id="acc_openpings" value="<?php esc_html_e( 'Open Pings', 'autoclose' ); ?>" class="button button-secondary" onclick="if (!confirm('Do you want to open pings on all posts and post types?')) return false;" />
 				</p>
 
 				<p>
-					<input name="acc_closecomments" type="submit" id="acc_closecomments" value="<?php _e( 'Close Comments', 'autoclose' ); ?>" class="button button-secondary" onclick="if (!confirm('Do you want to close comments on all posts and post types?')) return false;" />
+					<input name="acc_closecomments" type="submit" id="acc_closecomments" value="<?php esc_html_e( 'Close Comments', 'autoclose' ); ?>" class="button button-secondary" onclick="if (!confirm('Do you want to close comments on all posts and post types?')) return false;" />
 
-					<input name="acc_closepings" type="submit" id="acc_closepings" value="<?php _e( 'Close Pings', 'autoclose' ); ?>" class="button button-secondary" onclick="if (!confirm('Do you want to close pings on all posts and post types?')) return false;" />
+					<input name="acc_closepings" type="submit" id="acc_closepings" value="<?php esc_html_e( 'Close Pings', 'autoclose' ); ?>" class="button button-secondary" onclick="if (!confirm('Do you want to close pings on all posts and post types?')) return false;" />
+				</p>
+
+				<h2 style="padding-left:0px"><?php esc_html_e( 'Delete Pingbacks / Trackbacks', 'autoclose' ); ?></h2>
+				<p>
+					<input name="acc_delete_pingtracks" type="submit" id="acc_delete_pingtracks" value="<?php esc_attr_e( 'Delete pingbacks/trackbacks', 'autoclose' ); ?>" class="button button-secondary" onclick="if (!confirm('<?php esc_attr_e( 'This will delete all pingbacks/trackbacks permanently. Proceed?', 'autoclose' ); ?>')) return false;" />
+				</p>
+				<p class="description">
+					<?php esc_html_e( 'This is a permanent change. Once you go through with this, there is no way to restore your pingbacks/trackbacks. Please backup your database before proceeding.', 'autoclose' ); ?>
 				</p>
 
 				<h2 style="padding-left:0px"><?php esc_html_e( 'Other tools', 'autoclose' ); ?></h2>
