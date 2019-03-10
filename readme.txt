@@ -50,7 +50,7 @@ An extra feature is the ability to delete post revisions that were introduced in
 
 = 2.0.0 =
 Major upgrade. Complete rewrite. You will need to reactivate the plugin.
-Check the ChangeLog for details
+Check settings on upgrade. Check the ChangeLog for details
 
 
 == Changelog ==
