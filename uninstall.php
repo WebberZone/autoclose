@@ -39,6 +39,7 @@ if ( is_multisite() ) {
 function acc_delete_data() {
 
 	delete_option( 'acc_settings' );
+	delete_option( 'ald_acc_settings' );
 
 	if ( wp_next_scheduled( 'acc_cron_hook' ) ) {
 		wp_clear_scheduled_hook( 'acc_cron_hook' );

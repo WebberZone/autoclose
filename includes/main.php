@@ -12,22 +12,22 @@
  * @since 2.0.0
  */
 function acc_main() {
-	global $wpdb, $acc_settings;
+	global $wpdb;
 
 	$acc_settings = acc_get_settings();
 
-	$comment_age      = $acc_settings['comment_age'];
-	$pbtb_age         = $acc_settings['pbtb_age'];
-	$comment_pids     = $acc_settings['comment_pids'];
-	$pbtb_pids        = $acc_settings['pbtb_pids'];
-	$delete_revisions = $acc_settings['delete_revisions'];
+	$comment_age      = acc_get_option( 'comment_age' );
+	$pbtb_age         = acc_get_option( 'pbtb_age' );
+	$comment_pids     = acc_get_option( 'comment_pids' );
+	$pbtb_pids        = acc_get_option( 'pbtb_pids' );
+	$delete_revisions = acc_get_option( 'delete_revisions' );
 
 	// Get the post types.
-	$comment_post_types = acc_parse_post_types( $acc_settings['comment_post_types'] );
-	$pbtb_post_types    = acc_parse_post_types( $acc_settings['pbtb_post_types'] );
+	$comment_post_types = acc_parse_post_types( acc_get_option( 'comment_post_types' ) );
+	$pbtb_post_types    = acc_parse_post_types( acc_get_option( 'pbtb_post_types' ) );
 
 	// Close Comments on posts.
-	if ( $acc_settings['close_comment'] ) {
+	if ( acc_get_option( 'close_comment' ) ) {
 		acc_close_discussions(
 			'comment',
 			array(
@@ -38,7 +38,7 @@ function acc_main() {
 	}
 
 	// Close Pingbacks/Trackbacks on posts.
-	if ( $acc_settings['close_pbtb'] ) {
+	if ( acc_get_option( 'close_pbtb' ) ) {
 		acc_close_discussions(
 			'ping',
 			array(

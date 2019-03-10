@@ -34,27 +34,27 @@ function acc_tools_page() {
 
 		$message = '';
 
-		if ( $acc_settings['close_comment'] ) {
+		if ( acc_get_option( 'close_comment' ) ) {
 			/* translators: 1: Date. */
 			$message .= sprintf(
 				/* translators: 1. Date */
 				esc_html__( 'Comments closed up to %1$s', 'autoclose' ),
-				date( $date_time_format, ( $current_time - $acc_settings['comment_age'] * DAY_IN_SECONDS ) )
+				date( $date_time_format, ( $current_time - acc_get_option( 'comment_age' ) * DAY_IN_SECONDS ) )
 			);
 			$message .= '<br />';
 		}
 
-		if ( $acc_settings['close_pbtb'] ) {
+		if ( acc_get_option( 'close_pbtb' ) ) {
 			/* translators: 1: Date. */
 			$message .= sprintf(
 				/* translators: 1. Date */
 				esc_html__( 'Pingbacks/Trackbacks closed up to %1$s', 'autoclose' ),
-				date( $date_time_format, ( $current_time - $acc_settings['pbtb_age'] * DAY_IN_SECONDS ) )
+				date( $date_time_format, ( $current_time - acc_get_option( 'pbtb_age' ) * DAY_IN_SECONDS ) )
 			);
 			$message .= '<br />';
 		}
 
-		if ( $acc_settings['delete_revisions'] ) {
+		if ( acc_get_option( 'delete_revisions' ) ) {
 			$message .= esc_html__( 'Post revisions deleted', 'autoclose' );
 			$message .= '<br />';
 		}

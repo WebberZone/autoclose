@@ -49,7 +49,7 @@ An extra feature is the ability to delete post revisions that were introduced in
 == Upgrade Notice ==
 
 = 2.0.0 =
-Major upgrade. Plugin has been rewritten for the latest WordPress standards.
+Major upgrade. Complete rewrite. You will need to reactivate the plugin.
 Check the ChangeLog for details
 
 
@@ -60,6 +60,7 @@ Check the ChangeLog for details
 * Features:
 	* New Tools page with several buttons to open, close and delete comments, pingbacks and trackbacks. You can find the link in the Settings page under the main header
 	* New button to delete all pingbacks and trackbacks in the Tools page
+	* Activating the plugin on Multisite should upgrade settings from v1.x
 	* Uninstalling the plugin on Multisite will delete the settings from all sites
 
 * Enhancements:

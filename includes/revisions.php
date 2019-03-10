@@ -27,7 +27,7 @@ function acc_delete_revisions() {
 		"
 		DELETE FROM {$wpdb->posts}
 		WHERE post_type = 'revision'
-	"
+		"
 	);
 
 	return $result;

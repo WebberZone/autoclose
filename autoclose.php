@@ -63,6 +63,15 @@ if ( ! defined( 'ACC_PLUGIN_FILE' ) ) {
 	define( 'ACC_PLUGIN_FILE', __FILE__ );
 }
 
+/*
+ *---------------------------------------------------------------------------*
+ * AutoClose Settings
+ *---------------------------------------------------------------------------*
+ */
+
+require_once ACC_PLUGIN_DIR . 'includes/admin/default-settings.php';
+require_once ACC_PLUGIN_DIR . 'includes/admin/register-settings.php';
+
 /**
  * Global variable holding the current settings for AutoClose
  *
@@ -84,6 +93,10 @@ $acc_settings = acc_get_settings();
  */
 function acc_get_settings() {
 
+	if ( false === get_option( 'acc_settings' ) ) {
+		add_option( 'acc_settings', acc_settings_defaults() );
+	}
+
 	$settings = get_option( 'acc_settings' );
 
 	/**
@@ -104,8 +117,7 @@ function acc_get_settings() {
  *---------------------------------------------------------------------------*
  */
 
-require_once ACC_PLUGIN_DIR . 'includes/admin/default-settings.php';
-require_once ACC_PLUGIN_DIR . 'includes/admin/register-settings.php';
+require_once ACC_PLUGIN_DIR . 'includes/activation.php';
 require_once ACC_PLUGIN_DIR . 'includes/main.php';
 require_once ACC_PLUGIN_DIR . 'includes/comments.php';
 require_once ACC_PLUGIN_DIR . 'includes/revisions.php';
