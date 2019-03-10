@@ -57,6 +57,8 @@ Check settings on upgrade. Check the ChangeLog for details
 
 = 2.0.0 =
 
+Release post: https://wzn.io/2EOQ0Ec
+
 * Features:
 	* New Tools page with several buttons to open, close and delete comments, pingbacks and trackbacks. You can find the link in the Settings page under the main header
 	* New button to delete all pingbacks and trackbacks in the Tools page
