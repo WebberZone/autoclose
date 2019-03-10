@@ -24,7 +24,7 @@ An extra feature is the ability to delete post revisions that were introduced in
 * **Close pingbacks and trackbacks**: Automatically close pingbacks and trackbacks as well
 * **Choose how old**: Choose a custom time period as to when the comments, pingbacks and trackbacks need to be closed
 * **Scheduling**: You can also schedule a cron job to automatically close comments, pingbacks and trackbacks daily
-* **Bonus**: Delete post revisions
+* **Bonus**: Delete post revisions, pingbacks and trackbacks
 
 
 == Installation ==
