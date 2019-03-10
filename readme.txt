@@ -74,7 +74,10 @@ For older changes, refer to changelog.txt
 
 == Screenshots ==
 
-1. Autoclose options in WP-Admin
+1. Autoclose Settings - General
+2. Autoclose Settings - Comments
+3. Autoclose Settings - Pingbacks/Trackbacks
+4. Autoclose Tools
 
 
 == Frequently Asked Questions ==
