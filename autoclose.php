@@ -35,10 +35,21 @@ if ( ! defined( 'WPINC' ) ) {
  *
  * @since 2.0.0
  *
+ * @var string Plugin Root File
+ */
+if ( ! defined( 'ACC_PLUGIN_FILE' ) ) {
+	define( 'ACC_PLUGIN_FILE', __FILE__ );
+}
+
+/**
+ * Holds the filesystem directory path (with trailing slash) for AutoClose
+ *
+ * @since 2.0.0
+ *
  * @var string Plugin folder path
  */
 if ( ! defined( 'ACC_PLUGIN_DIR' ) ) {
-	define( 'ACC_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+	define( 'ACC_PLUGIN_DIR', plugin_dir_path( ACC_PLUGIN_FILE ) );
 }
 
 /**
@@ -49,18 +60,7 @@ if ( ! defined( 'ACC_PLUGIN_DIR' ) ) {
  * @var string Plugin folder URL
  */
 if ( ! defined( 'ACC_PLUGIN_URL' ) ) {
-	define( 'ACC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
-}
-
-/**
- * Holds the filesystem directory path (with trailing slash) for AutoClose
- *
- * @since 2.0.0
- *
- * @var string Plugin Root File
- */
-if ( ! defined( 'ACC_PLUGIN_FILE' ) ) {
-	define( 'ACC_PLUGIN_FILE', __FILE__ );
+	define( 'ACC_PLUGIN_URL', plugin_dir_url( ACC_PLUGIN_FILE ) );
 }
 
 /*
@@ -93,10 +93,6 @@ $acc_settings = acc_get_settings();
  */
 function acc_get_settings() {
 
-	if ( false === get_option( 'acc_settings' ) ) {
-		add_option( 'acc_settings', acc_settings_defaults() );
-	}
-
 	$settings = get_option( 'acc_settings' );
 
 	/**
@@ -104,7 +100,7 @@ function acc_get_settings() {
 	 *
 	 * Retrieves all plugin settings
 	 *
-	 * @since 2.0.0
+	 * @since 2.6.0
 	 * @param array $settings Settings array
 	 */
 	return apply_filters( 'acc_get_settings', $settings );
