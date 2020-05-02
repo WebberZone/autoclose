@@ -11,13 +11,13 @@ __Tested up to:__ 5.1
 
 __License:__ [GPL-2.0+](http://www.gnu.org/licenses/gpl-2.0.html)
 
-__Plugin page:__ [Auto-Close Comments, Pingbacks and Trackbacks](http://ajaydsouza.com/wordpress/plugins/autoclose/) | [WordPress.org plugin page](https://wordpress.org/plugins/autoclose/)
+__Plugin page:__ [Auto-Close Comments, Pingbacks and Trackbacks](https://webberzone.com/plugins/autoclose/) | [WordPress.org plugin page](https://wordpress.org/plugins/autoclose/)
 
 Close comments, pingbacks and trackbacks on your WordPress posts automatically at intervals set by you
 
 ## Description
 
-Spammers target old posts in a hope that you won't notice the comments on them. Why not stop them in their tracks by just shutting off comments and pingbacks? [Auto-Close Comments, Pingbacks and Trackbacks](http://ajaydsouza.com/wordpress/plugins/autoclose/) let's you automatically close comments, pingbacks and trackbacks on your posts, pages and custom post types.
+Spammers target old posts in a hope that you won't notice the comments on them. Why not stop them in their tracks by just shutting off comments and pingbacks? [Auto-Close Comments, Pingbacks and Trackbacks](https://webberzone.com/plugins/autoclose/) let's you automatically close comments, pingbacks and trackbacks on your posts, pages and custom post types.
 
 You can also choose to keep comments / pingbacks / trackbacks open on certain posts, page or custom post types. Just enter a comma-separated list of post IDs in the Settings page.
 
@@ -62,7 +62,7 @@ For more screenshots visit the [WordPress plugin page](http://wordpress.org/plug
 
 Check out the [FAQ on the plugin page](http://wordpress.org/plugins/autoclose/faq/).
 
-If your question isn't listed there, please create a new post at the [WordPress.org support forum](http://wordpress.org/support/plugin/autoclose). It is the fastest way to get support as I monitor the forums regularly. I also provide [premium *paid* support via email](https://ajaydsouza.com/support/).
+If your question isn't listed there, please create a new post at the [WordPress.org support forum](http://wordpress.org/support/plugin/autoclose). It is the fastest way to get support as I monitor the forums regularly. I also provide [premium *paid* support via email](https://webberzone.com/support/).
 
 ## About this repository
 

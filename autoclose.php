@@ -7,16 +7,16 @@
  * @package AutoClose
  * @author  Ajay D'Souza
  * @license GPL-2.0+
- * @link    http://ajaydsouza.com
- * @copyright   2008-2019 Ajay D'Souza
+ * @link    https://webberzone.com/
+ * @copyright   2008-2020 Ajay D'Souza
  *
  * @wordpress-plugin
  * Plugin Name: Auto-Close Comments, Pingbacks and Trackbacks
- * Plugin URI:  http://ajaydsouza.com/wordpress/plugins/autoclose/
+ * Plugin URI:  https://webberzone.com/plugins/autoclose/
  * Description: Automatically close Comments, Pingbacks and Trackbacks after certain amount of days.
- * Version:     2.0.0
+ * Version:     2.1.0-beta
  * Author:      Ajay D'Souza
- * Author URI:  http://ajaydsouza.com/
+ * Author URI:  https://webberzone.com/
  * Text Domain: autoclose
  * License:     GPL-2.0+
  * License URI: http://www.gnu.org/licenses/gpl-2.0.txt
@@ -35,21 +35,10 @@ if ( ! defined( 'WPINC' ) ) {
  *
  * @since 2.0.0
  *
- * @var string Plugin Root File
- */
-if ( ! defined( 'ACC_PLUGIN_FILE' ) ) {
-	define( 'ACC_PLUGIN_FILE', __FILE__ );
-}
-
-/**
- * Holds the filesystem directory path (with trailing slash) for AutoClose
- *
- * @since 2.0.0
- *
  * @var string Plugin folder path
  */
 if ( ! defined( 'ACC_PLUGIN_DIR' ) ) {
-	define( 'ACC_PLUGIN_DIR', plugin_dir_path( ACC_PLUGIN_FILE ) );
+	define( 'ACC_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 }
 
 /**
@@ -60,7 +49,18 @@ if ( ! defined( 'ACC_PLUGIN_DIR' ) ) {
  * @var string Plugin folder URL
  */
 if ( ! defined( 'ACC_PLUGIN_URL' ) ) {
-	define( 'ACC_PLUGIN_URL', plugin_dir_url( ACC_PLUGIN_FILE ) );
+	define( 'ACC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+}
+
+/**
+ * Holds the filesystem directory path (with trailing slash) for AutoClose
+ *
+ * @since 2.0.0
+ *
+ * @var string Plugin Root File
+ */
+if ( ! defined( 'ACC_PLUGIN_FILE' ) ) {
+	define( 'ACC_PLUGIN_FILE', __FILE__ );
 }
 
 /*
@@ -93,6 +93,10 @@ $acc_settings = acc_get_settings();
  */
 function acc_get_settings() {
 
+	if ( false === get_option( 'acc_settings' ) ) {
+		add_option( 'acc_settings', acc_settings_defaults() );
+	}
+
 	$settings = get_option( 'acc_settings' );
 
 	/**
@@ -100,7 +104,7 @@ function acc_get_settings() {
 	 *
 	 * Retrieves all plugin settings
 	 *
-	 * @since 2.6.0
+	 * @since 2.0.0
 	 * @param array $settings Settings array
 	 */
 	return apply_filters( 'acc_get_settings', $settings );

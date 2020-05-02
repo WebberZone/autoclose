@@ -1,17 +1,17 @@
 === Auto-Close Comments, Pingbacks and Trackbacks ===
 Tags: autoclose, comments, pingback, trackback, spam, anti-spam
-Contributors: Ajay
-Donate link: http://ajaydsouza.com/donate/
-Stable tag: trunk
-Requires at least: 4.5
-Tested up to: 5.1
+Contributors: webberzone, Ajay
+Donate link: https://webberzone.com/donate/
+Stable tag: 2.1.0
+Requires at least: 4.9
+Tested up to: 5.4
 License: GPL v2 or later
 
 Close comments, pingbacks and trackbacks on your posts automatically at intervals set by you
 
 == Description ==
 
-Spammers target old posts in a hope that you won't notice the comments on them. Why not stop them in their tracks by just shutting off comments and pingbacks? [Auto-Close Comments, Pingbacks and Trackbacks](http://ajaydsouza.com/wordpress/plugins/autoclose/) let's you automatically close comments, pingbacks and trackbacks on your posts, pages and custom post types.
+Spammers target old posts in a hope that you won't notice the comments on them. Why not stop them in their tracks by just shutting off comments and pingbacks? [Auto-Close Comments, Pingbacks and Trackbacks](https://webberzone.com/plugins/autoclose/) let's you automatically close comments, pingbacks and trackbacks on your posts, pages and custom post types.
 
 You can also choose to keep comments / pingbacks / trackbacks open on certain posts, page or custom post types. Just enter a comma-separated list of post IDs in the Settings page.
 
@@ -57,7 +57,7 @@ Check settings on upgrade. Check the ChangeLog for details
 
 = 2.0.0 =
 
-Release post: [https://wzn.io/2EOQ0Ec](https://wzn.io/2EOQ0Ec)
+Release post: https://wzn.io/2EOQ0Ec
 
 * Features:
 	* New Tools page with several buttons to open, close and delete comments, pingbacks and trackbacks. You can find the link in the Settings page under the main header
@@ -84,7 +84,7 @@ For older changes, refer to changelog.txt
 
 == Frequently Asked Questions ==
 
-If your question isn't listed there, please create a new post at the [WordPress.org support forum](http://wordpress.org/support/plugin/autoclose). It is the fastest way to get support as I monitor the forums regularly. I also provide [premium *paid* support via email](https://ajaydsouza.com/support/).
+If your question isn't listed there, please create a new post at the [WordPress.org support forum](http://wordpress.org/support/plugin/autoclose). It is the fastest way to get support as I monitor the forums regularly. I also provide [premium *paid* support via email](https://webberzone.com/support/).
 
 = What does "Delete Post Revisions" do?  =
 

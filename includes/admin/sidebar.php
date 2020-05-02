@@ -30,7 +30,7 @@
 			<div id="quick-links">
 				<ul>
 					<li>
-						<a href="https://ajaydsouza.com/wordpress/plugins/autoclose/"><?php esc_html_e( 'AutoClose homepage', 'autoclose' ); ?></a>
+						<a href="https://webberzone.com/plugins/autoclose/"><?php esc_html_e( 'AutoClose homepage', 'autoclose' ); ?></a>
 					</li>
 
 					<li>

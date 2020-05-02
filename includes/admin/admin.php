@@ -110,7 +110,7 @@ function acc_admin_footer( $footer_text ) {
 		$text = sprintf(
 			/* translators: 1: Plugin website, 2: Plugin reviews link. */
 			__( 'Thank you for using <a href="%1$s" target="_blank">AutoClose</a>! Please <a href="%2$s" target="_blank">rate us</a> on <a href="%2$s" target="_blank">WordPress.org</a>', 'autoclose' ),
-			'https://ajaydsouza.com/wordpress/plugins/autoclose',
+			'https://webberzone.com/plugins/autoclose',
 			'https://wordpress.org/support/plugin/autoclose/reviews/#new-post'
 		);
 

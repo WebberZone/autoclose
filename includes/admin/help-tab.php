@@ -103,7 +103,7 @@ function acc_settings_tools_help() {
  */
 function acc_get_help_sidebar() {
 	/* translators: 1: Support link. */
-	$message = '<p>' . sprintf( __( 'For more information or how to get support visit the <a href="%1$s" target="_blank">Support site</a>.', 'autoclose' ), esc_url( 'https://ajaydsouza.com/support/' ) ) . '</p>';
+	$message = '<p>' . sprintf( __( 'For more information or how to get support visit the <a href="%1$s" target="_blank">Support site</a>.', 'autoclose' ), esc_url( 'https://webberzone.com/support/' ) ) . '</p>';
 
 	/* translators: 1: Forum link. */
 	$message .= '<p>' . sprintf( __( 'Support queries should be posted in the <a href="%1$s" target="_blank">WordPress.org support forums</a>.', 'autoclose' ), esc_url( 'https://wordpress.org/support/plugin/autoclose' ) ) . '</p>';
