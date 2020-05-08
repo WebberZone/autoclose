@@ -28,6 +28,7 @@ function acc_get_registered_settings() {
 		'general'    => acc_settings_general(),
 		'comments'   => acc_settings_comments(),
 		'pingtracks' => acc_settings_pingtracks(),
+		'revisions'  => acc_settings_revisions(),
 	);
 
 	/**
@@ -51,47 +52,20 @@ function acc_get_registered_settings() {
 function acc_settings_general() {
 
 	$settings = array(
-		'close_comment'    => array(
-			'id'      => 'close_comment',
-			'name'    => esc_html__( 'Close comments', 'autoclose' ),
-			'desc'    => esc_html__( 'Additional settings have to be configured on the Comments tab', 'autoclose' ),
-			'type'    => 'checkbox',
-			'options' => false,
-		),
-		'close_pbtb'       => array(
-			'id'      => 'close_pbtb',
-			'name'    => esc_html__( 'Close Pingbacks/Trackbacks', 'autoclose' ),
-			'desc'    => esc_html__( 'Additional settings have to be configured on the Pingbacks/Trackbacks tab', 'autoclose' ),
-			'type'    => 'checkbox',
-			'options' => false,
-		),
-		'delete_revisions' => array(
-			'id'      => 'delete_revisions',
-			'name'    => esc_html__( 'Delete post revisions', 'autoclose' ),
-			'desc'    => esc_html__( 'The WordPress revisions system stores a record of each saved draft or published update. This can gather up a lot of overhead in the long run. Use this option to delete old post revisions.', 'autoclose' ),
-			'type'    => 'checkbox',
-			'options' => false,
-		),
-		'cron_header'      => array(
-			'id'   => 'cron_header',
-			'name' => '<h3>' . esc_html__( 'Automatic Closing', 'autoclose' ) . '</h3>',
-			'desc' => '',
-			'type' => 'header',
-		),
-		'cron_on'          => array(
+		'cron_on'         => array(
 			'id'      => 'cron_on',
 			'name'    => esc_html__( 'Activate scheduled closing', 'autoclose' ),
-			'desc'    => esc_html__( 'This creates a WordPress cron job. Comments and/or pingbacks/trackbacks will be closed at time and schedule specified below.', 'autoclose' ),
+			'desc'    => esc_html__( 'This creates a WordPress cron job using the schedule settings below. This cron job will execute the tasks to close comments, pingbacks/trackbacks or delete post revisions based on the settings from the other tabs.', 'autoclose' ),
 			'type'    => 'checkbox',
 			'options' => false,
 		),
-		'cron_range_desc'  => array(
+		'cron_range_desc' => array(
 			'id'   => 'cron_range_desc',
 			'name' => '<strong>' . esc_html__( 'Time to run closing', 'autoclose' ) . '</strong>',
 			'desc' => esc_html__( 'The next two options allow you to set the time to run the cron. The cron job will run now if the hour:min set below if before the current time. e.g. if the time now is 20:30 hours and you set the schedule to 9:00. Else it will run later today at the scheduled time.', 'autoclose' ),
 			'type' => 'descriptive_text',
 		),
-		'cron_hour'        => array(
+		'cron_hour'       => array(
 			'id'      => 'cron_hour',
 			'name'    => esc_html__( 'Hour', 'autoclose' ),
 			'desc'    => '',
@@ -101,7 +75,7 @@ function acc_settings_general() {
 			'max'     => '23',
 			'size'    => 'small',
 		),
-		'cron_min'         => array(
+		'cron_min'        => array(
 			'id'      => 'cron_min',
 			'name'    => esc_html__( 'Minute', 'autoclose' ),
 			'desc'    => '',
@@ -111,7 +85,7 @@ function acc_settings_general() {
 			'max'     => '59',
 			'size'    => 'small',
 		),
-		'cron_recurrence'  => array(
+		'cron_recurrence' => array(
 			'id'      => 'cron_recurrence',
 			'name'    => esc_html__( 'Run maintenance', 'autoclose' ),
 			'desc'    => '',
@@ -147,6 +121,13 @@ function acc_settings_general() {
 function acc_settings_comments() {
 
 	$settings = array(
+		'close_comment'      => array(
+			'id'      => 'close_comment',
+			'name'    => esc_html__( 'Close comments', 'autoclose' ),
+			'desc'    => esc_html__( 'Enable to close comments - used for the automatic schedule as well as one time runs under the Tools tab.', 'autoclose' ),
+			'type'    => 'checkbox',
+			'options' => false,
+		),
 		'comment_post_types' => array(
 			'id'      => 'comment_post_types',
 			'name'    => esc_html__( 'Post types to include', 'autoclose' ),
@@ -192,6 +173,13 @@ function acc_settings_comments() {
 function acc_settings_pingtracks() {
 
 	$settings = array(
+		'close_pbtb'      => array(
+			'id'      => 'close_pbtb',
+			'name'    => esc_html__( 'Close Pingbacks/Trackbacks', 'autoclose' ),
+			'desc'    => esc_html__( 'Enable to close pingbacks and trackbacks - used for the automatic schedule as well as one time runs under the Tools tab.', 'autoclose' ),
+			'type'    => 'checkbox',
+			'options' => false,
+		),
 		'pbtb_post_types' => array(
 			'id'      => 'pbtb_post_types',
 			'name'    => esc_html__( 'Post types to include', 'autoclose' ),
@@ -222,6 +210,36 @@ function acc_settings_pingtracks() {
 	 * @since 2.0.0
 	 *
 	 * @param array $settings Pingbacks/Trackbacks settings array
+	 */
+	return apply_filters( 'acc_settings_pingtracks', $settings );
+}
+
+
+/**
+ * Retrieve the array of Revisions settings
+ *
+ * @since 2.1.0
+ *
+ * @return array Revisions settings array
+ */
+function acc_settings_revisions() {
+
+	$settings = array(
+		'delete_revisions' => array(
+			'id'      => 'delete_revisions',
+			'name'    => esc_html__( 'Delete post revisions', 'autoclose' ),
+			'desc'    => esc_html__( 'The WordPress revisions system stores a record of each saved draft or published update. This can gather up a lot of overhead in the long run. Use this option to delete old post revisions.', 'autoclose' ),
+			'type'    => 'checkbox',
+			'options' => false,
+		),
+	);
+
+	/**
+	 * Filters the Revisions settings array
+	 *
+	 * @since 2.1.0
+	 *
+	 * @param array $settings Revisions settings array
 	 */
 	return apply_filters( 'acc_settings_pingtracks', $settings );
 }

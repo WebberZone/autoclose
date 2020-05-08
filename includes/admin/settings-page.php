@@ -127,6 +127,7 @@ function acc_get_settings_sections() {
 		'general'    => __( 'General', 'autoclose' ),
 		'comments'   => __( 'Comments', 'autoclose' ),
 		'pingtracks' => __( 'Pingbacks/Trackbacks', 'autoclose' ),
+		'revisions'  => __( 'Revisions', 'autoclose' ),
 	);
 
 	/**
@@ -267,7 +268,9 @@ function acc_textarea_callback( $args ) {
 		$value = isset( $args['options'] ) ? $args['options'] : '';
 	}
 
-	$html  = sprintf( '<textarea class="large-text" cols="50" rows="5" id="acc_settings[%1$s]" name="acc_settings[%1$s]">%2$s</textarea>', sanitize_key( $args['id'] ), esc_textarea( stripslashes( $value ) ) );
+	$class = sanitize_html_class( $args['field_class'] );
+
+	$html  = sprintf( '<textarea class="%3$s" cols="50" rows="20" id="acc_settings[%1$s]" name="acc_settings[%1$s]">%2$s</textarea>', sanitize_key( $args['id'] ), esc_textarea( stripslashes( $value ) ), 'large-text ' . $class );
 	$html .= '<p class="description">' . wp_kses_post( $args['desc'] ) . '</p>';
 
 	/** This filter has been defined in settings-page.php */
@@ -531,7 +534,9 @@ function acc_posttypes_callback( $args ) {
 	}
 
 	// If post_types is empty or contains a query string then use parse_str else consider it comma-separated.
-	if ( false === strpos( $options, '=' ) ) {
+	if ( is_array( $options ) ) {
+		$post_types = $options;
+	} elseif ( ! is_array( $options ) && false === strpos( $options, '=' ) ) {
 		$post_types = explode( ',', $options );
 	} else {
 		parse_str( $options, $post_types );
@@ -543,6 +548,8 @@ function acc_posttypes_callback( $args ) {
 		)
 	);
 	$posts_types_inc = array_intersect( $wp_post_types, $post_types );
+
+	$html .= sprintf( '<input type="hidden" name="acc_settings[%1$s]" value="-1" />', sanitize_key( $args['id'] ) );
 
 	foreach ( $wp_post_types as $wp_post_type ) {
 
