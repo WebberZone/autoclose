@@ -38,7 +38,7 @@
 					</li>
 
 					<li>
-						<a href="http://wordpress.org/support/plugin/autoclose"><?php esc_html_e( 'Support', 'autoclose' ); ?></a>
+						<a href="https://wordpress.org/support/plugin/autoclose"><?php esc_html_e( 'Support', 'autoclose' ); ?></a>
 					</li>
 
 					<li>
