@@ -81,7 +81,8 @@ For older changes, refer to changelog.txt
 1. Autoclose Settings - General
 2. Autoclose Settings - Comments
 3. Autoclose Settings - Pingbacks/Trackbacks
-4. Autoclose Tools
+4. Autoclose Settings - Revisions
+5. Autoclose Tools
 
 
 == Frequently Asked Questions ==
