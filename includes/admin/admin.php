@@ -157,9 +157,12 @@ add_filter( 'plugin_action_links_' . plugin_basename( ACC_PLUGIN_FILE ), 'acc_pl
  */
 function acc_plugin_actions( $links, $file ) {
 
-	if ( false !== strpos( $file, 'autoclose.php' ) ) {
+	$plugin = plugin_basename( ACC_PLUGIN_FILE );
+
+	if ( $file === $plugin ) {
 		$links[] = '<a href="https://wordpress.org/support/plugin/autoclose">' . esc_html__( 'Support', 'autoclose' ) . '</a>';
 		$links[] = '<a href="https://ajaydsouza.com/donate/">' . esc_html__( 'Donate', 'autoclose' ) . '</a>';
+		$links[] = '<a href="https://github.com/WebberZone/autoclose">' . __( 'Contribute', 'autoclose' ) . '</a>';
 	}
 	return $links;
 }
