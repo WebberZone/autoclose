@@ -53,6 +53,10 @@ function acc_edit_discussions( $type = 'comment', $action = 'open', $args = arra
 			return false;
 	}
 
+	if ( false === $type || false === $action ) {
+		return false;
+	}
+
 	$defaults = array(
 		'age'        => 0,
 		'post_types' => array(),
@@ -62,7 +66,7 @@ function acc_edit_discussions( $type = 'comment', $action = 'open', $args = arra
 	// Parse incomming $args into an array and merge it with $defaults.
 	$args = wp_parse_args( $args, $defaults );
 
-	$current_time = current_time( 'timestamp', 0 );
+	$current_time = strtotime( current_time( 'mysql' ) );
 	$close_date   = $current_time - ( max( 0, ( $args['age'] - 1 ) ) * DAY_IN_SECONDS );
 	$close_date   = gmdate( 'Y-m-d H:i:s', $close_date );
 
