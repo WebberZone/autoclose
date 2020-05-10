@@ -225,14 +225,23 @@ function acc_settings_pingtracks() {
 function acc_settings_revisions() {
 
 	$settings = array(
-		'delete_revisions' => array(
+		'delete_revisions'    => array(
 			'id'      => 'delete_revisions',
 			'name'    => esc_html__( 'Delete post revisions', 'autoclose' ),
 			'desc'    => esc_html__( 'The WordPress revisions system stores a record of each saved draft or published update. This can gather up a lot of overhead in the long run. Use this option to delete old post revisions.', 'autoclose' ),
 			'type'    => 'checkbox',
 			'options' => false,
 		),
+		'revision_post_types' => array(
+			'id'   => 'revision_post_types',
+			'name' => '<strong>' . esc_html__( 'Number of revisions', 'autoclose' ) . '</strong>',
+			/* translators: 1: Code. */
+			'desc' => sprintf( esc_html__( 'Limit the number of revisions that WordPress stores in the database for each of the post types below. %1$s -2: ignore setting from this plugin, %1$s -1: store every revision, %1$s 0: do not store any revisions, %1$s >0: store that many revisions per post. Old revisions are automatically deleted.', 'autoclose' ), '<br />' ),
+			'type' => 'descriptive_text',
+		),
 	);
+
+	$settings = array_merge( $settings, acc_settings_post_types() );
 
 	/**
 	 * Filters the Revisions settings array
@@ -242,6 +251,70 @@ function acc_settings_revisions() {
 	 * @param array $settings Revisions settings array
 	 */
 	return apply_filters( 'acc_settings_pingtracks', $settings );
+}
+
+
+/**
+ * Retrieve the array of settings for post types that support revisions.
+ *
+ * @since 2.1.0
+ *
+ * @return array Revisions settings array
+ */
+function acc_settings_post_types() {
+
+	$settings = array();
+
+	$revision_post_types = acc_get_revision_post_types();
+
+	foreach ( $revision_post_types as $post_type => $name ) {
+		$settings[ 'revision_' . $post_type ] = array(
+			'id'      => 'revision_' . $post_type,
+			'name'    => $name,
+			'desc'    => '',
+			'type'    => 'number',
+			'options' => -2,
+			'min'     => -2,
+			'size'    => 'small',
+		);
+	}
+
+	/**
+	 * Filters the array of settings for post types that support revisions.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @param array $settings Array of settings for post types that support revisions.
+	 */
+	return apply_filters( 'acc_settings_post_types', $settings );
+}
+
+
+/**
+ * Retrieve the post types that have revisions.
+ *
+ * @since 2.1.0
+ *
+ * @return array Array of post types that support revisisions in the format name => label/name
+ */
+function acc_get_revision_post_types() {
+
+	$revision_post_types = array();
+
+	$post_types = get_post_types( array(), 'objects' );
+
+	foreach ( $post_types as $post_type ) {
+		if ( post_type_supports( $post_type->name, 'revisions' ) ) {
+			if ( property_exists( $post_type, 'labels' ) && property_exists( $post_type->labels, 'name' ) ) {
+				$name = $post_type->labels->name;
+			} else {
+				$name = $post_type->name;
+			}
+			$revision_post_types[ $post_type->name ] = $name;
+		}
+	}
+
+	return $revision_post_types;
 }
 
 

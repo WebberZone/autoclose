@@ -1,5 +1,5 @@
 === Auto-Close Comments, Pingbacks and Trackbacks ===
-Tags: autoclose, comments, pingback, trackback, spam, anti-spam
+Tags: autoclose, comments, pingback, trackback, revisions, spam, anti-spam
 Contributors: webberzone, Ajay
 Donate link: https://webberzone.com/donate/
 Stable tag: 2.1.0
@@ -48,16 +48,18 @@ An extra feature is the ability to delete post revisions that were introduced in
 
 == Upgrade Notice ==
 
-= 2.0.0 =
-Major upgrade. Complete rewrite. You will need to reactivate the plugin.
-Check settings on upgrade. Check the ChangeLog for details
+= 2.1.0 =
+New revisions tab and settings to control revisions by post type. Check settings on upgrade. Check the ChangeLog for details.
 
 
 == Changelog ==
 
-= 2.0.0 =
+= 2.1.0 =
 
-Release post: https://wzn.io/2EOQ0Ec
+* Features:
+	* New revisions tab with settings to control the number of revisions by post type
+
+= 2.0.0 =
 
 * Features:
 	* New Tools page with several buttons to open, close and delete comments, pingbacks and trackbacks. You can find the link in the Settings page under the main header
@@ -85,9 +87,3 @@ For older changes, refer to changelog.txt
 == Frequently Asked Questions ==
 
 If your question isn't listed there, please create a new post at the [WordPress.org support forum](http://wordpress.org/support/plugin/autoclose). It is the fastest way to get support as I monitor the forums regularly. I also provide [premium *paid* support via email](https://webberzone.com/support/).
-
-= What does "Delete Post Revisions" do?  =
-
-The WordPress revisions system stores a record of each saved draft or published update. This can gather up a lot of overhead in the long run. Use this option to delete old post revisions.
-
-If you enable this option and turn on the cron job then any new revisions will be automatically deleted on a daily basis.

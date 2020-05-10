@@ -14,12 +14,12 @@ if ( ! defined( 'WPINC' ) ) {
 
 
 /**
- * Function to read options from the database.
+ * Returns an array of post types from an input which an be either a query string, CSV or array.
  *
  * @since   1.0
  *
- * @param mixed $post_types_input Post types array or csv string.
- * @return array Options for the database. Will add any missing options.
+ * @param mixed $post_types_input Post types array or query or csv string.
+ * @return array Array of post types.
  */
 function acc_parse_post_types( $post_types_input ) {
 
