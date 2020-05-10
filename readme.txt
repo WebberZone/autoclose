@@ -7,7 +7,7 @@ Requires at least: 4.9
 Tested up to: 5.4
 License: GPL v2 or later
 
-Close comments, pingbacks and trackbacks on your posts automatically at intervals set by you
+Automatically close Comments, Pingbacks and Trackbacks. Manage and delete revisions.
 
 == Description ==
 
