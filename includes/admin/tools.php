@@ -30,7 +30,7 @@ function acc_tools_page() {
 		acc_main();
 
 		$date_time_format = get_option( 'date_format' ) . ', ' . get_option( 'time_format' );
-		$current_time     = current_time( 'timestamp', 0 );
+		$current_time     = strtotime( current_time( 'mysql' ) );
 
 		$message = '';
 
@@ -39,7 +39,7 @@ function acc_tools_page() {
 			$message .= sprintf(
 				/* translators: 1. Date */
 				esc_html__( 'Comments closed up to %1$s', 'autoclose' ),
-				date( $date_time_format, ( $current_time - acc_get_option( 'comment_age' ) * DAY_IN_SECONDS ) )
+				gmdate( $date_time_format, ( $current_time - acc_get_option( 'comment_age' ) * DAY_IN_SECONDS ) )
 			);
 			$message .= '<br />';
 		}
@@ -49,7 +49,7 @@ function acc_tools_page() {
 			$message .= sprintf(
 				/* translators: 1. Date */
 				esc_html__( 'Pingbacks/Trackbacks closed up to %1$s', 'autoclose' ),
-				date( $date_time_format, ( $current_time - acc_get_option( 'pbtb_age' ) * DAY_IN_SECONDS ) )
+				gmdate( $date_time_format, ( $current_time - acc_get_option( 'pbtb_age' ) * DAY_IN_SECONDS ) )
 			);
 			$message .= '<br />';
 		}
