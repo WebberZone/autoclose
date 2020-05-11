@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Auto-Close\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-03-10 17:14+0000\n"
+"POT-Creation-Date: 2020-05-11 18:57+0100\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Ajay D'Souza <me@ajaydsouza.com>\n"
 "Language-Team: <me@ajaydsouza.com>\n"
@@ -13,7 +13,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Poedit-KeywordsList: __;_e;_c;__ngettext\n"
 "X-Poedit-Basepath: ..\n"
-"X-Generator: Poedit 2.2\n"
+"X-Generator: Poedit 2.3\n"
 "X-Poedit-SearchPath-0: .\n"
 
 #: includes/admin/admin.php:112
@@ -22,6 +22,10 @@ msgid ""
 "Thank you for using <a href=\"%1$s\" target=\"_blank\">AutoClose</a>! Please "
 "<a href=\"%2$s\" target=\"_blank\">rate us</a> on <a href=\"%2$s\" target="
 "\"_blank\">WordPress.org</a>"
+msgstr ""
+
+#: includes/admin/admin.php:165
+msgid "Contribute"
 msgstr ""
 
 #: includes/admin/help-tab.php:37 includes/admin/settings-page.php:127
@@ -33,9 +37,7 @@ msgid "This screen provides the basic settings for configuring AutoClose."
 msgstr ""
 
 #: includes/admin/help-tab.php:40
-msgid ""
-"Enable closing of comments, pingbacks/trackbacks and/or deleting revisions. "
-"You can also set up the schedule at which this will take place automatically."
+msgid "Set up the schedule at which this will take place automatically."
 msgstr ""
 
 #: includes/admin/help-tab.php:47 includes/admin/settings-page.php:128
@@ -43,8 +45,7 @@ msgid "Comments"
 msgstr ""
 
 #: includes/admin/help-tab.php:49
-msgid ""
-"This screen provides options to configure options for Comments specifically."
+msgid "This screen provides options to configure options for Comments."
 msgstr ""
 
 #: includes/admin/help-tab.php:50
@@ -59,8 +60,7 @@ msgstr ""
 
 #: includes/admin/help-tab.php:59
 msgid ""
-"This screen provides options to configure options for Pingbacks/Trackbacks "
-"specifically."
+"This screen provides options to configure options for Pingbacks/Trackbacks."
 msgstr ""
 
 #: includes/admin/help-tab.php:60
@@ -69,35 +69,49 @@ msgid ""
 "to close and exceptions."
 msgstr ""
 
-#: includes/admin/help-tab.php:87
+#: includes/admin/help-tab.php:67 includes/admin/settings-page.php:130
+msgid "Revisions"
+msgstr ""
+
+#: includes/admin/help-tab.php:69
+msgid ""
+"This screen provides options to configure options for managing revisions."
+msgstr ""
+
+#: includes/admin/help-tab.php:70
+msgid ""
+"Delete post revisions or limit the number of revisions for each post type."
+msgstr ""
+
+#: includes/admin/help-tab.php:97
 msgid "Tools"
 msgstr ""
 
-#: includes/admin/help-tab.php:89
+#: includes/admin/help-tab.php:99
 msgid ""
 "This screen gives you a few tools namely one click buttons to run the "
 "closing algorithm or open comments, pingbacks/trackbacks."
 msgstr ""
 
-#: includes/admin/help-tab.php:90
+#: includes/admin/help-tab.php:100
 msgid "You can also delete the old settings from prior to v2.0.0"
 msgstr ""
 
-#: includes/admin/help-tab.php:106
+#: includes/admin/help-tab.php:116
 #, php-format
 msgid ""
 "For more information or how to get support visit the <a href=\"%1$s\" target="
 "\"_blank\">Support site</a>."
 msgstr ""
 
-#: includes/admin/help-tab.php:109
+#: includes/admin/help-tab.php:119
 #, php-format
 msgid ""
 "Support queries should be posted in the <a href=\"%1$s\" target=\"_blank"
 "\">WordPress.org support forums</a>."
 msgstr ""
 
-#: includes/admin/help-tab.php:113
+#: includes/admin/help-tab.php:123
 #, php-format
 msgid ""
 "<a href=\"%1$s\" target=\"_blank\">Post an issue</a> on <a href=\"%2$s\" "
