@@ -37,7 +37,7 @@ function acc_settings_help() {
 			'title'   => __( 'General', 'autoclose' ),
 			'content' =>
 			'<p>' . __( 'This screen provides the basic settings for configuring AutoClose.', 'autoclose' ) . '</p>' .
-				'<p>' . __( 'Enable closing of comments, pingbacks/trackbacks and/or deleting revisions. You can also set up the schedule at which this will take place automatically.', 'autoclose' ) . '</p>',
+				'<p>' . __( 'Set up the schedule at which this will take place automatically.', 'autoclose' ) . '</p>',
 		)
 	);
 
@@ -46,7 +46,7 @@ function acc_settings_help() {
 			'id'      => 'acc-settings-comments',
 			'title'   => __( 'Comments', 'autoclose' ),
 			'content' =>
-			'<p>' . __( 'This screen provides options to configure options for Comments specifically.', 'autoclose' ) . '</p>' .
+			'<p>' . __( 'This screen provides options to configure options for Comments.', 'autoclose' ) . '</p>' .
 				'<p>' . __( 'Select the post types on which comments will be closed, period to close and exceptions.', 'autoclose' ) . '</p>',
 		)
 	);
@@ -56,8 +56,18 @@ function acc_settings_help() {
 			'id'      => 'acc-settings-pingtracks',
 			'title'   => __( 'Pingbacks / Trackbacks', 'autoclose' ),
 			'content' =>
-			'<p>' . __( 'This screen provides options to configure options for Pingbacks/Trackbacks specifically.', 'autoclose' ) . '</p>' .
+			'<p>' . __( 'This screen provides options to configure options for Pingbacks/Trackbacks.', 'autoclose' ) . '</p>' .
 				'<p>' . __( 'Select the post types on which pingbacks/trackbacks will be closed, period to close and exceptions.', 'autoclose' ) . '</p>',
+		)
+	);
+
+	$screen->add_help_tab(
+		array(
+			'id'      => 'acc-settings-revisions',
+			'title'   => __( 'Revisions', 'autoclose' ),
+			'content' =>
+			'<p>' . __( 'This screen provides options to configure options for managing revisions.', 'autoclose' ) . '</p>' .
+				'<p>' . __( 'Delete post revisions or limit the number of revisions for each post type.', 'autoclose' ) . '</p>',
 		)
 	);
 
