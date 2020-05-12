@@ -21,15 +21,14 @@ Spammers target old posts in a hope that you won't notice the comments on them. 
 
 You can also choose to keep comments / pingbacks / trackbacks open on certain posts, page or custom post types. Just enter a comma-separated list of post IDs in the Settings page.
 
-An extra feature is the ability to delete post revisions that were introduced in WordPress v2.6 onwards.
+An extra feature is the ability delete post revisions or limit their number.
 
 ### Key features
 
-* **Close comments**: Automatically close comments on posts, pages, attachments and even Custom Post Types!
-* **Close pingbacks and trackbacks**: Automatically close pingbacks and trackbacks as well
-* **Choose how old**: Choose a custom time period as to when the comments, pingbacks and trackbacks need to be closed
-* **Scheduling**: You can also schedule a cron job to automatically close comments, pingbacks and trackbacks daily
-* **Bonus**: Delete post revisions
+* Close (or open) comments on posts, pages, attachments and even Custom Post Types!
+* Close (or open) pingbacks and trackbacks as well across all post types. You can also choose to delete them
+* Schedule a cron job to automatically close comments, pingbacks and trackbacks daily
+* Delete all post revisions or limit the number of revisions by post type
 
 ## Screenshots
 

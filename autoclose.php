@@ -2,7 +2,7 @@
 /**
  * Auto-Close Comments, Pingbacks and Trackbacks
  *
- * Automatically close Comments, Pingbacks and Trackbacks after certain amount of days.
+ * Automatically close Comments, Pingbacks and Trackbacks. Manage and delete revisions.
  *
  * @package AutoClose
  * @author  Ajay D'Souza
