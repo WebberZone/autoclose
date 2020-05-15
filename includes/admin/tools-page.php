@@ -113,6 +113,13 @@ function acc_tools_page() {
 		add_settings_error( 'acc-notices', '', esc_html__( 'Pingbacks/Trackbacks deleted on all post types', 'autoclose' ), 'updated' );
 	}
 
+	/* Close revisions */
+	if ( ( isset( $_POST['acc_delete_revisions'] ) ) && ( check_admin_referer( 'acc-tools-settings' ) ) ) {
+		acc_delete_revisions();
+
+		add_settings_error( 'acc-notices', '', esc_html__( 'Revisions deleted on all post types', 'autoclose' ), 'updated' );
+	}
+
 	ob_start();
 	?>
 	<div class="wrap">
@@ -161,7 +168,15 @@ function acc_tools_page() {
 					<?php esc_html_e( 'This is a permanent change. Once you go through with this, there is no way to restore your pingbacks/trackbacks. Please backup your database before proceeding.', 'autoclose' ); ?>
 				</p>
 
-				<h2 style="padding-left:0px"><?php esc_html_e( 'Other tools', 'autoclose' ); ?></h2>
+				<h2 style="padding-left:0px"><?php esc_html_e( 'Delete Revisions', 'autoclose' ); ?></h2>
+				<p>
+					<input name="acc_delete_revisions" type="submit" id="acc_delete_revisions" value="<?php esc_attr_e( 'Delete revisions', 'autoclose' ); ?>" class="button button-secondary" onclick="if (!confirm('<?php esc_attr_e( 'This will delete all revisions permanently. Proceed?', 'autoclose' ); ?>')) return false;" />
+				</p>
+				<p class="description">
+					<?php esc_html_e( 'This is a permanent change. Once you go through with this, there is no way to restore your revisions. Please backup your database before proceeding.', 'autoclose' ); ?>
+				</p>
+
+				<h2 style="padding-left:0px"><?php esc_html_e( 'Delete old settings', 'autoclose' ); ?></h2>
 				<p>
 					<input name="acc_delete_old_settings" type="submit" id="acc_delete_old_settings" value="<?php esc_attr_e( 'Delete old settings', 'autoclose' ); ?>" class="button button-secondary" onclick="if (!confirm('<?php esc_attr_e( 'This will delete the settings before v2.0.x. Proceed?', 'autoclose' ); ?>')) return false;" />
 				</p>

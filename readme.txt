@@ -57,6 +57,7 @@ New revisions tab and settings to control revisions by post type. Check settings
 
 * Features:
 	* New revisions tab with settings to control the number of revisions by post type
+	* New button in Tools page to delete all revisions
 
 = 2.0.0 =
 
