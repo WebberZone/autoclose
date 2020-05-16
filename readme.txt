@@ -55,6 +55,8 @@ New revisions tab and settings to control revisions by post type. Check settings
 
 = 2.1.0 =
 
+Release post: [https://webberzone.com/blog/auto-close-v2-1-0/](https://webberzone.com/blog/auto-close-v2-1-0/)
+
 * Features:
 	* New revisions tab with settings to control the number of revisions by post type
 	* New button in Tools page to delete all revisions
