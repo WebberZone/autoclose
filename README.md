@@ -1,15 +1,18 @@
 ﻿# Auto-Close Comments, Pingbacks and Trackbacks
 
+![Auto-Close](https://raw.githubusercontent.com/WebberZone/autoclose/master/wporg-assets/banner-1544x500.png)
+
 [![WordPress Plugin Version](https://img.shields.io/wordpress/plugin/v/autoclose.svg?style=flat-square)](https://wordpress.org/plugins/autoclose/)
-[![License](https://img.shields.io/badge/license-GPL_v2%2B-orange.svg?style=flat-square)](https://www.gnu.org/licenses/gpl-2.0.html)
+[![License](https://img.shields.io/badge/license-GPL_v2%2B-orange.svg?style=flat-square)](https://opensource.org/licenses/GPL-2.0)
 [![WordPress Tested](https://img.shields.io/wordpress/v/autoclose.svg?style=flat-square)](https://wordpress.org/plugins/autoclose/)
-[![Build Status](https://travis-ci.com/ajaydsouza/autoclose.svg?branch=master)](https://travis-ci.com/ajaydsouza/autoclose)
+[![Required PHP](https://img.shields.io/wordpress/plugin/required-php/autoclose?style=flat-square)](https://wordpress.org/plugins/autoclose/)
+[![Active installs](https://img.shields.io/wordpress/plugin/installs/autoclose?style=flat-square)](https://wordpress.org/plugins/autoclose/)
 
-__Requires:__ 4.9
+__Requires:__ 5.6
 
-__Tested up to:__ 5.4
+__Tested up to:__ 5.9
 
-__License:__ [GPL-2.0+](https://www.gnu.org/licenses/gpl-2.0.html)
+__License:__ [GPL-2.0+](http://www.gnu.org/licenses/gpl-2.0.html)
 
 __Plugin page:__ [Auto-Close Comments, Pingbacks and Trackbacks](https://webberzone.com/plugins/autoclose/) | [WordPress.org plugin page](https://wordpress.org/plugins/autoclose/)
 
@@ -55,13 +58,13 @@ For more screenshots visit the [WordPress plugin page](https://wordpress.org/plu
 
 3. Activate the Plugin in WP-Admin
 
-4. Goto **Settings &raquo; Auto-Close** to configure
+4. Goto __Settings &raquo; Auto-Close__ to configure
 
 ## Frequently Asked Questions
 
 Check out the [FAQ on the plugin page](https://wordpress.org/plugins/autoclose/faq/).
 
-If your question isn't listed there, please create a new post at the [WordPress.org support forum](https://wordpress.org/support/plugin/autoclose). It is the fastest way to get support as I monitor the forums regularly. I also provide [premium *paid* support via email](https://webberzone.com/support/).
+If your question isn't listed there, please create a new post at the [WordPress.org support forum](https://wordpress.org/support/plugin/autoclose). It is the fastest way to get support as I monitor the forums regularly. I also provide [premium _paid_ support via email](https://webberzone.com/support/).
 
 ## About this repository
 
