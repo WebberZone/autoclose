@@ -3,8 +3,8 @@ Tags: autoclose, comments, pingback, trackback, revisions, spam, anti-spam
 Contributors: webberzone, Ajay
 Donate link: https://webberzone.com/donate/
 Stable tag: 2.1.0
-Requires at least: 4.9
-Tested up to: 5.4
+Requires at least: 5.1
+Tested up to: 5.9
 License: GPL v2 or later
 
 Automatically close Comments, Pingbacks and Trackbacks. Manage and delete revisions.

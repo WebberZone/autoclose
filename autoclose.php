@@ -8,13 +8,13 @@
  * @author  Ajay D'Souza
  * @license GPL-2.0+
  * @link    https://webberzone.com/
- * @copyright   2008-2020 Ajay D'Souza
+ * @copyright 2008-2022 Ajay D'Souza
  *
  * @wordpress-plugin
  * Plugin Name: Auto-Close Comments, Pingbacks and Trackbacks
  * Plugin URI:  https://webberzone.com/plugins/autoclose/
  * Description: Automatically close Comments, Pingbacks and Trackbacks. Manage and delete revisions.
- * Version:     2.1.0
+ * Version:     2.2.0-beta1
  * Author:      Ajay D'Souza
  * Author URI:  https://webberzone.com/
  * Text Domain: autoclose
@@ -149,4 +149,3 @@ if ( is_admin() || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
  */
 
 require_once ACC_PLUGIN_DIR . 'includes/deprecated.php';
-

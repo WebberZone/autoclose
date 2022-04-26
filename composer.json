@@ -1,0 +1,23 @@
+{
+    "name": "webberzone/autoclose",
+    "description": "Automatically close Comments, Pingbacks and Trackbacks. Manage and delete revisions.",
+    "type": "wordpress-plugin",
+    "keywords": [
+        "autoclose",
+        "pingbacks",
+        "trackbacks",
+        "comments",
+        "revisions"
+    ],
+    "license": "gpl-2.0-or-later",
+    "authors": [
+        {
+            "name": "WebberZone",
+            "email": "plugins@webberzone.com",
+            "role": "Developer"
+        }
+    ],
+    "requires": {
+        "php": ">=7"
+    }
+}
