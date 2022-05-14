@@ -18,27 +18,21 @@ if ( ! defined( 'WPINC' ) ) {
  *
  * @since 2.0.0
  *
- * @param string $type   'comment' or 'ping'.
- * @param string $action 'open' or 'close'.
- * @param array  $args   Array of arguments.
+ * @param string       $type   'comment' or 'ping'.
+ * @param string       $action 'open' or 'close'.
+ * @param string|array $args {
+ *     Optional. Array or string of Query parameters.
  *
+ *     @type int    $age          Age of the posts in days.
+ *     @type int    $post_types   Post types to include.
+ *     @type bool   $post_ids     Post IDs to include.
+ * }
  * @return int|bool Number of rows affected/selected for all other queries. Boolean false on error.
  */
 function acc_edit_discussions( $type = 'comment', $action = 'open', $args = array() ) {
 	global $wpdb;
 
 	$sql = '';
-
-	switch ( $type ) {
-		case 'comment':
-			$type = 'comment';
-			break;
-		case 'ping':
-			$type = 'ping';
-			break;
-		default:
-			return false;
-	}
 
 	switch ( $action ) {
 		case 'close':
@@ -53,7 +47,7 @@ function acc_edit_discussions( $type = 'comment', $action = 'open', $args = arra
 			return false;
 	}
 
-	if ( false === $type || false === $action ) {
+	if ( ! in_array( $type, array( 'comment', 'ping' ), true ) || false === $action ) {
 		return false;
 	}
 
@@ -80,14 +74,16 @@ function acc_edit_discussions( $type = 'comment', $action = 'open', $args = arra
 	}
 
 	if ( ! empty( $args['post_types'] ) ) {
+		$post_types = wp_parse_list( $args['post_types'] );
 
-		$sql .= " AND $wpdb->posts.post_type IN ('" . join( "', '", $args['post_types'] ) . "') ";
+		$sql .= " AND $wpdb->posts.post_type IN ('" . join( "', '", $post_types ) . "') ";
 
 	}
 
 	if ( ! empty( $args['post_ids'] ) ) {
+		$post_ids = wp_parse_id_list( $args['post_ids'] );
 
-		$sql .= " AND $wpdb->posts.ID IN ( {$args['post_ids']} )";
+		$sql .= " AND $wpdb->posts.ID IN ( {$post_ids} )";
 
 	}
 
@@ -221,5 +217,3 @@ function acc_delete_pingtracks() {
 
 	return $deleted_comments;
 }
-
-
