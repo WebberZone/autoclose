@@ -31,6 +31,17 @@ if ( ! defined( 'WPINC' ) ) {
 
 
 /**
+ * Holds the AutoClose plugin version
+ *
+ * @since 2.2.0
+ *
+ * @var string Plugin version
+ */
+if ( ! defined( 'ACC_PLUGIN_VERSION' ) ) {
+	define( 'ACC_PLUGIN_VERSION', '2.2.0' );
+}
+
+/**
  * Holds the filesystem directory path (with trailing slash) for AutoClose
  *
  * @since 2.0.0
@@ -72,45 +83,6 @@ if ( ! defined( 'ACC_PLUGIN_FILE' ) ) {
 require_once ACC_PLUGIN_DIR . 'includes/admin/default-settings.php';
 require_once ACC_PLUGIN_DIR . 'includes/admin/register-settings.php';
 
-/**
- * Global variable holding the current settings for AutoClose
- *
- * @since 2.0.0
- *
- * @var array
- */
-global $acc_settings;
-$acc_settings = acc_get_settings();
-
-
-/**
- * Get Settings.
- *
- * Retrieves all plugin settings
- *
- * @since  2.5.0
- * @return array AutoClose settings
- */
-function acc_get_settings() {
-
-	if ( false === get_option( 'acc_settings' ) ) {
-		add_option( 'acc_settings', acc_settings_defaults() );
-	}
-
-	$settings = get_option( 'acc_settings' );
-
-	/**
-	 * Settings array
-	 *
-	 * Retrieves all plugin settings
-	 *
-	 * @since 2.0.0
-	 * @param array $settings Settings array
-	 */
-	return apply_filters( 'acc_get_settings', $settings );
-}
-
-
 /*
  *---------------------------------------------------------------------------*
  * AutoClose modules
@@ -149,3 +121,38 @@ if ( is_admin() || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
  */
 
 require_once ACC_PLUGIN_DIR . 'includes/deprecated.php';
+
+
+/**
+ * Global variable holding the current settings for AutoClose
+ *
+ * @since 2.0.0
+ *
+ * @var array
+ */
+global $acc_settings;
+$acc_settings = acc_get_settings();
+
+
+/**
+ * Get Settings.
+ *
+ * Retrieves all plugin settings
+ *
+ * @since  2.0.0
+ * @return array AutoClose settings
+ */
+function acc_get_settings() {
+
+	$settings = get_option( 'acc_settings', acc_settings_defaults() );
+
+	/**
+	 * Settings array
+	 *
+	 * Retrieves all plugin settings
+	 *
+	 * @since 2.0.0
+	 * @param array $settings Settings array
+	 */
+	return apply_filters( 'acc_get_settings', $settings );
+}
