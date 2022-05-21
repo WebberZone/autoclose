@@ -22,4 +22,3 @@ function ald_acc_lang_init() {
 	load_plugin_textdomain( 'autoclose', false, dirname( plugin_basename( ACC_PLUGIN_FILE ) ) . '/languages/' );
 }
 add_action( 'plugins_loaded', 'ald_acc_lang_init' );
-

@@ -113,4 +113,3 @@ function acc_read_options() {
 
 	return apply_filters( 'acc_read_options', $acc_settings );
 }
-

@@ -56,7 +56,5 @@ register_activation_hook( ACC_PLUGIN_FILE, 'acc_install' );
  * @return void
  */
 function acc_single_activate() {
-
-	$acc_settings = acc_get_settings();
-
+	acc_get_settings();
 }

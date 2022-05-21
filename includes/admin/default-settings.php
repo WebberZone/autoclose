@@ -346,5 +346,3 @@ function acc_upgrade_settings() {
 
 	return $settings;
 }
-
-

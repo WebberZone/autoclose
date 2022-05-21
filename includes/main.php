@@ -12,9 +12,6 @@
  * @since 2.0.0
  */
 function acc_main() {
-	global $wpdb;
-
-	$acc_settings = acc_get_settings();
 
 	$comment_age      = acc_get_option( 'comment_age' );
 	$pbtb_age         = acc_get_option( 'pbtb_age' );
@@ -74,5 +71,3 @@ function acc_main() {
 	}
 }
 add_action( 'acc_cron_hook', 'acc_main' );
-
-

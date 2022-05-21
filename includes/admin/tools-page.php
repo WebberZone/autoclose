@@ -22,8 +22,6 @@ if ( ! defined( 'WPINC' ) ) {
  */
 function acc_tools_page() {
 
-	$acc_settings = acc_get_settings();
-
 	/* Close all */
 	if ( ( isset( $_POST['close_all'] ) ) && ( check_admin_referer( 'acc-tools-settings' ) ) ) {
 		// Execute the main function.
@@ -205,4 +203,3 @@ function acc_tools_page() {
 	<?php
 	echo ob_get_clean(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 }
-

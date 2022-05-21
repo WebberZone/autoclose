@@ -298,5 +298,3 @@ function acc_sanitize_cron( $settings ) {
 	return $settings;
 }
 add_filter( 'acc_settings_sanitize', 'acc_sanitize_cron' );
-
-

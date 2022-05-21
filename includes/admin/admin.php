@@ -26,11 +26,24 @@ if ( ! defined( 'WPINC' ) ) {
 function acc_add_admin_pages_links() {
 	global $acc_settings_page, $acc_settings_tools;
 
-	$acc_settings_page = add_options_page( esc_html__( 'AutoClose', 'autoclose' ), esc_html__( 'AutoClose', 'autoclose' ), 'manage_options', 'acc_options_page', 'acc_options_page' );
+	$acc_settings_page = add_options_page(
+		esc_html__( 'AutoClose', 'autoclose' ),
+		esc_html__( 'AutoClose', 'autoclose' ),
+		'manage_options',
+		'acc_options_page',
+		'acc_options_page'
+	);
 	add_action( "load-$acc_settings_page", 'acc_settings_help' ); // Load the settings contextual help.
 	add_action( "admin_head-$acc_settings_page", 'acc_adminhead' ); // Load the admin head.
 
-	$acc_settings_tools = add_submenu_page( $acc_settings_page, esc_html__( 'AutoClose Tools', 'autoclose' ), esc_html__( 'Tools', 'autoclose' ), 'manage_options', 'acc_tools_page', 'acc_tools_page' );
+	$acc_settings_tools = add_submenu_page(
+		$acc_settings_page,
+		esc_html__( 'AutoClose Tools', 'autoclose' ),
+		esc_html__( 'Tools', 'autoclose' ),
+		'manage_options',
+		'acc_tools_page',
+		'acc_tools_page'
+	);
 	add_action( "load-$acc_settings_tools", 'acc_settings_tools_help' );
 	add_action( "admin_head-$acc_settings_tools", 'acc_adminhead' );
 
@@ -167,4 +180,3 @@ function acc_plugin_actions( $links, $file ) {
 	return $links;
 }
 add_filter( 'plugin_row_meta', 'acc_plugin_actions', 10, 2 );
-

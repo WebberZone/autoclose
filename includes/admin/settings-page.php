@@ -563,5 +563,3 @@ function acc_posttypes_callback( $args ) {
 	/** This filter has been defined in settings-page.php */
 	echo apply_filters( 'acc_after_setting_output', $html, $args ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 }
-
-

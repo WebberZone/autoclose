@@ -43,5 +43,3 @@ function acc_parse_post_types( $post_types_input ) {
 
 	return $post_types;
 }
-
-

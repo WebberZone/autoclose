@@ -43,4 +43,3 @@ function acc_disable_run() {
 		wp_clear_scheduled_hook( 'acc_cron_hook' );
 	}
 }
-
