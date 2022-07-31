@@ -24,11 +24,13 @@ if ( ! defined( 'WPINC' ) ) {
  * @param int $recurrence Frequency.
  */
 function acc_enable_run( $hour, $min, $recurrence ) {
+	$on   = mktime( $hour, $min, 0, gmdate( 'm' ), gmdate( 'd' ), gmdate( 'Y' ) );
+	$date = gmdate( 'm/d/Y H:i:s', $on );
 	if ( ! wp_next_scheduled( 'acc_cron_hook' ) ) {
-		wp_schedule_event( mktime( $hour, $min, 0 ), $recurrence, 'acc_cron_hook' );
+		wp_schedule_event( $on, $recurrence, 'acc_cron_hook' );
 	} else {
 		wp_clear_scheduled_hook( 'acc_cron_hook' );
-		wp_schedule_event( mktime( $hour, $min, 0 ), $recurrence, 'acc_cron_hook' );
+		wp_schedule_event( $on, $recurrence, 'acc_cron_hook' );
 	}
 }
 

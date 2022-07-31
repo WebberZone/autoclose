@@ -76,19 +76,13 @@ if ( ! defined( 'ACC_PLUGIN_FILE' ) ) {
 
 /*
  *---------------------------------------------------------------------------*
- * AutoClose Settings
- *---------------------------------------------------------------------------*
- */
-
-require_once ACC_PLUGIN_DIR . 'includes/admin/default-settings.php';
-require_once ACC_PLUGIN_DIR . 'includes/admin/register-settings.php';
-
-/*
- *---------------------------------------------------------------------------*
  * AutoClose modules
  *---------------------------------------------------------------------------*
  */
 
+require_once ACC_PLUGIN_DIR . 'includes/admin/class-settings-api.php';
+require_once ACC_PLUGIN_DIR . 'includes/admin/class-autoclose-settings.php';
+require_once ACC_PLUGIN_DIR . 'includes/admin/options-api.php';
 require_once ACC_PLUGIN_DIR . 'includes/activation.php';
 require_once ACC_PLUGIN_DIR . 'includes/main.php';
 require_once ACC_PLUGIN_DIR . 'includes/comments.php';
@@ -106,10 +100,6 @@ require_once ACC_PLUGIN_DIR . 'includes/helpers.php';
 
 if ( is_admin() || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
 
-	require_once ACC_PLUGIN_DIR . 'includes/admin/admin.php';
-	require_once ACC_PLUGIN_DIR . 'includes/admin/settings-page.php';
-	require_once ACC_PLUGIN_DIR . 'includes/admin/save-settings.php';
-	require_once ACC_PLUGIN_DIR . 'includes/admin/help-tab.php';
 	require_once ACC_PLUGIN_DIR . 'includes/admin/tools-page.php';
 
 }
@@ -121,17 +111,6 @@ if ( is_admin() || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
  */
 
 require_once ACC_PLUGIN_DIR . 'includes/deprecated.php';
-
-
-/**
- * Global variable holding the current settings for AutoClose
- *
- * @since 2.0.0
- *
- * @var array
- */
-global $acc_settings;
-$acc_settings = acc_get_settings();
 
 
 /**
@@ -156,3 +135,13 @@ function acc_get_settings() {
 	 */
 	return apply_filters( 'acc_get_settings', $settings );
 }
+
+/**
+ * Global variable holding the current settings for AutoClose
+ *
+ * @since 2.0.0
+ *
+ * @var array
+ */
+global $acc_settings;
+$acc_settings = acc_get_settings();

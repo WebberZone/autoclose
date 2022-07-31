@@ -57,3 +57,31 @@ function acc_revisions_to_keep( $num, $post ) {
 	return $is_target_type ? $revisions_to_keep : $num;
 }
 add_filter( 'wp_revisions_to_keep', 'acc_revisions_to_keep', 999999, 2 );
+
+
+/**
+ * Retrieve the post types that have revisions.
+ *
+ * @since 2.1.0
+ *
+ * @return array Array of post types that support revisisions in the format name => label/name
+ */
+function acc_get_revision_post_types() {
+
+	$revision_post_types = array();
+
+	$post_types = get_post_types( array(), 'objects' );
+
+	foreach ( $post_types as $post_type ) {
+		if ( post_type_supports( $post_type->name, 'revisions' ) ) {
+			if ( property_exists( $post_type, 'labels' ) && property_exists( $post_type->labels, 'name' ) ) {
+				$name = $post_type->labels->name;
+			} else {
+				$name = $post_type->name;
+			}
+			$revision_post_types[ $post_type->name ] = $name;
+		}
+	}
+
+	return $revision_post_types;
+}

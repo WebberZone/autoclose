@@ -124,7 +124,7 @@ function acc_tools_page() {
 		<h1><?php esc_html_e( 'Automatically Close Comments, Pingbacks and Trackbacks Tools', 'autoclose' ); ?></h1>
 
 		<p>
-			<a href="<?php echo admin_url( 'options-general.php?page=acc_options_page' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>">
+			<a class="acc_button" href="<?php echo admin_url( 'options-general.php?page=acc_options_page' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>">
 				<?php esc_html_e( 'Visit the Settings page', 'autoclose' ); ?>
 			</a>
 		<p>
