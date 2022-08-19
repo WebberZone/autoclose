@@ -61,6 +61,9 @@ Release post: [https://webberzone.com/blog/auto-close-v2-1-0/](https://webberzon
 	* New revisions tab with settings to control the number of revisions by post type
 	* New button in Tools page to delete all revisions
 
+* Enhancements:
+	* The comment count for the post will be updated when deleting Pingbacks/Trackbacks
+
 = 2.0.0 =
 
 * Features:

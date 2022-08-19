@@ -192,15 +192,18 @@ function acc_close_pingtracks() {
 function acc_delete_pingtracks() {
 	global $wpdb;
 
+	$post_ids = array();
+
 	$comments = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
 		"
-		SELECT comment_ID FROM {$wpdb->comments}
+		SELECT comment_ID, comment_post_ID FROM {$wpdb->comments}
 		WHERE comment_type IN ('pingback', 'trackback')
 		",
 		ARRAY_A
 	);
 
 	$comment_ids = wp_list_pluck( $comments, 'comment_ID' );
+	$post_ids    = array_unique( wp_list_pluck( $comments, 'comment_post_ID' ) );
 
 	$deleted_comments = $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
 		"
@@ -214,6 +217,11 @@ function acc_delete_pingtracks() {
 		DELETE FROM {$wpdb->commentmeta}
 		WHERE comment_ID IN ('" . join( "', '", $comment_ids ) . "') " // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 	);
+
+	// Now update the comment count for each post.
+	foreach ( $post_ids as $post_id ) {
+		wp_update_comment_count( $post_id );
+	}
 
 	return $deleted_comments;
 }
