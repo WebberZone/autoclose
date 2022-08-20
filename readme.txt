@@ -2,9 +2,9 @@
 Tags: autoclose, comments, pingback, trackback, revisions, spam, anti-spam
 Contributors: webberzone, Ajay
 Donate link: https://webberzone.com/donate/
-Stable tag: 2.1.0
+Stable tag: 2.2.0
 Requires at least: 5.6
-Tested up to: 5.9
+Tested up to: 6.0
 License: GPL v2 or later
 
 Automatically close Comments, Pingbacks and Trackbacks. Manage and delete revisions.
@@ -47,11 +47,19 @@ An extra feature is the ability delete post revisions or limit their number.
 
 == Upgrade Notice ==
 
-= 2.1.0 =
-New revisions tab and settings to control revisions by post type. Check settings on upgrade. Check the ChangeLog for details.
+= 2.2.0 =
+Comment counts updated; settings interface upgraded. Check settings on upgrade and the ChangeLog for details.
 
 
 == Changelog ==
+
+= 2.2.0 =
+
+Release post: [https://webberzone.com/blog/auto-close-v2-2-0/](https://webberzone.com/blog/auto-close-v2-2-0/)
+
+* Enhancements:
+	* The comment count for the post will be updated when deleting Pingbacks/Trackbacks
+	* Settings page now uses the latest version of the WebberZone Settings_API class
 
 = 2.1.0 =
 
@@ -60,9 +68,6 @@ Release post: [https://webberzone.com/blog/auto-close-v2-1-0/](https://webberzon
 * Features:
 	* New revisions tab with settings to control the number of revisions by post type
 	* New button in Tools page to delete all revisions
-
-* Enhancements:
-	* The comment count for the post will be updated when deleting Pingbacks/Trackbacks
 
 = 2.0.0 =
 
