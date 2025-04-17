@@ -21,7 +21,7 @@ if ( ! defined( 'WPINC' ) ) {
  * @since   1.0
  * @deprecated 2.0.0
  */
-define( 'ALD_ACC_DIR', dirname( __FILE__ ) );
+define( 'ALD_ACC_DIR', __DIR__ );
 
 
 /**
@@ -43,7 +43,7 @@ $acc_path = plugin_dir_path( __FILE__ );
  *
  * @var string
  */
-$acc_url = plugins_url() . '/' . plugin_basename( dirname( __FILE__ ) );
+$acc_url = plugins_url() . '/' . plugin_basename( __DIR__ );
 
 
 

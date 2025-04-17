@@ -106,7 +106,6 @@ function acc_edit_discussions( $type = 'comment', $action = 'open', $args = arra
 function acc_open_discussions( $type = 'comment', $args = array() ) {
 
 	return acc_edit_discussions( $type, 'open', $args );
-
 }
 
 /**
@@ -122,7 +121,6 @@ function acc_open_discussions( $type = 'comment', $args = array() ) {
 function acc_close_discussions( $type = 'comment', $args = array() ) {
 
 	return acc_edit_discussions( $type, 'close', $args );
-
 }
 
 
@@ -136,7 +134,6 @@ function acc_close_discussions( $type = 'comment', $args = array() ) {
 function acc_open_comments() {
 
 	return acc_edit_discussions( 'comment', 'open' );
-
 }
 
 
@@ -150,7 +147,6 @@ function acc_open_comments() {
 function acc_open_pingtracks() {
 
 	return acc_edit_discussions( 'ping', 'open' );
-
 }
 
 
@@ -164,7 +160,6 @@ function acc_open_pingtracks() {
 function acc_close_comments() {
 
 	return acc_edit_discussions( 'comment', 'close' );
-
 }
 
 
@@ -178,7 +173,6 @@ function acc_close_comments() {
 function acc_close_pingtracks() {
 
 	return acc_edit_discussions( 'ping', 'close' );
-
 }
 
 

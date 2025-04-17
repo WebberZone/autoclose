@@ -14,7 +14,7 @@
  * Plugin Name: Auto-Close Comments, Pingbacks and Trackbacks
  * Plugin URI:  https://webberzone.com/plugins/autoclose/
  * Description: Automatically close Comments, Pingbacks and Trackbacks. Manage and delete revisions.
- * Version:     2.2.0
+ * Version:     2.3.0-beta1
  * Author:      Ajay D'Souza
  * Author URI:  https://webberzone.com/
  * Text Domain: autoclose
@@ -38,7 +38,7 @@ if ( ! defined( 'WPINC' ) ) {
  * @var string Plugin version
  */
 if ( ! defined( 'ACC_PLUGIN_VERSION' ) ) {
-	define( 'ACC_PLUGIN_VERSION', '2.2.0' );
+	define( 'ACC_PLUGIN_VERSION', '2.3.0-beta1' );
 }
 
 /**

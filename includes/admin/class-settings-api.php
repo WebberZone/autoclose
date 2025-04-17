@@ -176,7 +176,6 @@ if ( ! class_exists( 'Settings_API' ) ) :
 			foreach ( $args as $name => $value ) {
 				$this->$name = $value;
 			}
-
 		}
 
 		/**
@@ -359,7 +358,6 @@ if ( ! class_exists( 'Settings_API' ) ) :
 			if ( $hook === $this->settings_page ) {
 				$this->enqueue_scripts_styles();
 			}
-
 		}
 
 		/**
@@ -559,7 +557,6 @@ if ( ! class_exists( 'Settings_API' ) ) :
 			} else {
 				return false;
 			}
-
 		}
 
 
@@ -598,10 +595,10 @@ if ( ! class_exists( 'Settings_API' ) ) :
 		 * Get the value of a settings field.
 		 *
 		 * @param string $option  Settings field name.
-		 * @param string $default Default text if it's not found.
+		 * @param string $default_value Default text if it's not found.
 		 * @return string
 		 */
-		public function get_option( $option, $default = '' ) {
+		public function get_option( $option, $default_value = '' ) {
 
 			$options = get_option( $this->settings_key );
 
@@ -609,7 +606,7 @@ if ( ! class_exists( 'Settings_API' ) ) :
 				return $options[ $option ];
 			}
 
-			return $default;
+			return $default_value;
 		}
 
 		/**
@@ -792,12 +789,11 @@ if ( ! class_exists( 'Settings_API' ) ) :
 
 			$html  = sprintf( '<input type="hidden" name="%1$s[%2$s]" value="-1" />', $this->settings_key, sanitize_key( $args['id'] ) );
 			$html .= sprintf( '<input type="checkbox" id="%1$s[%2$s]" name="%1$s[%2$s]" value="1" %3$s />', $this->settings_key, sanitize_key( $args['id'] ), $checked );
-			$html .= ( $value <> $default ) ? '<em style="color:orange">' . $this->translation_strings['checkbox_modified'] . '</em>' : ''; // phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison
+			$html .= ( $value !== $default ) ? '<em style="color:orange">' . $this->translation_strings['checkbox_modified'] . '</em>' : ''; // phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison
 			$html .= $this->get_field_description( $args );
 
 			/** This filter has been defined in class-settings-api.php */
 			echo apply_filters( $this->prefix . '_after_setting_output', $html, $args ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-
 		}
 
 		/**
@@ -845,7 +841,6 @@ if ( ! class_exists( 'Settings_API' ) ) :
 
 			/** This filter has been defined in class-settings-api.php */
 			echo apply_filters( $this->prefix . '_after_setting_output', $html, $args ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-
 		}
 
 		/**
@@ -1292,7 +1287,6 @@ if ( ! class_exists( 'Settings_API' ) ) :
 			 * @param array $input Input settings array.
 			 */
 			return apply_filters( $this->prefix . '_settings_sanitize', $output, $input );
-
 		}
 
 		/**
@@ -1300,7 +1294,7 @@ if ( ! class_exists( 'Settings_API' ) ) :
 		 *
 		 * @param string $key Settings key.
 		 *
-		 * @return string|bool Callback function or false if callback isn't found.
+		 * @return string|bool|array Callback function or false if callback isn't found.
 		 */
 		public function get_sanitize_callback( $key = '' ) {
 			if ( empty( $key ) ) {
@@ -1644,9 +1638,7 @@ if ( ! class_exists( 'Settings_API' ) ) :
 			foreach ( $this->help_tabs as $tab ) {
 				$screen->add_help_tab( $tab );
 			}
-
 		}
-
 	}
 
 endif;

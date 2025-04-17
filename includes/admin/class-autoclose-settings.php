@@ -154,7 +154,6 @@ if ( ! class_exists( 'AutoClose_Settings' ) ) :
 			 * @param array $strings Translation strings.
 			 */
 			return apply_filters( self::$prefix . '_translation_strings', $strings );
-
 		}
 
 		/**
@@ -180,7 +179,6 @@ if ( ! class_exists( 'AutoClose_Settings' ) ) :
 			 * @param array $acc_settings_sections Settings array
 			 */
 			return apply_filters( self::$prefix . '_settings_sections', $acc_settings_sections );
-
 		}
 
 
@@ -208,7 +206,6 @@ if ( ! class_exists( 'AutoClose_Settings' ) ) :
 			 * @param array $acc_setings Settings array
 			 */
 			return apply_filters( self::$prefix . '_registered_settings', $acc_settings );
-
 		}
 
 		/**
@@ -460,7 +457,6 @@ if ( ! class_exists( 'AutoClose_Settings' ) ) :
 
 				return $settings;
 			}
-
 		}
 
 		/**
@@ -657,7 +653,6 @@ if ( ! class_exists( 'AutoClose_Settings' ) ) :
 					)
 				);
 			}
-
 		}
 
 		/**
@@ -673,7 +668,6 @@ if ( ! class_exists( 'AutoClose_Settings' ) ) :
 				</a>
 			<p>
 			<?php
-
 		}
 
 
@@ -698,7 +692,6 @@ if ( ! class_exists( 'AutoClose_Settings' ) ) :
 
 			return $settings;
 		}
-
 	}
 
 	/**

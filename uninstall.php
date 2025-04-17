@@ -48,7 +48,4 @@ function acc_delete_data() {
 	if ( wp_next_scheduled( 'ald_acc_hook' ) ) {
 		wp_clear_scheduled_hook( 'ald_acc_hook' );
 	}
-
 }
-
-

@@ -22,22 +22,22 @@ if ( ! defined( 'WPINC' ) ) {
  *
  * @since  2.0.0
  *
- * @param string $key Option to fetch.
- * @param mixed  $default Default option.
+ * @param string $key           Option to fetch.
+ * @param mixed  $default_value Default option.
  * @return mixed
  */
-function acc_get_option( $key = '', $default = null ) {
+function acc_get_option( $key = '', $default_value = null ) {
 	global $acc_settings;
 
 	if ( empty( $acc_settings ) ) {
 		$acc_settings = acc_get_settings();
 	}
 
-	if ( is_null( $default ) ) {
-		$default = acc_get_default_option( $key );
+	if ( is_null( $default_value ) ) {
+		$default_value = acc_get_default_option( $key );
 	}
 
-	$value = isset( $acc_settings[ $key ] ) ? $acc_settings[ $key ] : $default;
+	$value = isset( $acc_settings[ $key ] ) ? $acc_settings[ $key ] : $default_value;
 
 	/**
 	 * Filter the value for the option being fetched.
@@ -45,10 +45,10 @@ function acc_get_option( $key = '', $default = null ) {
 	 * @since 2.0.0
 	 *
 	 * @param mixed $value  Value of the option
-	 * @param mixed $key  Name of the option
-	 * @param mixed $default Default value
+	 * @param mixed $key    Name of the option
+	 * @param mixed $default_value Default value
 	 */
-	$value = apply_filters( 'acc_get_option', $value, $key, $default );
+	$value = apply_filters( 'acc_get_option', $value, $key, $default_value );
 
 	/**
 	 * Key specific filter for the value of the option being fetched.
@@ -57,9 +57,9 @@ function acc_get_option( $key = '', $default = null ) {
 	 *
 	 * @param mixed $value  Value of the option
 	 * @param mixed $key  Name of the option
-	 * @param mixed $default Default value
+	 * @param mixed $default_value Default value
 	 */
-	return apply_filters( 'acc_get_option_' . $key, $value, $key, $default );
+	return apply_filters( 'acc_get_option_' . $key, $value, $key, $default_value );
 }
 
 
@@ -202,7 +202,6 @@ function acc_get_default_option( $key = '' ) {
 	} else {
 		return false;
 	}
-
 }
 
 
@@ -276,7 +275,6 @@ if ( ! function_exists( 'wz_tag_search' ) ) :
 
 		echo wp_json_encode( $results );
 		wp_die();
-
 	}
 	add_action( 'wp_ajax_wz_tag_search', 'wz_tag_search' );
 endif;
