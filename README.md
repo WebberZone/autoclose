@@ -49,10 +49,9 @@ _Auto-Close_ is a WordPress plugin that _automatically closes comments, pingback
 
 We welcome contributions! Please:
 
-- Fork the repository and create your branch from `main`.
+- Fork the repository and create your branch from `master`.
 - Follow the code style and structure above.
 - Open issues for bugs, feature requests, or questions.
-- See [CONTRIBUTING.md](CONTRIBUTING.md) if available.
 
 ---
 
