@@ -1,7 +1,7 @@
 === Auto-Close Comments, Pingbacks and Trackbacks ===
-Tags: autoclose, comments, pingback, trackback, revisions, spam, anti-spam
+Tags: comments, pingback, revisions, spam, anti-spam
 Contributors: webberzone, Ajay
-Donate link: https://webberzone.com/donate/
+Donate link: https://ajaydsouza.com/donate/
 Stable tag: 3.0.0
 Requires at least: 6.3
 Tested up to: 6.8
