@@ -27,6 +27,7 @@ Found a bug or want to contribute? PRs and issues welcome on [GitHub](https://gi
 * Schedule a cron job to automatically close comments, pingbacks and trackbacks daily
 * Delete all post revisions or limit the number of revisions by post type
 * Exclude specific post IDs from auto-close
+* Block self-pings and custom ping URLs
 
 == Screenshots ==
 
@@ -71,6 +72,9 @@ Major plugin changes. Check the Changelog and release post for complete informat
 Release post: https://webberzone.com/blog/auto-close-v3-0-0/
 
 Completely rewritten the plugin to use autoloading, namespaces and classes.
+
+* Features:
+    * Added block ping URLs feature.
 
 * Bug fixes:
     * Fixed PHP error/warnings about loading translations too early.

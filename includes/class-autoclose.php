@@ -114,8 +114,9 @@ class AutoClose {
 	 * @since 3.0.0
 	 */
 	private function define_feature_hooks() {
-		$comments  = new Features\Comments();
-		$revisions = new Features\Revisions();
+		$comments    = new Features\Comments();
+		$revisions   = new Features\Revisions();
+		$block_pings = new Features\Block_Pings();
 
 		// Register cron hooks.
 		$this->loader->add_action( 'acc_cron_hook', $comments, 'process_comments' );
@@ -123,6 +124,9 @@ class AutoClose {
 
 		// Register revisions hooks.
 		$this->loader->add_filter( 'wp_revisions_to_keep', $revisions, 'revisions_to_keep', 999999, 2 );
+
+		// Register ping hooks.
+		$this->loader->add_action( 'pre_ping', $block_pings, 'block_pings' );
 	}
 
 	/**

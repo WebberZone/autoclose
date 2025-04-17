@@ -38,6 +38,7 @@ _Auto-Close_ is a WordPress plugin that _automatically closes comments, pingback
 - _Automatically close_ comments, pingbacks, and trackbacks on posts, pages, and custom post types
 - _Open or close_ comments/pingbacks/trackbacks selectively by post ID
 - _Schedule_ automatic closing using WordPress cron
+- _Block self-pings and custom ping URLs_
 - _Delete or limit_ post revisions by type
 - _Manual tools_ for opening/closing and deleting
 - _Admin interface_ with settings and tools tabs

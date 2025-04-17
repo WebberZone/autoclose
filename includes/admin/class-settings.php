@@ -308,32 +308,47 @@ class Settings {
 	 */
 	public static function settings_pingtracks() {
 		$settings = array(
-			'close_pbtb'      => array(
+			'close_pbtb'       => array(
 				'id'      => 'close_pbtb',
 				'name'    => esc_html__( 'Close Pingbacks/Trackbacks', 'autoclose' ),
 				'desc'    => esc_html__( 'Enable to close pingbacks and trackbacks - used for the automatic schedule as well as one time runs under the Tools tab.', 'autoclose' ),
 				'type'    => 'checkbox',
 				'options' => false,
 			),
-			'pbtb_post_types' => array(
+			'pbtb_post_types'  => array(
 				'id'      => 'pbtb_post_types',
 				'name'    => esc_html__( 'Post types to include', 'autoclose' ),
 				'desc'    => esc_html__( 'At least one option should be selected above. Select which post types on which you want pingbacks/trackbacks closed.', 'autoclose' ),
 				'type'    => 'posttypes',
 				'options' => 'post',
 			),
-			'pbtb_age'        => array(
+			'pbtb_age'         => array(
 				'id'      => 'pbtb_age',
 				'name'    => esc_html__( 'Close pingbacks/trackbacks on posts/pages older than', 'autoclose' ),
 				'desc'    => esc_html__( 'Pingbacks/Trackbacks that are older than the above number, in days, will be closed automatically if the schedule is enabled', 'autoclose' ),
 				'type'    => 'number',
 				'options' => '90',
 			),
-			'pbtb_pids'       => array(
+			'pbtb_pids'        => array(
 				'id'      => 'pbtb_pids',
 				'name'    => esc_html__( 'Keep pingbacks/trackbacks on these posts/pages open', 'autoclose' ),
 				'desc'    => esc_html__( 'Comma-separated list of post, page or custom post type IDs. e.g. 188,320,500', 'autoclose' ),
 				'type'    => 'numbercsv',
+				'options' => '',
+				'size'    => 'large',
+			),
+			'block_self_pings' => array(
+				'id'      => 'block_self_pings',
+				'name'    => esc_html__( 'Block Self-Pings', 'autoclose' ),
+				'desc'    => esc_html__( 'Enable to block self-pings (pings to your own site).', 'autoclose' ),
+				'type'    => 'checkbox',
+				'options' => true,
+			),
+			'block_ping_urls'  => array(
+				'id'      => 'block_ping_urls',
+				'name'    => esc_html__( 'Block Ping URLs', 'autoclose' ),
+				'desc'    => esc_html__( 'Enter one URL per line. Pings to any of these URLs will be blocked in addition to self-pings.', 'autoclose' ),
+				'type'    => 'textarea',
 				'options' => '',
 				'size'    => 'large',
 			),
