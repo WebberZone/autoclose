@@ -123,7 +123,7 @@ require_once ACC_PLUGIN_DIR . 'includes/deprecated.php';
  */
 function acc_get_settings() {
 
-	$settings = get_option( 'acc_settings', acc_settings_defaults() );
+	$settings = get_option( 'acc_settings' );
 
 	/**
 	 * Settings array
@@ -145,3 +145,13 @@ function acc_get_settings() {
  */
 global $acc_settings;
 $acc_settings = acc_get_settings();
+
+/**
+ * Register settings function
+ *
+ * @since 2.0.0
+ */
+function acc_register_settings() {
+	AutoClose_Settings::get_instance();
+}
+add_action( 'admin_menu', 'acc_register_settings', 999 );
