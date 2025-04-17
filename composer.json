@@ -13,11 +13,33 @@
     "authors": [
         {
             "name": "WebberZone",
-            "email": "plugins@webberzone.com",
             "role": "Developer"
         }
     ],
-    "requires": {
-        "php": ">=7"
+    "require": {
+        "php": ">=7.4"
+    },
+    "require-dev": {
+        "szepeviktor/phpstan-wordpress": "^1",
+        "phpstan/extension-installer": "^1",
+        "phpstan/phpstan": "^1",
+        "php-stubs/wordpress-stubs": "^6",
+        "wp-coding-standards/wpcs": "^3",
+        "dealerdirect/phpcodesniffer-composer-installer": "^1",
+        "phpcompatibility/phpcompatibility-wp": "^2",
+        "yoast/phpunit-polyfills": "^3",
+        "phpunit/phpunit": "^7.5 || ^8 || ^9 || ^10 || ^11 || ^12"
+    },
+    "config": {
+        "allow-plugins": {
+            "phpstan/extension-installer": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    },
+    "scripts": {
+        "phpstan": "vendor/bin/phpstan analyse --memory-limit=2048M",
+        "phpstan-baseline": "vendor/bin/phpstan analyse --generate-baseline --memory-limit=2048M",
+        "phpcs": "vendor/bin/phpcs -p -v -s --standard=phpcs.xml.dist $(find . -name '*.php')",
+        "phpcbf": "vendor/bin/phpcbf -p -v -s --standard=phpcs.xml.dist $(find . -name '*.php')"
     }
 }
