@@ -1,5 +1,31 @@
 This file contains the old changelog entries. You can always find the latest entries in the readme.txt
 
+= 2.2.0 =
+Release post: https://webberzone.com/blog/auto-close-v2-2-0/
+
+* Enhancements:
+    * The comment count for the post will be updated when deleting Pingbacks/Trackbacks
+    * Settings page now uses the latest version of the WebberZone Settings_API class
+
+= 2.1.0 =
+Release post: https://webberzone.com/blog/auto-close-v2-1-0/
+
+* Features:
+    * New revisions tab with settings to control the number of revisions by post type
+    * New button in Tools page to delete all revisions
+
+= 2.0.0 =
+* Features:
+    * New Tools page with several buttons to open, close and delete comments, pingbacks and trackbacks. You can find the link in the Settings page under the main header
+    * New button to delete all pingbacks and trackbacks in the Tools page
+    * Activating the plugin on Multisite should upgrade settings from v1.x
+    * Uninstalling the plugin on Multisite will delete the settings from all sites
+* Enhancements:
+    * Migrated options to the Settings API
+* Modifications:
+    * Main plugin file has been renamed to autoclose.php
+    * Cron hook renamed from `ald_acc_hook` to `acc_cron_hook`
+
 = 1.6 =
 * Fixed: Bug where comments on attachments did not get closed
 * Fixed: JavaScript bug when saving options in Admin area
