@@ -535,7 +535,7 @@ class Settings_Form {
 		$min         = isset( $args['min'] ) ? intval( $args['min'] ) : 0;
 		$step        = isset( $args['step'] ) ? intval( $args['step'] ) : 1;
 		$size        = isset( $args['size'] ) ? $args['size'] : 'regular';
-		$placeholder = empty( $args['placeholder'] ) ? '' : ' placeholder="' . esc_attr( $args['placeholder'] ) . '"';
+		$placeholder = empty( $args['placeholder'] ) ? '' : ' placeholder="' . $args['placeholder'] . '"';
 		$disabled    = ( ! empty( $args['disabled'] ) || $args['pro'] ) ? ' disabled="disabled"' : '';
 		$readonly    = ( isset( $args['readonly'] ) && true === $args['readonly'] ) ? ' readonly="readonly"' : '';
 		$required    = ( isset( $args['required'] ) && true === $args['required'] ) ? ' required' : '';
@@ -778,7 +778,7 @@ class Settings_Form {
 			$this->settings_key,
 			sanitize_key( $args['id'] ),
 			esc_attr( $value ),
-			! empty( $value ) ? 'placeholder="' . esc_attr__( 'Previously saved', 'glue-link' ) . '"' : ''
+			! empty( $value ) ? 'placeholder="' . esc_attr__( 'Previously saved' ) . '"' : ''
 		);
 		$html .= $this->get_field_description( $args );
 
@@ -818,7 +818,7 @@ class Settings_Form {
 				?>
 			</div>
 			<button type="button" class="button add-item" data-target="<?php echo esc_attr( $args['id'] ); ?>">
-				<?php echo esc_html( ! empty( $args['add_button_text'] ) ? $args['add_button_text'] : __( 'Add Item', 'glue-link' ) ); ?>
+				<?php echo esc_html( ! empty( $args['add_button_text'] ) ? $args['add_button_text'] : __( 'Add Item' ) ); ?>
 			</button>
 
 			<script type="text/template" class="repeater-template" data-id="<?php echo esc_attr( $args['id'] ); ?>">
@@ -956,7 +956,7 @@ class Settings_Form {
 						<label class="wz-repeater-field-label" for="<?php echo esc_attr( sprintf( '%s_%s_%s', $args['id'], $index, $field_id ) ); ?>">
 							<?php echo esc_html( $field['name'] ); ?>
 							<?php if ( ! empty( $field['required'] ) ) : ?>
-								<span class="required" title="<?php esc_attr_e( 'Required', 'glue-link' ); ?>">*</span>
+								<span class="required" title="<?php esc_attr_e( 'Required' ); ?>">*</span>
 							<?php endif; ?>
 						</label>
 					</div>
@@ -1009,12 +1009,8 @@ class Settings_Form {
 		<?php
 	}
 
-
-
 	/**
 	 * Display sensitive fields.
-	 *
-	 * @since 1.0.0
 	 *
 	 * @param array $args Array of arguments.
 	 */
@@ -1025,5 +1021,76 @@ class Settings_Form {
 		$args['value'] = $decrypted_key ? str_repeat( '*', strlen( $decrypted_key ) - 4 ) . substr( $decrypted_key, -4 ) : '';
 
 		$this->callback_text( $args );
+	}
+
+	/**
+	 * Display date picker fields.
+	 *
+	 * @param array $args Array of arguments.
+	 */
+	public function callback_date( $args ) {
+		$value       = isset( $args['value'] ) ? $args['value'] : $this->get_option( $args['id'], $args['options'] );
+		$size        = sanitize_html_class( isset( $args['size'] ) ? $args['size'] : 'regular' );
+		$class       = sanitize_html_class( $args['field_class'] );
+		$placeholder = empty( $args['placeholder'] ) ? '' : ' placeholder="' . $args['placeholder'] . '"';
+		$disabled    = ( ! empty( $args['disabled'] ) || $args['pro'] ) ? ' disabled="disabled"' : '';
+		$readonly    = ( isset( $args['readonly'] ) && true === $args['readonly'] ) ? ' readonly="readonly"' : '';
+		$required    = ( isset( $args['required'] ) && true === $args['required'] ) ? ' required' : '';
+		$attributes  = $disabled . $readonly . $required;
+		foreach ( (array) $args['field_attributes'] as $attribute => $val ) {
+			$attributes .= sprintf( ' %1$s="%2$s"', $attribute, esc_attr( $val ) );
+		}
+		$field_attributes = $this->get_field_attributes( $args );
+
+		$html = sprintf(
+			'<input type="date" id="%1$s" name="%2$s" class="%3$s" value="%4$s" %5$s %6$s />',
+			$field_attributes['field_id'],
+			$field_attributes['field_name'],
+			$class . ' ' . $size . '-text',
+			esc_attr( stripslashes( $value ) ),
+			$attributes,
+			$placeholder
+		);
+
+		$html .= $this->get_field_description( $args );
+
+		/** This filter has been defined in class-settings-api.php */
+		echo apply_filters( $this->prefix . '_after_setting_output', $html, $args ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	}
+
+	/**
+	 * Display datetime-local picker fields.
+	 *
+	 * @param array $args Array of arguments.
+	 */
+	public function callback_datetime( $args ) {
+		$value       = isset( $args['value'] ) ? $args['value'] : $this->get_option( $args['id'], $args['options'] );
+		$size        = sanitize_html_class( isset( $args['size'] ) ? $args['size'] : 'regular' );
+		$class       = sanitize_html_class( $args['field_class'] );
+		$placeholder = empty( $args['placeholder'] ) ? '' : ' placeholder="' . $args['placeholder'] . '"';
+		$disabled    = ( ! empty( $args['disabled'] ) || $args['pro'] ) ? ' disabled="disabled"' : '';
+		$readonly    = ( isset( $args['readonly'] ) && true === $args['readonly'] ) ? ' readonly="readonly"' : '';
+		$required    = ( isset( $args['required'] ) && true === $args['required'] ) ? ' required' : '';
+		$attributes  = $disabled . $readonly . $required;
+
+		foreach ( (array) $args['field_attributes'] as $attribute => $val ) {
+			$attributes .= sprintf( ' %1$s="%2$s"', $attribute, esc_attr( $val ) );
+		}
+		$field_attributes = $this->get_field_attributes( $args );
+
+		$html = sprintf(
+			'<input type="datetime-local" id="%1$s" name="%2$s" class="%3$s" value="%4$s" %5$s %6$s />',
+			$field_attributes['field_id'],
+			$field_attributes['field_name'],
+			$class . ' ' . $size . '-text',
+			esc_attr( stripslashes( $value ) ),
+			$attributes,
+			$placeholder
+		);
+
+		$html .= $this->get_field_description( $args );
+
+		/** This filter has been defined in class-settings-api.php */
+		echo apply_filters( $this->prefix . '_after_setting_output', $html, $args ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 }

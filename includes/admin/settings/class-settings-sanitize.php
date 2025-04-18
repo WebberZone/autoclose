@@ -347,6 +347,40 @@ class Settings_Sanitize {
 	}
 
 	/**
+	 * Sanitize date fields (HTML5 date inputs).
+	 *
+	 * @param string $value Date in 'Y-m-d' format.
+	 * @return string Sanitized date or empty string.
+	 */
+	public function sanitize_date_field( $value ) {
+		$value = sanitize_text_field( wp_unslash( $value ) );
+		// Validate 'YYYY-MM-DD'.
+		if ( preg_match( '/^\d{4}-\d{2}-\d{2}$/', $value ) ) {
+			return $value;
+		}
+		return '';
+	}
+
+	/**
+	 * Sanitize datetime-local fields (HTML5 datetime-local inputs).
+	 *
+	 * @param string $value Datetime in 'Y-m-d\TH:i' format, or just 'Y-m-d'.
+	 * @return string Sanitized datetime or empty string.
+	 */
+	public function sanitize_datetime_field( $value ) {
+		$value = sanitize_text_field( wp_unslash( $value ) );
+		// If only date is given, fallback to 00:00 for time.
+		if ( preg_match( '/^\d{4}-\d{2}-\d{2}$/', $value ) ) {
+			return $value . 'T00:00';
+		}
+		// Validate 'YYYY-MM-DDThh:mm'.
+		if ( preg_match( '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/', $value ) ) {
+			return $value;
+		}
+		return '';
+	}
+
+	/**
 	 * Convert a string to CSV.
 	 *
 	 * @param array  $input_array Input string.

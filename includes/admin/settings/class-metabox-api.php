@@ -264,29 +264,12 @@ class Metabox_API {
 		echo '<table class="form-table">';
 		foreach ( $this->registered_settings as $setting ) {
 
-			$args = wp_parse_args(
-				$setting,
-				array(
-					'id'               => null,
-					'name'             => '',
-					'desc'             => '',
-					'type'             => null,
-					'default'          => '',
-					'options'          => '',
-					'max'              => null,
-					'min'              => null,
-					'step'             => null,
-					'size'             => null,
-					'field_class'      => '',
-					'field_attributes' => '',
-					'placeholder'      => '',
-				)
-			);
+			$args = Settings_API::parse_field_args( $setting );
 
 			$id            = $args['id'];
 			$value         = get_post_meta( $post->ID, "_{$this->prefix}_{$id}", true );
 			$args['value'] = ! empty( $value ) ? $value : ( isset( $args['default'] ) ? $args['default'] : $args['options'] );
-			$type          = isset( $args['type'] ) ? $args['type'] : 'text';
+			$type          = $args['type'] ?? 'text';
 			$callback      = method_exists( $settings_form, "callback_{$type}" ) ? array( $settings_form, "callback_{$type}" ) : array( $settings_form, 'callback_missing' );
 
 			echo '<tr>';

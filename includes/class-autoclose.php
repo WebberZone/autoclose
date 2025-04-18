@@ -117,6 +117,7 @@ class AutoClose {
 		$comments    = new Features\Comments();
 		$revisions   = new Features\Revisions();
 		$block_pings = new Features\Block_Pings();
+		$close_date  = new Features\Close_Date();
 
 		// Register cron hooks.
 		$this->loader->add_action( 'acc_cron_hook', $comments, 'process_comments' );

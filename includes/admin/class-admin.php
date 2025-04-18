@@ -15,12 +15,19 @@ namespace WebberZone\AutoClose\Admin;
 class Admin {
 
 	/**
+	 * Instance of Metabox.
+	 *
+	 * @var Metabox
+	 */
+	public $metabox;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 3.0.0
 	 */
 	public function __construct() {
-		// Constructor code.
+		$this->metabox = new Metabox();
 	}
 
 	/**

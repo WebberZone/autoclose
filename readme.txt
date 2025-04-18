@@ -28,6 +28,7 @@ Found a bug or want to contribute? PRs and issues welcome on [GitHub](https://gi
 * Delete all post revisions or limit the number of revisions by post type
 * Exclude specific post IDs from auto-close
 * Block self-pings and custom ping URLs
+* Schedule the closing of comments, pingbacks, and trackbacks for the current post
 
 == Screenshots ==
 
@@ -74,7 +75,8 @@ Release post: https://webberzone.com/blog/auto-close-v3-0-0/
 Completely rewritten the plugin to use autoloading, namespaces and classes.
 
 * Features:
-    * Added block ping URLs feature.
+    * Added block ping URLs feature and self-pings feature.
+    * Introduced a new meta box allowing users to schedule the closure of comments, pingbacks, and trackbacks for the current post.
 
 * Bug fixes:
     * Fixed PHP error/warnings about loading translations too early.
