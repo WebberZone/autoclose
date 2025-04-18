@@ -9,7 +9,7 @@
 <div class="postbox-container">
 	<div id="pro-upgrade-banner">
 		<div class="inside">
-			<p><a href="https://wzn.io/donate-bd" target="_blank"><img src="<?php echo esc_url( plugins_url( 'images/support.webp', __FILE__ ) ); ?>" alt="<?php esc_html_e( 'Support the development - Send us a donation today.', 'autoclose' ); ?>" width="300" height="169" style="max-width: 100%;" /></a></p>
+			<p><a href="https://wzn.io/donatetoajay" target="_blank"><img src="<?php echo esc_url( plugins_url( 'images/support.webp', __FILE__ ) ); ?>" alt="<?php esc_html_e( 'Support the development - Send us a donation today.', 'autoclose' ); ?>" width="300" height="169" style="max-width: 100%;" /></a></p>
 		</div>
 	</div>
 
