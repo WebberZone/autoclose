@@ -8,7 +8,7 @@ Tested up to: 6.8
 Requires PHP: 7.4
 License: GPL v2 or later
 
-Tired of spam on old posts? Auto-Close keeps your site clean by automatically closing comments, pingbacks, and trackbacks—so you can focus on content, not cleanup.
+Auto-Close keeps your site clean by automatically closing comments, pingbacks, and trackbacks—so you can focus on content, not cleanup.
 
 == Description ==
 
@@ -70,7 +70,7 @@ Major plugin changes. Check the Changelog and release post for complete informat
 == Changelog ==
 
 = 3.0.0 =
-Release post: https://webberzone.com/blog/auto-close-v3-0-0/
+Release post: [https://webberzone.com/announcements/auto-close-v3-0-0/](https://webberzone.com/announcements/auto-close-v3-0-0/)
 
 Completely rewritten the plugin to use autoloading, namespaces and classes.
 
