@@ -342,7 +342,7 @@ class Settings {
 				'name'    => esc_html__( 'Block Self-Pings', 'autoclose' ),
 				'desc'    => esc_html__( 'Enable to block self-pings (pings to your own site).', 'autoclose' ),
 				'type'    => 'checkbox',
-				'options' => true,
+				'options' => false,
 			),
 			'block_ping_urls'  => array(
 				'id'      => 'block_ping_urls',
