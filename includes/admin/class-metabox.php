@@ -122,9 +122,9 @@ class Metabox {
 			),
 			array(
 				'id'   => 'pings_date',
-				'name' => esc_html__( 'Close trackbacks on', 'autoclose' ),
+				'name' => esc_html__( 'Close pingbacks/trackbacks on', 'autoclose' ),
 				'type' => 'datetime',
-				'desc' => esc_html__( 'Select the date/time to close trackbacks.', 'autoclose' ),
+				'desc' => esc_html__( 'Select the date/time to close pingbacks/trackbacks.', 'autoclose' ),
 			),
 		);
 
