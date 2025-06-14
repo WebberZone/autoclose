@@ -62,6 +62,10 @@ Yes! Auto-Close works with posts, pages, attachments, and any registered custom 
 = Can I delete or limit revisions? =
 Yes, you can delete all revisions or set a limit per post type from the settings page.
 
+= How can I report security bugs? =
+
+You can report security bugs through the Patchstack Vulnerability Disclosure Program. The Patchstack team help validate, triage and handle any security vulnerabilities. [Report a security vulnerability.](https://patchstack.com/database/wordpress/plugin/autoclose/vdp)
+
 == Upgrade Notice ==
 
 = 3.0.0 =
