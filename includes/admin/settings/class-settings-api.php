@@ -10,6 +10,8 @@
 
 namespace WebberZone\AutoClose\Admin\Settings;
 
+use WebberZone\AutoClose\Util\Hook_Registry;
+
 // If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) {
 	die;
@@ -175,10 +177,26 @@ class Settings_API {
 	 * Adds the functions to the appropriate WordPress hooks.
 	 */
 	public function hooks() {
-		add_action( 'admin_menu', array( $this, 'admin_menu' ), 11 );
-		add_action( 'admin_init', array( $this, 'admin_init' ) );
-		add_filter( 'admin_footer_text', array( $this, 'admin_footer_text' ) );
-		add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
+		Hook_Registry::add_action( 'admin_menu', array( $this, 'admin_menu' ), 11 );
+		Hook_Registry::add_action( 'admin_init', array( $this, 'admin_init' ) );
+		Hook_Registry::add_filter( 'admin_footer_text', array( $this, 'admin_footer_text' ) );
+		Hook_Registry::add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
+		Hook_Registry::add_filter( 'admin_body_class', array( $this, 'admin_body_class' ) );
+	}
+
+	/**
+	 * Filters the CSS classes for the body tag in the admin.
+	 *
+	 * @param string $classes Space-separated list of CSS classes.
+	 * @return string Space-separated list of CSS classes.
+	 */
+	public function admin_body_class( $classes ) {
+		$current_screen = get_current_screen();
+
+		if ( in_array( $current_screen->id, $this->menu_pages, true ) ) {
+			$classes .= " {$this->prefix}-dashboard-page";
+		}
+		return $classes;
 	}
 
 	/**
@@ -235,12 +253,16 @@ class Settings_API {
 		// Args prefixed with an underscore are reserved for internal use.
 		$defaults = array(
 			'page_header'          => '',
-			'reset_message'        => __( 'Settings have been reset to their default values. Reload this page to view the updated settings.' ),
-			'success_message'      => __( 'Settings updated.' ),
-			'save_changes'         => __( 'Save Changes' ),
-			'reset_settings'       => __( 'Reset all settings' ),
-			'reset_button_confirm' => __( 'Do you really want to reset all these settings to their default values?' ),
-			'checkbox_modified'    => __( 'Modified from default setting' ),
+			'reset_message'        => 'Settings have been reset to their default values. Reload this page to view the updated settings.',
+			'success_message'      => 'Settings updated.',
+			'save_changes'         => 'Save Changes',
+			'reset_settings'       => 'Reset all settings',
+			'reset_button_confirm' => 'Do you really want to reset all these settings to their default values?',
+			'checkbox_modified'    => 'Modified from default setting',
+			'button_label'         => 'Choose File',
+			'previous_saved'       => 'Previously saved',
+			'repeater_new_item'    => 'New Item',
+			'required_label'       => 'Required',
 		);
 
 		$strings = wp_parse_args( $strings, $defaults );
@@ -400,8 +422,6 @@ class Settings_API {
 	 * Add admin menu.
 	 */
 	public function admin_menu() {
-		global ${$this->prefix . '_menu_pages'};
-
 		foreach ( $this->menus as $menu ) {
 			$menu_page = $this->add_custom_menu_page( $menu );
 
@@ -410,10 +430,9 @@ class Settings_API {
 				$this->settings_page = $menu_page;
 			}
 		}
-		${$this->prefix . '_menu_pages'} = $this->menu_pages;
 
 		// Load the settings contextual help.
-		add_action( 'load-' . $this->settings_page, array( $this, 'settings_help' ) );
+		Hook_Registry::add_action( 'load-' . $this->settings_page, array( $this, 'settings_help' ) );
 	}
 
 	/**
@@ -471,7 +490,7 @@ class Settings_API {
 		);
 		wp_register_script(
 			'wz-' . $this->prefix . '-codemirror',
-			plugins_url( 'js/apply-codemirror' . $minimize . '.js', __FILE__ ),
+			plugins_url( 'js/apply-cm' . $minimize . '.js', __FILE__ ),
 			array( 'jquery' ),
 			self::VERSION,
 			true
@@ -497,18 +516,18 @@ class Settings_API {
 			self::VERSION
 		);
 
-		// Top Select scripts and styles.
+		// Tom Select scripts and styles.
 		wp_register_style(
 			'wz-' . $this->prefix . '-tom-select',
-			'https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.min.css',
+			plugins_url( 'css/tom-select.min.css', __FILE__ ),
 			array(),
-			'2.3.1'
+			self::VERSION
 		);
 		wp_register_script(
 			'wz-' . $this->prefix . '-tom-select',
-			'https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js',
+			plugins_url( 'js/tom-select.complete.min.js', __FILE__ ),
 			array( 'jquery' ),
-			'2.3.1',
+			self::VERSION,
 			true
 		);
 		wp_register_script(
@@ -517,6 +536,14 @@ class Settings_API {
 			array( 'jquery', 'wz-' . $this->prefix . '-tom-select' ),
 			self::VERSION,
 			true
+		);
+		wp_localize_script(
+			"wz-{$this->prefix}-admin",
+			'WZSettingsAdmin',
+			array(
+				'prefix'       => $this->prefix,
+				'settings_key' => $this->settings_key,
+			)
 		);
 
 		if ( $hook === $this->settings_page ) {
@@ -561,8 +588,8 @@ class Settings_API {
 			'wz-' . $this->prefix . '-tom-select-init',
 			'WZTomSelectSettings',
 			array(
-				'action'   => $this->prefix . '_kit_search',
-				'nonce'    => wp_create_nonce( $this->prefix . '_kit_search' ),
+				'action'   => $this->prefix . '_taxonomy_search_tom_select',
+				'nonce'    => wp_create_nonce( $this->prefix . '_taxonomy_search_tom_select' ),
 				'endpoint' => 'forms',
 			)
 		);
@@ -589,9 +616,9 @@ class Settings_API {
 
 		$this->settings_form = new Settings_Form(
 			array(
-				'settings_key'           => $settings_key,
-				'prefix'                 => $this->prefix,
-				'checkbox_modified_text' => $this->translation_strings['checkbox_modified'],
+				'settings_key'        => $settings_key,
+				'prefix'              => $this->prefix,
+				'translation_strings' => $this->translation_strings,
 			)
 		);
 
@@ -624,15 +651,15 @@ class Settings_API {
 			}
 		}
 
-		// Register the settings into the options table.
-		register_setting(
-			$settings_key,
-			$settings_key,
-			array(
-				'sanitize_callback' => array( $this, 'settings_sanitize' ),
-				'show_in_rest'      => true,
-			)
-		);
+			// Register the settings into the options table.
+			register_setting(
+				$settings_key,
+				$settings_key,
+				array(
+					'sanitize_callback' => array( $this, 'settings_sanitize' ),
+					'show_in_rest'      => true,
+				)
+			);
 	}
 
 	/**
@@ -672,22 +699,33 @@ class Settings_API {
 		// Populate some default values.
 		foreach ( $this->registered_settings as $tab => $settings ) {
 			foreach ( $settings as $option ) {
-				// When checkbox is set to true, set this to 1.
-				if ( 'checkbox' === $option['type'] && ! empty( $option['options'] ) ) {
-					$options[ $option['id'] ] = 1;
-				} else {
-					$options[ $option['id'] ] = 0;
+				/**
+				 * Skip settings that are not really settings.
+				 *
+				 * @param  array $non_setting_types Array of types which are not settings.
+				 */
+				$non_setting_types = apply_filters( $this->prefix . '_non_setting_types', array( 'header', 'descriptive_text' ) );
+
+				if ( in_array( $option['type'], $non_setting_types, true ) ) {
+					continue;
 				}
-				// If an option is set.
-				if ( in_array( $option['type'], array( 'textarea', 'css', 'html', 'text', 'url', 'csv', 'color', 'numbercsv', 'postids', 'posttypes', 'number', 'wysiwyg', 'file', 'password' ), true ) ) {
-					if ( isset( $option['default'] ) ) {
-						$options[ $option['id'] ] = $option['default'];
-					} elseif ( isset( $option['options'] ) ) {
+
+				// Base default per type.
+				$options[ $option['id'] ] = ( 'checkbox' === $option['type'] ) ? 0 : '';
+
+				// Prefer the explicit 'default' key when provided.
+				if ( isset( $option['default'] ) ) {
+					$options[ $option['id'] ] = $option['default'];
+				} else {
+					// Back-compat for legacy configs that used 'options' to store default values for text-like fields.
+					if ( in_array( $option['type'], array( 'textarea', 'css', 'html', 'text', 'url', 'csv', 'color', 'numbercsv', 'postids', 'posttypes', 'number', 'wysiwyg', 'file', 'password' ), true ) && isset( $option['options'] ) ) {
 						$options[ $option['id'] ] = $option['options'];
 					}
-				}
-				if ( in_array( $option['type'], array( 'multicheck', 'radio', 'select', 'radiodesc', 'thumbsizes' ), true ) && isset( $option['default'] ) ) {
-					$options[ $option['id'] ] = $option['default'];
+
+					// Back-compat: when checkbox used 'options' truthy to indicate checked by default.
+					if ( 'checkbox' === $option['type'] && ! empty( $option['options'] ) ) {
+						$options[ $option['id'] ] = 1;
+					}
 				}
 			}
 		}
@@ -817,7 +855,7 @@ class Settings_API {
 		$settings_types = $this->get_registered_settings_types();
 
 		// Get the tab. This is also our settings' section.
-		$tab = isset( $referrer['tab'] ) ? $referrer['tab'] : $this->default_tab;
+		$tab = $referrer['tab'] ?? $this->default_tab;
 
 		$input = $input ? $input : array();
 
@@ -890,6 +928,7 @@ class Settings_API {
 		ob_start();
 		?>
 			<div class="wrap">
+				<?php do_action( $this->prefix . '_settings_page_header_before' ); ?>
 				<h1><?php echo esc_html( $this->translation_strings['page_header'] ); ?></h1>
 				<?php do_action( $this->prefix . '_settings_page_header' ); ?>
 
@@ -965,7 +1004,7 @@ class Settings_API {
 		ob_start();
 		?>
 
-			<form method="post" action="options.php">
+			<form method="post" action="options.php" id="<?php echo esc_attr( "{$this->prefix}-settings-form" ); ?>">
 
 			<?php settings_fields( $this->settings_key ); ?>
 
@@ -1061,8 +1100,6 @@ class Settings_API {
 	/**
 	 * Parse field arguments with defaults.
 	 *
-	 * @since 1.0.0
-	 *
 	 * @param array  $field   Field arguments.
 	 * @param string $section Section name.
 	 *
@@ -1094,7 +1131,7 @@ class Settings_API {
 
 		// Add required indicator to field name if the field is required.
 		if ( ! empty( $field['required'] ) && true === $field['required'] ) {
-			$field['name'] = sprintf( '%s <span class="required" title="%s">*</span>', $field['name'], esc_attr__( 'Required' ) );
+			$field['name'] = sprintf( '%s <span class="required" title="%s">*</span>', $field['name'], 'Required' );
 		}
 
 		return $field;

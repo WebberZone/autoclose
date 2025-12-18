@@ -10,7 +10,7 @@ if ( ! defined( 'WPINC' ) ) {
 	die( "Aren't you supposed to come here via WP-Admin?" );
 }
 
-use WebberZone\AutoClose\Utilities\Options;
+use WebberZone\AutoClose\Util\Options;
 use WebberZone\AutoClose\Features\Comments;
 use WebberZone\AutoClose\Features\Revisions;
 

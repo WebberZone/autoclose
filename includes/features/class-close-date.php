@@ -8,6 +8,8 @@
 
 namespace WebberZone\AutoClose\Features;
 
+use WebberZone\AutoClose\Util\Hook_Registry;
+
 if ( ! defined( 'WPINC' ) ) {
 	die;
 }
@@ -32,8 +34,8 @@ class Close_Date {
 	 * Constructor.
 	 */
 	public function __construct() {
-		add_action( 'init', array( $this, 'schedule_cron_for_due_posts' ) );
-		add_action( 'autoclose_close_comments_pings_event', array( $this, 'maybe_close_due_comments_pings' ) );
+		Hook_Registry::add_action( 'init', array( $this, 'schedule_cron_for_due_posts' ) );
+		Hook_Registry::add_action( 'autoclose_close_comments_pings_event', array( $this, 'maybe_close_due_comments_pings' ) );
 	}
 
 	/**

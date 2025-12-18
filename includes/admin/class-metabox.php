@@ -10,6 +10,7 @@ namespace WebberZone\AutoClose\Admin;
 
 use WebberZone\AutoClose\Admin\Settings\Metabox_API;
 use WebberZone\AutoClose\Features\Close_Date;
+use WebberZone\AutoClose\Util\Hook_Registry;
 
 if ( ! defined( 'WPINC' ) ) {
 	die;
@@ -56,8 +57,8 @@ class Metabox {
 	 */
 	public function __construct() {
 		$this->close_date_logic = new Close_Date();
-		add_action( 'admin_menu', array( $this, 'initialise_metabox_api' ) );
-		add_action( 'save_post', array( $this, 'save_metabox' ), 10, 2 );
+		Hook_Registry::add_action( 'admin_menu', array( $this, 'initialise_metabox_api' ) );
+		Hook_Registry::add_action( 'save_post', array( $this, 'save_metabox' ), 10, 2 );
 	}
 
 	/**

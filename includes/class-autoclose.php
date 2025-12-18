@@ -7,6 +7,8 @@
 
 namespace WebberZone\AutoClose;
 
+use WebberZone\AutoClose\Util\Hook_Registry;
+
 /**
  * The main plugin class.
  *
@@ -22,13 +24,6 @@ class AutoClose {
 	 */
 	private static $instance;
 
-	/**
-	 * The loader that's responsible for maintaining and registering all hooks.
-	 *
-	 * @since 3.0.0
-	 * @var   Core\Loader
-	 */
-	protected $loader;
 
 	/**
 	 * The settings instance.
@@ -77,7 +72,6 @@ class AutoClose {
 	 * @since 3.0.0
 	 */
 	private function load_dependencies() {
-		$this->loader   = new Core\Loader();
 		$this->settings = new Admin\Settings();
 	}
 
@@ -87,8 +81,8 @@ class AutoClose {
 	 * @since 3.0.0
 	 */
 	private function set_locale() {
-		$l10n = new Utilities\L10n();
-		$this->loader->add_action( 'init', $l10n, 'load_plugin_textdomain' );
+		$l10n = new Util\L10n();
+		Hook_Registry::add_action( 'init', array( $l10n, 'load_plugin_textdomain' ) );
 	}
 
 	/**
@@ -101,11 +95,11 @@ class AutoClose {
 		$tools = new Admin\Tools();
 
 		// Plugin links.
-		$this->loader->add_filter( 'plugin_row_meta', $admin, 'plugin_row_meta', 10, 2 );
-		$this->loader->add_filter( 'plugin_action_links_' . plugin_basename( ACC_PLUGIN_FILE ), $admin, 'plugin_actions_links' );
+		Hook_Registry::add_filter( 'plugin_row_meta', array( $admin, 'plugin_row_meta' ), 10, 2 );
+		Hook_Registry::add_filter( 'plugin_action_links_' . plugin_basename( ACC_PLUGIN_FILE ), array( $admin, 'plugin_actions_links' ) );
 
 		// Tools page hooks.
-		$this->loader->add_action( 'admin_menu', $tools, 'add_tools_page' );
+		Hook_Registry::add_action( 'admin_menu', array( $tools, 'add_tools_page' ) );
 	}
 
 	/**
@@ -120,14 +114,14 @@ class AutoClose {
 		$close_date  = new Features\Close_Date();
 
 		// Register cron hooks.
-		$this->loader->add_action( 'acc_cron_hook', $comments, 'process_comments' );
-		$this->loader->add_action( 'acc_cron_hook', $revisions, 'process_revisions' );
+		Hook_Registry::add_action( 'acc_cron_hook', array( $comments, 'process_comments' ) );
+		Hook_Registry::add_action( 'acc_cron_hook', array( $revisions, 'process_revisions' ) );
 
 		// Register revisions hooks.
-		$this->loader->add_filter( 'wp_revisions_to_keep', $revisions, 'revisions_to_keep', 999999, 2 );
+		Hook_Registry::add_filter( 'wp_revisions_to_keep', array( $revisions, 'revisions_to_keep' ), 999999, 2 );
 
 		// Register ping hooks.
-		$this->loader->add_action( 'pre_ping', $block_pings, 'block_pings' );
+		Hook_Registry::add_action( 'pre_ping', array( $block_pings, 'block_pings' ) );
 	}
 
 	/**
@@ -136,7 +130,7 @@ class AutoClose {
 	 * @since 3.0.0
 	 */
 	public function run() {
-		$this->loader->run();
+		// Hook_Registry registers hooks immediately, so nothing to do here.
 	}
 
 	/**

@@ -7,6 +7,8 @@
 
 namespace WebberZone\AutoClose\Admin;
 
+use WebberZone\AutoClose\Util\Hook_Registry;
+
 // If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) {
 	die;
@@ -61,10 +63,10 @@ class Settings {
 		self::$prefix       = 'acc';
 		$this->menu_slug    = 'acc_options_page';
 
-		add_action( 'admin_menu', array( $this, 'init_settings_api' ) );
-		add_action( 'admin_head', array( $this, 'admin_head' ), 11 );
-		add_action( self::$prefix . '_settings_page_header', array( $this, 'settings_page_header' ) );
-		add_filter( self::$prefix . '_settings_sanitize', array( $this, 'change_settings_on_save' ), 99 );
+		Hook_Registry::add_action( 'admin_menu', array( $this, 'init_settings_api' ) );
+		Hook_Registry::add_action( 'admin_head', array( $this, 'admin_head' ), 11 );
+		Hook_Registry::add_action( self::$prefix . '_settings_page_header', array( $this, 'settings_page_header' ) );
+		Hook_Registry::add_filter( self::$prefix . '_settings_sanitize', array( $this, 'change_settings_on_save' ), 99 );
 	}
 
 	/**
@@ -185,6 +187,76 @@ class Settings {
 		 * @param array $settings Settings array.
 		 */
 		return apply_filters( self::$prefix . '_registered_settings', $settings );
+	}
+
+	/**
+	 * Get settings defaults.
+	 *
+	 * @since 3.1.0
+	 *
+	 * @return array Default settings.
+	 */
+	public static function settings_defaults() {
+		$defaults = array();
+
+		// Get all registered settings.
+		$settings      = self::get_registered_settings();
+		$default_types = array(
+			'color',
+			'css',
+			'csv',
+			'file',
+			'html',
+			'multicheck',
+			'number',
+			'numbercsv',
+			'password',
+			'postids',
+			'posttypes',
+			'radio',
+			'radiodesc',
+			'repeater',
+			'select',
+			'sensitive',
+			'taxonomies',
+			'text',
+			'textarea',
+			'thumbsizes',
+			'url',
+			'wysiwyg',
+		);
+
+		// Loop through each section.
+		foreach ( $settings as $section_settings ) {
+			// Loop through each setting in the section.
+			foreach ( $section_settings as $setting ) {
+				if ( ! isset( $setting['id'] ) ) {
+					continue;
+				}
+
+				$setting_id    = $setting['id'];
+				$setting_type  = $setting['type'] ?? '';
+				$default_value = '';
+
+				// When checkbox is set to true, set this to 1.
+				if ( 'checkbox' === $setting_type ) {
+					$default_value = isset( $setting['default'] ) ? (int) (bool) $setting['default'] : 0;
+				} elseif ( isset( $setting['default'] ) && in_array( $setting_type, $default_types, true ) ) {
+					$default_value = $setting['default'];
+				}
+
+				$defaults[ $setting_id ] = $default_value;
+			}
+		}
+
+		/**
+		 * Filter the default settings array.
+		 *
+		 * @since 3.1.0
+		 *
+		 * @param array $defaults Default settings.
+		 */
+		return apply_filters( self::$prefix . '_settings_defaults', $defaults );
 	}
 
 	/**
@@ -577,7 +649,7 @@ class Settings {
 		$settings['cron_hour'] = min( 23, absint( $settings['cron_hour'] ) );
 		$settings['cron_min']  = min( 59, absint( $settings['cron_min'] ) );
 
-		$cron = new \WebberZone\AutoClose\Utilities\Cron();
+		$cron = new \WebberZone\AutoClose\Util\Cron();
 		if ( ! empty( $settings['cron_on'] ) ) {
 			$cron->enable_run( $settings['cron_hour'], $settings['cron_min'], $settings['cron_recurrence'] );
 		} else {

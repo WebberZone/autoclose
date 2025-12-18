@@ -7,7 +7,7 @@
 
 namespace WebberZone\AutoClose\Core;
 
-use WebberZone\AutoClose\Utilities\Options;
+use WebberZone\AutoClose\Util\Options;
 
 /**
  * Fired during plugin activation.

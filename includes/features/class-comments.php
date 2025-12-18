@@ -7,8 +7,8 @@
 
 namespace WebberZone\AutoClose\Features;
 
-use WebberZone\AutoClose\Utilities\Options;
-use WebberZone\AutoClose\Utilities\Helpers;
+use WebberZone\AutoClose\Util\Options;
+use WebberZone\AutoClose\Util\Helpers;
 
 /**
  * Comments class.

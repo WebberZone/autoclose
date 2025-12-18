@@ -5,7 +5,7 @@
  * @package    AutoClose
  */
 
-namespace WebberZone\AutoClose\Utilities;
+namespace WebberZone\AutoClose\Util;
 
 /**
  * Cron class.
