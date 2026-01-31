@@ -26,33 +26,6 @@ jQuery(document).ready(function ($) {
 		file_frame.open();
 	});
 
-	// Prompt the user when they leave the page without saving the form.
-	var formmodified = 0;
-
-	function confirmFormChange() {
-		formmodified = 1;
-	}
-
-	function confirmExit() {
-		if (formmodified == 1) {
-			return true;
-		}
-	}
-
-	function formNotModified() {
-		formmodified = 0;
-	}
-
-	// Only apply form change detection to settings form, not wizard or other forms
-	$('#' + prefix + '-settings-form').on('change', 'input, textarea, select', confirmFormChange);
-
-	// Only set window.onbeforeunload if we're on the settings page
-	if ($('#' + prefix + '-settings-form').length) {
-		window.onbeforeunload = confirmExit;
-	}
-
-	$('input[name="submit"], input#search-submit, input#doaction, input#doaction2, input[name="filter_action"]').on('click', formNotModified);
-
 	$(function () {
 		$("#post-body-content").tabs({
 			create: function (event, ui) {
@@ -73,10 +46,15 @@ jQuery(document).ready(function ($) {
 	// Reset default thumbnail - uses plugin-specific localized data.
 	$('.reset-default-thumb').on('click', function () {
 		var settingsKey = WZSettingsAdmin.settings_key || '';
-		var thumbDefault = (typeof window[WZSettingsAdmin.prefix + '_admin'] !== 'undefined') 
-			? window[WZSettingsAdmin.prefix + '_admin'].thumb_default 
+		var thumbDefault = (typeof window[WZSettingsAdmin.prefix + '_admin'] !== 'undefined')
+			? window[WZSettingsAdmin.prefix + '_admin'].thumb_default
 			: '';
 		$('#' + settingsKey + '\\[thumb_default\\]').val(thumbDefault);
+	});
+
+	// Reset formmodified on submit.
+	$('#' + prefix + '-settings-form').on('submit', function () {
+		formmodified = 0;
 	});
 
 });
