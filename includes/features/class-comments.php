@@ -108,7 +108,7 @@ class Comments {
 				return false;
 		}
 
-		if ( ! in_array( $type, array( 'comment', 'ping' ), true ) || false === $action ) {
+		if ( ! in_array( $type, array( 'comment', 'ping' ), true ) ) {
 			return false;
 		}
 
@@ -136,6 +136,7 @@ class Comments {
 
 		if ( ! empty( $args['post_types'] ) ) {
 			$post_types = wp_parse_list( $args['post_types'] );
+			$post_types = array_map( 'sanitize_key', $post_types );
 
 			$sql .= " AND $wpdb->posts.post_type IN ('" . join( "', '", $post_types ) . "') ";
 		}
@@ -143,7 +144,7 @@ class Comments {
 		if ( ! empty( $args['post_ids'] ) ) {
 			$post_ids = wp_parse_id_list( $args['post_ids'] );
 
-			$sql .= " AND $wpdb->posts.ID IN ( {$post_ids} )";
+			$sql .= " AND $wpdb->posts.ID IN (" . implode( ',', $post_ids ) . ')';
 		}
 
 		$result = $wpdb->query( $sql ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared

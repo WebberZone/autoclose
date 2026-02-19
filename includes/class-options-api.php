@@ -2,7 +2,7 @@
 /**
  * AutoClose Options API.
  *
- * @since 3.1.0
+ * @since 3.0.0
  *
  * @package WebberZone\AutoClose
  */
@@ -61,7 +61,7 @@ class Options_API {
 	 * Retrieves all plugin settings
 	 *
 	 * @since 3.0.0
-	 * @return array Glue Link settings
+	 * @return array AutoClose settings
 	 */
 	public static function get_settings() {
 		$settings = get_option( self::SETTINGS_OPTION );

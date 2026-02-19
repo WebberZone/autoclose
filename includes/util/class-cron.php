@@ -33,8 +33,7 @@ class Cron {
 	 * @param string $recurrence Frequency.
 	 */
 	public function enable_run( $hour, $min, $recurrence ) {
-		$on   = mktime( $hour, $min, 0, gmdate( 'm' ), gmdate( 'd' ), gmdate( 'Y' ) );
-		$date = gmdate( 'm/d/Y H:i:s', $on );
+		$on = gmmktime( $hour, $min, 0, gmdate( 'm' ), gmdate( 'd' ), gmdate( 'Y' ) );
 
 		if ( ! wp_next_scheduled( 'acc_cron_hook' ) ) {
 			wp_schedule_event( $on, $recurrence, 'acc_cron_hook' );
