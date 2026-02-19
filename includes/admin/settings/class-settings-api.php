@@ -5,7 +5,7 @@
  * Functions to register, read, write and update settings.
  * Portions of this code have been inspired by Easy Digital Downloads, WordPress Settings Sandbox, WordPress Settings API class, etc.
  *
- * @package WebberZone\AutoClose
+ * @package WebberZone\AutoClose\Admin
  */
 
 namespace WebberZone\AutoClose\Admin\Settings;
@@ -945,6 +945,7 @@ class Settings_API {
 				<?php do_action( $this->prefix . '_settings_page_header_before' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound ?>
 				<h1><?php echo esc_html( $this->translation_strings['page_header'] ); ?></h1>
 				<?php do_action( $this->prefix . '_settings_page_header' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound ?>
+
 				<?php settings_errors( $this->prefix . '-notices' ); ?>
 
 				<div id="poststuff">

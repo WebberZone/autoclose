@@ -5,13 +5,10 @@
  * A reusable API class for creating multi-step settings wizards.
  * This class provides the framework for creating guided setup experiences.
  *
- * @package WebberZone\Better_External_Links
+ * @package WebberZone\AutoClose\Admin
  */
 
 namespace WebberZone\AutoClose\Admin\Settings;
-
-use WebberZone\AutoClose\Admin\Settings\Settings_Sanitize;
-use WebberZone\AutoClose\Admin\Settings\Settings_API;
 
 // If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) {

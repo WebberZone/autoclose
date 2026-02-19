@@ -8,6 +8,7 @@
 namespace WebberZone\AutoClose\Admin;
 
 use WebberZone\AutoClose\Util\Hook_Registry;
+use WebberZone\AutoClose\Admin\Settings\Settings_API;
 
 // If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) {
@@ -91,7 +92,7 @@ class Settings {
 			'upgraded_settings'   => array(),
 		);
 
-		$this->settings_api = new Settings\Settings_API( $this->settings_key, self::$prefix, $args );
+		$this->settings_api = new Settings_API( $this->settings_key, self::$prefix, $args );
 	}
 
 	/**

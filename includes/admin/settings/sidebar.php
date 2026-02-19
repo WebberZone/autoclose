@@ -2,7 +2,7 @@
 /**
  * Sidebar template.
  *
- * @package WebberZone\Autoclose
+ * @package WebberZone\AutoClose\Admin
  */
 
 ?>
