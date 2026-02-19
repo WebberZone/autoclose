@@ -68,12 +68,11 @@ class Metabox {
 		foreach ( $this->get_supported_post_types() as $post_type ) {
 			$this->metaboxes[ $post_type ] = new Metabox_API(
 				array(
-					'settings_key'           => $this->settings_key,
-					'prefix'                 => $this->prefix,
-					'post_type'              => $post_type,
-					'title'                  => esc_html__( 'AutoClose Settings', 'autoclose' ),
-					'registered_settings'    => $this->get_registered_settings(),
-					'checkbox_modified_text' => __( 'Modified from default', 'autoclose' ),
+					'settings_key'        => $this->settings_key,
+					'prefix'              => $this->prefix,
+					'post_type'           => $post_type,
+					'title'               => esc_html__( 'AutoClose Settings', 'autoclose' ),
+					'registered_settings' => $this->get_registered_settings(),
 				)
 			);
 		}

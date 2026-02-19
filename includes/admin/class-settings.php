@@ -9,6 +9,7 @@ namespace WebberZone\AutoClose\Admin;
 
 use WebberZone\AutoClose\Util\Hook_Registry;
 use WebberZone\AutoClose\Admin\Settings\Settings_API;
+use WebberZone\AutoClose\Admin\Settings\Settings_Sanitize;
 
 // If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) {
@@ -64,7 +65,7 @@ class Settings {
 		self::$prefix       = 'acc';
 		$this->menu_slug    = 'acc_options_page';
 
-		Hook_Registry::add_action( 'admin_menu', array( $this, 'init_settings_api' ) );
+		Hook_Registry::add_action( 'admin_menu', array( $this, 'initialise_settings' ) );
 		Hook_Registry::add_action( 'admin_head', array( $this, 'admin_head' ), 11 );
 		Hook_Registry::add_action( self::$prefix . '_settings_page_header', array( $this, 'settings_page_header' ) );
 		Hook_Registry::add_filter( self::$prefix . '_settings_sanitize', array( $this, 'change_settings_on_save' ), 99 );
@@ -75,7 +76,7 @@ class Settings {
 	 *
 	 * @since 3.0.0
 	 */
-	public function init_settings_api() {
+	public function initialise_settings() {
 		$props = array(
 			'default_tab'       => 'general',
 			'help_sidebar'      => $this->get_help_sidebar(),
