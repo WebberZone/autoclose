@@ -10,6 +10,9 @@
 
 namespace WebberZone\AutoClose\Admin\Settings;
 
+use WebberZone\AutoClose\Admin\Settings\Settings_Sanitize;
+use WebberZone\AutoClose\Admin\Settings\Settings_API;
+
 // If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) {
 	die;
