@@ -28,9 +28,9 @@ class Options {
 	 * Holds the plugin options array.
 	 *
 	 * @since 3.0.0
-	 * @var array
+	 * @var array|null
 	 */
-	private static $options;
+	private static $options = null;
 
 	/**
 	 * Get the plugin options.

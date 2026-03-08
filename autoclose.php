@@ -34,7 +34,7 @@ if ( ! defined( 'WPINC' ) ) {
  *
  * @since 2.2.0
  *
- * @var string Plugin version
+ * @var string $ACC_PLUGIN_VERSION Plugin version
  */
 if ( ! defined( 'ACC_PLUGIN_VERSION' ) ) {
 	define( 'ACC_PLUGIN_VERSION', '3.1.0' );
@@ -45,7 +45,7 @@ if ( ! defined( 'ACC_PLUGIN_VERSION' ) ) {
  *
  * @since 2.0.0
  *
- * @var string Plugin folder path
+ * @var string $ACC_PLUGIN_DIR Plugin folder path
  */
 if ( ! defined( 'ACC_PLUGIN_DIR' ) ) {
 	define( 'ACC_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
@@ -56,7 +56,7 @@ if ( ! defined( 'ACC_PLUGIN_DIR' ) ) {
  *
  * @since 2.0.0
  *
- * @var string Plugin folder URL
+ * @var string $ACC_PLUGIN_URL Plugin folder URL
  */
 if ( ! defined( 'ACC_PLUGIN_URL' ) ) {
 	define( 'ACC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -67,7 +67,7 @@ if ( ! defined( 'ACC_PLUGIN_URL' ) ) {
  *
  * @since 2.0.0
  *
- * @var string Plugin Root File
+ * @var string $ACC_PLUGIN_FILE Plugin Root File
  */
 if ( ! defined( 'ACC_PLUGIN_FILE' ) ) {
 	define( 'ACC_PLUGIN_FILE', __FILE__ );

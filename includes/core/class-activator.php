@@ -37,7 +37,7 @@ class Activator {
 			);
 
 			foreach ( $sites as $site ) {
-				switch_to_blog( $site->blog_id );
+				switch_to_blog( (int) $site->blog_id );
 				self::single_activate();
 				restore_current_blog();
 			}
