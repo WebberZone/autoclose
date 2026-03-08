@@ -231,6 +231,6 @@ class Comments {
 			}
 		}
 
-		return count( $comments );
+		return $comments ? count( $comments ) : 0;
 	}
 }
