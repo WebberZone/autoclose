@@ -9,7 +9,6 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit();
 }
 
-global $wpdb;
 
 if ( is_multisite() ) {
 
@@ -42,11 +41,15 @@ function acc_delete_data() {
 	delete_option( 'acc_settings' );
 	delete_option( 'ald_acc_settings' );
 
-	if ( wp_next_scheduled( 'acc_cron_hook' ) ) {
-		wp_clear_scheduled_hook( 'acc_cron_hook' );
-	}
+	// Wizard options.
+	delete_option( 'acc_wizard_completed' );
+	delete_option( 'acc_wizard_completed_date' );
+	delete_option( 'acc_wizard_current_step' );
+	delete_option( 'acc_show_wizard' );
 
-	if ( wp_next_scheduled( 'ald_acc_hook' ) ) {
-		wp_clear_scheduled_hook( 'ald_acc_hook' );
-	}
+	delete_transient( 'acc_show_wizard_activation_redirect' );
+
+	wp_clear_scheduled_hook( 'acc_cron_hook' );
+	wp_clear_scheduled_hook( 'ald_acc_hook' );
+	wp_clear_scheduled_hook( 'autoclose_close_comments_pings_event' );
 }

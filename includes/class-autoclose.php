@@ -108,10 +108,12 @@ class AutoClose {
 	 * @since 3.0.0
 	 */
 	private function define_feature_hooks() {
-		$comments    = new Features\Comments();
-		$revisions   = new Features\Revisions();
-		$block_pings = new Features\Block_Pings();
-		$close_date  = new Features\Close_Date();
+		$comments      = new Features\Comments();
+		$revisions     = new Features\Revisions();
+		$block_pings   = new Features\Block_Pings();
+		$close_date    = new Features\Close_Date();
+		$reopen        = new Features\Reopen();        // Feature: auto-reopen on post update.
+		$notifications = new Features\Notifications(); // Feature: email summary after cron.
 
 		// Register cron hooks.
 		Hook_Registry::add_action( 'acc_cron_hook', array( $comments, 'process_comments' ) );
