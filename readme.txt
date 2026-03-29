@@ -4,7 +4,7 @@ Contributors: webberzone, Ajay
 Donate link: https://wzn.io/donate-wz
 Stable tag: 3.1.0
 Requires at least: 6.6
-Tested up to: 6.9
+Tested up to: 7.0
 Requires PHP: 7.4
 License: GPL v2 or later
 
@@ -20,7 +20,7 @@ An extra feature is the ability to delete post revisions or limit their number.
 
 Found a bug or want to contribute? PRs and issues welcome on [GitHub](https://github.com/WebberZone/autoclose). For help, use the [support forum](https://wordpress.org/support/plugin/autoclose) or [premium support](https://webberzone.com/support/).
 
-== Key Features ==
+## Key Features
 
 * Close (or open) comments on posts, pages, attachments and even Custom Post Types
 * Close (or open) pingbacks and trackbacks as well across all post types. You can also choose to delete them
@@ -77,6 +77,7 @@ Major plugin changes. Check the Changelog and release post for complete informat
 == Changelog ==
 
 = 3.1.0 =
+Release post: [https://webberzone.com/announcements/auto-close-v3-1-0/](https://webberzone.com/announcements/auto-close-v3-1-0/)
 
 * New features:
     * Exclude posts in specific categories, tags, or any taxonomy term from having comments or pingbacks/trackbacks closed.

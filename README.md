@@ -4,8 +4,8 @@
 
 [![WordPress Plugin Version](https://img.shields.io/wordpress/plugin/v/autoclose.svg?style=flat-square)](https://wordpress.org/plugins/autoclose/) [![License](https://img.shields.io/badge/license-GPL_v2%2B-orange.svg?style=flat-square)](https://opensource.org/licenses/GPL-2.0) [![WordPress Tested](https://img.shields.io/wordpress/v/autoclose.svg?style=flat-square)](https://wordpress.org/plugins/autoclose/) [![Required PHP](https://img.shields.io/wordpress/plugin/required-php/autoclose?style=flat-square)](https://wordpress.org/plugins/autoclose/) [![Active installs](https://img.shields.io/wordpress/plugin/installs/autoclose?style=flat-square)](https://wordpress.org/plugins/autoclose/)
 
-_Requires:_ 6.3  
-_Tested up to:_ 6.8  
+_Requires:_ 6.6
+_Tested up to:_ 7.0
 _License:_ [GPL-2.0+](http://www.gnu.org/licenses/gpl-2.0.html)  
 _Plugin page:_ [Auto-Close Comments, Pingbacks and Trackbacks](https://webberzone.com/plugins/autoclose/) | [WordPress.org plugin page](https://wordpress.org/plugins/autoclose/)
 
@@ -37,6 +37,9 @@ _Auto-Close_ is a WordPress plugin that _automatically closes comments, pingback
 
 - _Automatically close_ comments, pingbacks, and trackbacks on posts, pages, and custom post types
 - _Open or close_ comments/pingbacks/trackbacks selectively by post ID
+- _Exclude posts_ in specific categories, tags, or any taxonomy term from auto-closing
+- _Reopen comments_ automatically when a post is updated, with a configurable open window
+- _Email summary_ after each scheduled cron run showing comments closed, pings closed, and revisions deleted
 - _Schedule_ automatic closing using WordPress cron
 - _Block self-pings and custom ping URLs_
 - _Delete or limit_ post revisions by type
