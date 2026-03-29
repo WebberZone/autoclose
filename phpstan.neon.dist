@@ -1,0 +1,14 @@
+includes:
+	- phpstan-baseline.neon
+parameters:
+    level: 5
+    paths:
+        - autoclose.php
+        - includes/
+    scanFiles:
+        - autoclose.php
+    scanDirectories:
+        - includes
+    bootstrapFiles:
+        - phpstan-bootstrap.php
+    ignoreErrors:

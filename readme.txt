@@ -1,10 +1,10 @@
 === Auto-Close Comments, Pingbacks and Trackbacks ===
 Tags: comments, pingback, revisions, spam, anti-spam
 Contributors: webberzone, Ajay
-Donate link: https://ajaydsouza.com/donate/
-Stable tag: 3.0.0
-Requires at least: 6.3
-Tested up to: 6.8
+Donate link: https://wzn.io/donate-wz
+Stable tag: 3.1.0
+Requires at least: 6.6
+Tested up to: 6.9
 Requires PHP: 7.4
 License: GPL v2 or later
 
@@ -27,6 +27,9 @@ Found a bug or want to contribute? PRs and issues welcome on [GitHub](https://gi
 * Schedule a cron job to automatically close comments, pingbacks and trackbacks daily
 * Delete all post revisions or limit the number of revisions by post type
 * Exclude specific post IDs from auto-close
+* Exclude posts in specific categories, tags, or any taxonomy term from auto-close
+* Reopen comments automatically when a post is updated, with a configurable open window
+* Receive an email summary after each scheduled cron run showing what was closed or deleted
 * Block self-pings and custom ping URLs
 * Schedule the closing of comments, pingbacks, and trackbacks for the current post
 
@@ -68,10 +71,26 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 == Upgrade Notice ==
 
-= 3.0.0 =
+= 3.1.0 =
 Major plugin changes. Check the Changelog and release post for complete information.
 
 == Changelog ==
+
+= 3.1.0 =
+
+* New features:
+    * Exclude posts in specific categories, tags, or any taxonomy term from having comments or pingbacks/trackbacks closed.
+    * Reopen comments automatically when a published post is saved or updated, with a configurable number of days before they are closed again by the cron.
+    * Email summary notification after each scheduled cron run, showing the number of comments closed, pings closed, and revisions deleted.
+
+* Bug fixes:
+    * Fixed undefined variable warnings when processing taxonomy term exclusions.
+    * Fixed Settings API repeater fields: form submission, hidden input names, and sanitization with row ID lookup.
+
+* Modifications:
+    * Update Settings API and other reusable classes in line with the latest WebberZone plugins.
+    * Email summary now uses an HTML template for improved readability.
+    * Term exclusion fields now use an autocomplete search (Tom Select) instead of manual ID entry.
 
 = 3.0.0 =
 Release post: [https://webberzone.com/announcements/auto-close-v3-0-0/](https://webberzone.com/announcements/auto-close-v3-0-0/)

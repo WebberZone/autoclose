@@ -9,7 +9,8 @@ namespace WebberZone\AutoClose\Admin;
 
 use WebberZone\AutoClose\Features\Comments;
 use WebberZone\AutoClose\Features\Revisions;
-use WebberZone\AutoClose\Utilities\Options;
+use WebberZone\AutoClose\Util\Options;
+use WebberZone\AutoClose\Util\Hook_Registry;
 
 /**
  * Tools class.
@@ -41,7 +42,7 @@ class Tools {
 			array( $this, 'render_tools_page' )
 		);
 
-		add_action( 'load-' . $page, array( $this, 'tools_help' ) );
+		Hook_Registry::add_action( 'load-' . $page, array( $this, 'tools_help' ) );
 	}
 
 	/**

@@ -10,6 +10,7 @@ namespace WebberZone\AutoClose\Admin;
 
 use WebberZone\AutoClose\Admin\Settings\Metabox_API;
 use WebberZone\AutoClose\Features\Close_Date;
+use WebberZone\AutoClose\Util\Hook_Registry;
 
 if ( ! defined( 'WPINC' ) ) {
 	die;
@@ -56,8 +57,8 @@ class Metabox {
 	 */
 	public function __construct() {
 		$this->close_date_logic = new Close_Date();
-		add_action( 'admin_menu', array( $this, 'initialise_metabox_api' ) );
-		add_action( 'save_post', array( $this, 'save_metabox' ), 10, 2 );
+		Hook_Registry::add_action( 'admin_menu', array( $this, 'initialise_metabox_api' ) );
+		Hook_Registry::add_action( 'save_post', array( $this, 'save_metabox' ), 10, 2 );
 	}
 
 	/**
@@ -67,12 +68,11 @@ class Metabox {
 		foreach ( $this->get_supported_post_types() as $post_type ) {
 			$this->metaboxes[ $post_type ] = new Metabox_API(
 				array(
-					'settings_key'           => $this->settings_key,
-					'prefix'                 => $this->prefix,
-					'post_type'              => $post_type,
-					'title'                  => esc_html__( 'AutoClose Settings', 'autoclose' ),
-					'registered_settings'    => $this->get_registered_settings(),
-					'checkbox_modified_text' => __( 'Modified from default', 'autoclose' ),
+					'settings_key'        => $this->settings_key,
+					'prefix'              => $this->prefix,
+					'post_type'           => $post_type,
+					'title'               => esc_html__( 'AutoClose Settings', 'autoclose' ),
+					'registered_settings' => $this->get_registered_settings(),
 				)
 			);
 		}

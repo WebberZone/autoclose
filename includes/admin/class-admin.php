@@ -52,7 +52,7 @@ class Admin {
 		if ( false !== strpos( $file, 'autoclose.php' ) ) {
 			$new_links = array(
 				'support'    => '<a href="https://wordpress.org/support/plugin/autoclose">' . esc_html__( 'Support', 'autoclose' ) . '</a>',
-				'donate'     => '<a href="https://ajaydsouza.com/donate/">' . esc_html__( 'Donate', 'autoclose' ) . '</a>',
+				'donate'     => '<a href="https://wzn.io/donate-wz">' . esc_html__( 'Donate', 'autoclose' ) . '</a>',
 				'contribute' => '<a href="https://github.com/WebberZone/autoclose">' . esc_html__( 'Contribute', 'autoclose' ) . '</a>',
 			);
 

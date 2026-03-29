@@ -7,7 +7,7 @@
 
 namespace WebberZone\AutoClose\Features;
 
-use WebberZone\AutoClose\Utilities\Options;
+use WebberZone\AutoClose\Util\Options;
 
 /**
  * Revisions class.
@@ -31,9 +31,21 @@ class Revisions {
 	 * @since 3.0.0
 	 */
 	public function process_revisions() {
+		$deleted = 0;
+
 		if ( Options::get_option( 'delete_revisions' ) ) {
-			$this->delete_revisions();
+			$result  = $this->delete_revisions();
+			$deleted = is_int( $result ) ? $result : 0;
 		}
+
+		/**
+		 * Fires after revisions have been processed by the cron.
+		 *
+		 * @since 3.1.0
+		 *
+		 * @param int $deleted Number of revisions deleted.
+		 */
+		do_action( 'acc_revisions_processed', $deleted );
 	}
 
 	/**

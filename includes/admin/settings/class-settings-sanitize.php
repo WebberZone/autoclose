@@ -2,7 +2,9 @@
 /**
  * Functions to sanitize settings.
  *
- * @package WebberZone\AutoClose
+ * @link  https://webberzone.com
+ *
+ * @package WebberZone\AutoClose\Admin
  */
 
 namespace WebberZone\AutoClose\Admin\Settings;
@@ -178,7 +180,7 @@ class Settings_Sanitize {
 		 *
 		 * @param array $allowedtags Allowed tags array.
 		 */
-		$allowedtags = apply_filters( 'wz_sanitize_allowed_tags', $allowedtags );
+		$allowedtags = apply_filters( $this->prefix . '_sanitize_allowed_tags', $allowedtags ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound
 
 		return wp_kses( wp_unslash( $value ), $allowedtags );
 	}
@@ -190,7 +192,7 @@ class Settings_Sanitize {
 	 * @return int  Sanitized value
 	 */
 	public function sanitize_checkbox_field( $value ) {
-		$value = ( -1 === (int) $value ) ? 0 : 1;
+		$value = in_array( (int) $value, array( 0, -1 ), true ) ? 0 : 1;
 
 		return $value;
 	}
@@ -286,7 +288,7 @@ class Settings_Sanitize {
 	/**
 	 * Sanitize repeater field.
 	 *
-	 * @param array $value Array of repeater values.
+	 * @param mixed $value Array of repeater values (may be non-array from form data).
 	 * @param array $field Field configuration array.
 	 * @return array Sanitized array
 	 */
@@ -296,9 +298,22 @@ class Settings_Sanitize {
 		}
 
 		$sanitized_value = array();
+		$existing_rows   = array();
 
 		// Get the subfields configuration.
 		$subfields = ! empty( $field['fields'] ) ? $field['fields'] : array();
+		if ( ! empty( $field['id'] ) ) {
+			$stored_value  = $this->get_option( $field['id'], array() );
+			$existing_rows = is_array( $stored_value ) ? $stored_value : array();
+		}
+
+		// Create a lookup table for existing rows by row_id.
+		$existing_by_id = array();
+		foreach ( $existing_rows as $existing_row ) {
+			if ( isset( $existing_row['row_id'] ) ) {
+				$existing_by_id[ $existing_row['row_id'] ] = $existing_row;
+			}
+		}
 
 		foreach ( $value as $index => $row ) {
 			// Ensure we have a valid row structure.
@@ -309,6 +324,17 @@ class Settings_Sanitize {
 			$sanitized_row = array(
 				'fields' => array(),
 			);
+
+			// Preserve row_id if it exists.
+			if ( isset( $row['row_id'] ) ) {
+				$sanitized_row['row_id'] = sanitize_text_field( $row['row_id'] );
+			}
+
+			// Get the corresponding existing row for sensitive field preservation.
+			$existing_row = null;
+			if ( isset( $row['row_id'] ) && isset( $existing_by_id[ $row['row_id'] ] ) ) {
+				$existing_row = $existing_by_id[ $row['row_id'] ];
+			}
 
 			foreach ( $row['fields'] as $field_key => $field_value ) {
 				$field_key = sanitize_key( $field_key );
@@ -329,10 +355,22 @@ class Settings_Sanitize {
 				// Get the field type from the subfield configuration.
 				$field_type = isset( $field_config['type'] ) ? $field_config['type'] : 'text';
 
+				// Preserve existing encrypted sensitive values when form submits masked/empty value.
+				if ( 'sensitive' === $field_type && ( empty( $field_value ) || ( is_string( $field_value ) && false !== strpos( $field_value, '**' ) ) ) ) {
+					if ( $existing_row && isset( $existing_row['fields'][ $field_key ] ) ) {
+						$sanitized_row['fields'][ $field_key ] = $existing_row['fields'][ $field_key ];
+					}
+					continue;
+				}
+
 				// Call the appropriate sanitization method.
 				$sanitize_method = 'sanitize_' . $field_type . '_field';
 				if ( method_exists( $this, $sanitize_method ) ) {
-					$sanitized_row['fields'][ $field_key ] = $this->$sanitize_method( $field_value, $field_config );
+					if ( 'sensitive' === $field_type ) {
+						$sanitized_row['fields'][ $field_key ] = $this->$sanitize_method( $field_value, $field_key );
+					} else {
+						$sanitized_row['fields'][ $field_key ] = $this->$sanitize_method( $field_value, $field_config );
+					}
 				} else {
 					$sanitized_row['fields'][ $field_key ] = $this->sanitize_text_field( $field_value );
 				}
@@ -344,40 +382,6 @@ class Settings_Sanitize {
 		}
 
 		return $sanitized_value;
-	}
-
-	/**
-	 * Sanitize date fields (HTML5 date inputs).
-	 *
-	 * @param string $value Date in 'Y-m-d' format.
-	 * @return string Sanitized date or empty string.
-	 */
-	public function sanitize_date_field( $value ) {
-		$value = sanitize_text_field( wp_unslash( $value ) );
-		// Validate 'YYYY-MM-DD'.
-		if ( preg_match( '/^\d{4}-\d{2}-\d{2}$/', $value ) ) {
-			return $value;
-		}
-		return '';
-	}
-
-	/**
-	 * Sanitize datetime-local fields (HTML5 datetime-local inputs).
-	 *
-	 * @param string $value Datetime in 'Y-m-d\TH:i' format, or just 'Y-m-d'.
-	 * @return string Sanitized datetime or empty string.
-	 */
-	public function sanitize_datetime_field( $value ) {
-		$value = sanitize_text_field( wp_unslash( $value ) );
-		// If only date is given, fallback to 00:00 for time.
-		if ( preg_match( '/^\d{4}-\d{2}-\d{2}$/', $value ) ) {
-			return $value . 'T00:00';
-		}
-		// Validate 'YYYY-MM-DDThh:mm'.
-		if ( preg_match( '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/', $value ) ) {
-			return $value;
-		}
-		return '';
 	}
 
 	/**
@@ -414,7 +418,7 @@ class Settings_Sanitize {
 						break;
 					// Make sure sprintf has a good datatype to work with.
 					case 'integer':
-						$sp_format = '%i';
+						$sp_format = '%d';
 						break;
 					case 'double':
 						$sp_format = '%0.2f';
@@ -448,7 +452,10 @@ class Settings_Sanitize {
 	 */
 	public static function sanitize_tax_slugs( &$settings, $source_key, $target_key ) {
 		if ( isset( $settings[ $source_key ] ) ) {
-			$slugs = array_unique( str_getcsv( $settings[ $source_key ] ) );
+			$slugs = array_unique( str_getcsv( $settings[ $source_key ], ',', '"', '' ) );
+
+			$tax_ids   = array();
+			$tax_slugs = array();
 
 			foreach ( $slugs as $slug ) {
 				// Pattern is Name (taxonomy:term_taxonomy_id).
@@ -465,8 +472,8 @@ class Settings_Sanitize {
 				}
 			}
 
-			$settings[ $target_key ] = isset( $tax_ids ) ? join( ',', $tax_ids ) : '';
-			$settings[ $source_key ] = isset( $tax_slugs ) ? self::str_putcsv( $tax_slugs ) : '';
+			$settings[ $target_key ] = join( ',', $tax_ids );
+			$settings[ $source_key ] = self::str_putcsv( $tax_slugs );
 		}
 	}
 }

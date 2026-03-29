@@ -7,6 +7,10 @@
 
 namespace WebberZone\AutoClose\Admin;
 
+use WebberZone\AutoClose\Util\Hook_Registry;
+use WebberZone\AutoClose\Admin\Settings\Settings_API;
+use WebberZone\AutoClose\Admin\Settings\Settings_Sanitize;
+
 // If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) {
 	die;
@@ -61,10 +65,12 @@ class Settings {
 		self::$prefix       = 'acc';
 		$this->menu_slug    = 'acc_options_page';
 
-		add_action( 'admin_menu', array( $this, 'init_settings_api' ) );
-		add_action( 'admin_head', array( $this, 'admin_head' ), 11 );
-		add_action( self::$prefix . '_settings_page_header', array( $this, 'settings_page_header' ) );
-		add_filter( self::$prefix . '_settings_sanitize', array( $this, 'change_settings_on_save' ), 99 );
+		Hook_Registry::add_action( 'admin_menu', array( $this, 'initialise_settings' ) );
+		Hook_Registry::add_action( 'admin_head', array( $this, 'admin_head' ), 11 );
+		Hook_Registry::add_action( self::$prefix . '_settings_page_header', array( $this, 'settings_page_header' ) );
+		Hook_Registry::add_filter( self::$prefix . '_settings_sanitize', array( $this, 'change_settings_on_save' ), 99 );
+		Hook_Registry::add_action( 'wp_ajax_' . self::$prefix . '_taxonomy_search_tom_select', array( __CLASS__, 'taxonomy_search_tom_select' ) );
+		Hook_Registry::add_action( 'wp_ajax_nopriv_' . self::$prefix . '_taxonomy_search_tom_select', array( __CLASS__, 'taxonomy_search_tom_select' ) );
 	}
 
 	/**
@@ -72,7 +78,7 @@ class Settings {
 	 *
 	 * @since 3.0.0
 	 */
-	public function init_settings_api() {
+	public function initialise_settings() {
 		$props = array(
 			'default_tab'       => 'general',
 			'help_sidebar'      => $this->get_help_sidebar(),
@@ -89,7 +95,7 @@ class Settings {
 			'upgraded_settings'   => array(),
 		);
 
-		$this->settings_api = new Settings\Settings_API( $this->settings_key, self::$prefix, $args );
+		$this->settings_api = new Settings_API( $this->settings_key, self::$prefix, $args );
 	}
 
 	/**
@@ -188,6 +194,76 @@ class Settings {
 	}
 
 	/**
+	 * Get settings defaults.
+	 *
+	 * @since 3.1.0
+	 *
+	 * @return array Default settings.
+	 */
+	public static function settings_defaults() {
+		$defaults = array();
+
+		// Get all registered settings.
+		$settings      = self::get_registered_settings();
+		$default_types = array(
+			'color',
+			'css',
+			'csv',
+			'file',
+			'html',
+			'multicheck',
+			'number',
+			'numbercsv',
+			'password',
+			'postids',
+			'posttypes',
+			'radio',
+			'radiodesc',
+			'repeater',
+			'select',
+			'sensitive',
+			'taxonomies',
+			'text',
+			'textarea',
+			'thumbsizes',
+			'url',
+			'wysiwyg',
+		);
+
+		// Loop through each section.
+		foreach ( $settings as $section_settings ) {
+			// Loop through each setting in the section.
+			foreach ( $section_settings as $setting ) {
+				if ( ! isset( $setting['id'] ) ) {
+					continue;
+				}
+
+				$setting_id    = $setting['id'];
+				$setting_type  = $setting['type'] ?? '';
+				$default_value = '';
+
+				// When checkbox is set to true, set this to 1.
+				if ( 'checkbox' === $setting_type ) {
+					$default_value = isset( $setting['default'] ) ? (int) (bool) $setting['default'] : 0;
+				} elseif ( isset( $setting['default'] ) && in_array( $setting_type, $default_types, true ) ) {
+					$default_value = $setting['default'];
+				}
+
+				$defaults[ $setting_id ] = $default_value;
+			}
+		}
+
+		/**
+		 * Filter the default settings array.
+		 *
+		 * @since 3.1.0
+		 *
+		 * @param array $defaults Default settings.
+		 */
+		return apply_filters( self::$prefix . '_settings_defaults', $defaults );
+	}
+
+	/**
 	 * Returns the general settings.
 	 *
 	 * @since 3.0.0
@@ -195,40 +271,40 @@ class Settings {
 	 */
 	public static function settings_general() {
 		$settings = array(
-			'cron_on'         => array(
+			'cron_on'              => array(
 				'id'      => 'cron_on',
 				'name'    => esc_html__( 'Activate scheduled closing', 'autoclose' ),
 				'desc'    => esc_html__( 'This creates a WordPress cron job using the schedule settings below. This cron job will execute the tasks to close comments, pingbacks/trackbacks or delete post revisions based on the settings from the other tabs.', 'autoclose' ),
 				'type'    => 'checkbox',
-				'options' => false,
+				'default' => false,
 			),
-			'cron_range_desc' => array(
+			'cron_range_desc'      => array(
 				'id'   => 'cron_range_desc',
 				'name' => '<strong>' . esc_html__( 'Time to run closing', 'autoclose' ) . '</strong>',
 				'desc' => esc_html__( 'The next two options allow you to set the time to run the cron. The cron job will run now if the hour:min set below if before the current time. e.g. if the time now is 20:30 hours and you set the schedule to 9:00. Else it will run later today at the scheduled time.', 'autoclose' ),
 				'type' => 'descriptive_text',
 			),
-			'cron_hour'       => array(
+			'cron_hour'            => array(
 				'id'      => 'cron_hour',
 				'name'    => esc_html__( 'Hour', 'autoclose' ),
 				'desc'    => '',
 				'type'    => 'number',
-				'options' => '0',
-				'min'     => '0',
-				'max'     => '23',
+				'default' => 0,
+				'min'     => 0,
+				'max'     => 23,
 				'size'    => 'small',
 			),
-			'cron_min'        => array(
+			'cron_min'             => array(
 				'id'      => 'cron_min',
 				'name'    => esc_html__( 'Minute', 'autoclose' ),
 				'desc'    => '',
 				'type'    => 'number',
-				'options' => '0',
-				'min'     => '0',
-				'max'     => '59',
+				'default' => 0,
+				'min'     => 0,
+				'max'     => 59,
 				'size'    => 'small',
 			),
-			'cron_recurrence' => array(
+			'cron_recurrence'      => array(
 				'id'      => 'cron_recurrence',
 				'name'    => esc_html__( 'Run maintenance', 'autoclose' ),
 				'desc'    => '',
@@ -240,6 +316,22 @@ class Settings {
 					'fortnightly' => esc_html__( 'Fortnightly', 'autoclose' ),
 					'monthly'     => esc_html__( 'Monthly', 'autoclose' ),
 				),
+			),
+			'email_notify'         => array(
+				'id'      => 'email_notify',
+				'name'    => esc_html__( 'Send summary email after cron run', 'autoclose' ),
+				'desc'    => esc_html__( 'Send an email summary after each scheduled run showing what was closed/deleted.', 'autoclose' ),
+				'type'    => 'checkbox',
+				'default' => false,
+			),
+			'email_notify_address' => array(
+				'id'          => 'email_notify_address',
+				'name'        => esc_html__( 'Notification email address', 'autoclose' ),
+				'desc'        => esc_html__( 'Leave blank to use the site admin email address.', 'autoclose' ),
+				'type'        => 'text',
+				'default'     => '',
+				'size'        => 'regular',
+				'placeholder' => get_option( 'admin_email' ),
 			),
 		);
 
@@ -260,34 +352,60 @@ class Settings {
 	 */
 	public static function settings_comments() {
 		$settings = array(
-			'close_comment'      => array(
+			'close_comment'         => array(
 				'id'      => 'close_comment',
 				'name'    => esc_html__( 'Close comments', 'autoclose' ),
 				'desc'    => esc_html__( 'Enable to close comments - used for the automatic schedule as well as one time runs under the Tools tab.', 'autoclose' ),
 				'type'    => 'checkbox',
-				'options' => false,
+				'default' => false,
 			),
-			'comment_post_types' => array(
+			'comment_post_types'    => array(
 				'id'      => 'comment_post_types',
 				'name'    => esc_html__( 'Post types to include', 'autoclose' ),
 				'desc'    => esc_html__( 'At least one option should be selected above. Select which post types on which you want comments closed.', 'autoclose' ),
 				'type'    => 'posttypes',
-				'options' => 'post',
+				'default' => 'post',
 			),
-			'comment_age'        => array(
+			'comment_age'           => array(
 				'id'      => 'comment_age',
 				'name'    => esc_html__( 'Close comments on posts/pages older than', 'autoclose' ),
 				'desc'    => esc_html__( 'Comments that are older than the above number, in days, will be closed automatically if the schedule is enabled', 'autoclose' ),
 				'type'    => 'number',
-				'options' => '90',
+				'default' => 90,
 			),
-			'comment_pids'       => array(
+			'comment_pids'          => array(
 				'id'      => 'comment_pids',
 				'name'    => esc_html__( 'Keep comments on these posts/pages open', 'autoclose' ),
 				'desc'    => esc_html__( 'Comma-separated list of post, page or custom post type IDs. e.g. 188,320,500', 'autoclose' ),
 				'type'    => 'numbercsv',
-				'options' => '',
+				'default' => '',
 				'size'    => 'large',
+			),
+			'comment_exclude_terms' => array(
+				'id'               => 'comment_exclude_terms',
+				'name'             => esc_html__( 'Exclude posts in these categories/tags', 'autoclose' ),
+				'desc'             => esc_html__( 'Start typing to search for categories, tags, or other taxonomy terms. Posts in these terms will not have comments closed. This field has an autocomplete — start typing and select from the options.', 'autoclose' ),
+				'type'             => 'csv',
+				'default'          => '',
+				'size'             => 'large',
+				'field_class'      => 'ts_autocomplete',
+				'field_attributes' => self::get_taxonomy_search_field_attributes( 'public_taxonomies' ),
+			),
+			'reopen_on_update'      => array(
+				'id'      => 'reopen_on_update',
+				'name'    => esc_html__( 'Reopen comments on post update', 'autoclose' ),
+				'desc'    => esc_html__( 'When a post is saved or updated, its comments will be reopened for the number of days set below.', 'autoclose' ),
+				'type'    => 'checkbox',
+				'default' => false,
+			),
+			'reopen_days'           => array(
+				'id'      => 'reopen_days',
+				'name'    => esc_html__( 'Keep comments open for (days)', 'autoclose' ),
+				'desc'    => esc_html__( 'Number of days to keep comments open after a post update. Set to 0 to keep open until the next scheduled close.', 'autoclose' ),
+				'type'    => 'number',
+				'default' => 30,
+				'min'     => 0,
+				'size'    => 'small',
 			),
 		);
 
@@ -308,48 +426,58 @@ class Settings {
 	 */
 	public static function settings_pingtracks() {
 		$settings = array(
-			'close_pbtb'       => array(
+			'close_pbtb'         => array(
 				'id'      => 'close_pbtb',
 				'name'    => esc_html__( 'Close Pingbacks/Trackbacks', 'autoclose' ),
 				'desc'    => esc_html__( 'Enable to close pingbacks and trackbacks - used for the automatic schedule as well as one time runs under the Tools tab.', 'autoclose' ),
 				'type'    => 'checkbox',
-				'options' => false,
+				'default' => false,
 			),
-			'pbtb_post_types'  => array(
+			'pbtb_post_types'    => array(
 				'id'      => 'pbtb_post_types',
 				'name'    => esc_html__( 'Post types to include', 'autoclose' ),
 				'desc'    => esc_html__( 'At least one option should be selected above. Select which post types on which you want pingbacks/trackbacks closed.', 'autoclose' ),
 				'type'    => 'posttypes',
-				'options' => 'post',
+				'default' => 'post',
 			),
-			'pbtb_age'         => array(
+			'pbtb_age'           => array(
 				'id'      => 'pbtb_age',
 				'name'    => esc_html__( 'Close pingbacks/trackbacks on posts/pages older than', 'autoclose' ),
 				'desc'    => esc_html__( 'Pingbacks/Trackbacks that are older than the above number, in days, will be closed automatically if the schedule is enabled', 'autoclose' ),
 				'type'    => 'number',
-				'options' => '90',
+				'default' => 90,
 			),
-			'pbtb_pids'        => array(
+			'pbtb_pids'          => array(
 				'id'      => 'pbtb_pids',
 				'name'    => esc_html__( 'Keep pingbacks/trackbacks on these posts/pages open', 'autoclose' ),
 				'desc'    => esc_html__( 'Comma-separated list of post, page or custom post type IDs. e.g. 188,320,500', 'autoclose' ),
 				'type'    => 'numbercsv',
-				'options' => '',
+				'default' => '',
 				'size'    => 'large',
 			),
-			'block_self_pings' => array(
+			'pbtb_exclude_terms' => array(
+				'id'               => 'pbtb_exclude_terms',
+				'name'             => esc_html__( 'Exclude posts in these categories/tags', 'autoclose' ),
+				'desc'             => esc_html__( 'Start typing to search for categories, tags, or other taxonomy terms. Posts in these terms will not have pingbacks/trackbacks closed. This field has an autocomplete — start typing and select from the options.', 'autoclose' ),
+				'type'             => 'csv',
+				'default'          => '',
+				'size'             => 'large',
+				'field_class'      => 'ts_autocomplete',
+				'field_attributes' => self::get_taxonomy_search_field_attributes( 'public_taxonomies' ),
+			),
+			'block_self_pings'   => array(
 				'id'      => 'block_self_pings',
 				'name'    => esc_html__( 'Block Self-Pings', 'autoclose' ),
 				'desc'    => esc_html__( 'Enable to block self-pings (pings to your own site).', 'autoclose' ),
 				'type'    => 'checkbox',
-				'options' => false,
+				'default' => false,
 			),
-			'block_ping_urls'  => array(
+			'block_ping_urls'    => array(
 				'id'      => 'block_ping_urls',
 				'name'    => esc_html__( 'Block Ping URLs', 'autoclose' ),
 				'desc'    => esc_html__( 'Enter one URL per line. Pings to any of these URLs will be blocked in addition to self-pings.', 'autoclose' ),
 				'type'    => 'textarea',
-				'options' => '',
+				'default' => '',
 				'size'    => 'large',
 			),
 		);
@@ -376,7 +504,7 @@ class Settings {
 				'name'    => esc_html__( 'Delete post revisions', 'autoclose' ),
 				'desc'    => esc_html__( 'The WordPress revisions system stores a record of each saved draft or published update. This can gather up a lot of overhead in the long run. Use this option to delete old post revisions.', 'autoclose' ),
 				'type'    => 'checkbox',
-				'options' => false,
+				'default' => false,
 			),
 			'revision_post_types' => array(
 				'id'   => 'revision_post_types',
@@ -397,7 +525,7 @@ class Settings {
 				'name'    => $name,
 				'desc'    => '',
 				'type'    => 'number',
-				'options' => -2,
+				'default' => -2,
 				'min'     => -2,
 				'size'    => 'small',
 			);
@@ -573,11 +701,17 @@ class Settings {
 	 * @return array Filtered settings array.
 	 */
 	public function change_settings_on_save( $settings ) {
+		// Sanitize comment_exclude_terms to save IDs into comment_exclude_term_ids.
+		Settings_Sanitize::sanitize_tax_slugs( $settings, 'comment_exclude_terms', 'comment_exclude_term_ids' );
+
+		// Sanitize pbtb_exclude_terms to save IDs into pbtb_exclude_term_ids.
+		Settings_Sanitize::sanitize_tax_slugs( $settings, 'pbtb_exclude_terms', 'pbtb_exclude_term_ids' );
+
 		// Sanitize cron hour and minute.
 		$settings['cron_hour'] = min( 23, absint( $settings['cron_hour'] ) );
 		$settings['cron_min']  = min( 59, absint( $settings['cron_min'] ) );
 
-		$cron = new \WebberZone\AutoClose\Utilities\Cron();
+		$cron = new \WebberZone\AutoClose\Util\Cron();
 		if ( ! empty( $settings['cron_on'] ) ) {
 			$cron->enable_run( $settings['cron_hour'], $settings['cron_min'], $settings['cron_recurrence'] );
 		} else {
@@ -585,5 +719,95 @@ class Settings {
 		}
 
 		return $settings;
+	}
+
+	/**
+	 * Get field attributes for Tom Select taxonomy search fields.
+	 *
+	 * @since 3.2.0
+	 *
+	 * @param string $taxonomy Taxonomy name or 'public_taxonomies' to search all.
+	 * @return array Field attributes array.
+	 */
+	public static function get_taxonomy_search_field_attributes( string $taxonomy ): array {
+		return array(
+			'data-wp-prefix'   => strtoupper( self::$prefix ),
+			'data-wp-action'   => self::$prefix . '_taxonomy_search_tom_select',
+			'data-wp-nonce'    => wp_create_nonce( self::$prefix . '_taxonomy_search_tom_select' ),
+			'data-wp-endpoint' => $taxonomy,
+		);
+	}
+
+	/**
+	 * AJAX handler for Tom Select taxonomy search.
+	 *
+	 * @since 3.2.0
+	 */
+	public static function taxonomy_search_tom_select(): void {
+		if ( ! isset( $_REQUEST['nonce'] ) ) {
+			wp_send_json_error( array( 'message' => 'Missing nonce' ) );
+		}
+
+		$nonce_valid = wp_verify_nonce( sanitize_key( $_REQUEST['nonce'] ), self::$prefix . '_taxonomy_search_tom_select' );
+
+		if ( ! $nonce_valid ) {
+			wp_send_json_error( array( 'message' => 'Invalid nonce' ) );
+		}
+
+		if ( ! isset( $_REQUEST['endpoint'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			wp_send_json_error( 'Missing endpoint' );
+		}
+
+		$endpoint    = sanitize_key( $_REQUEST['endpoint'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$search_term = isset( $_REQUEST['q'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['q'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+		// Handle comma-separated input — search only the last segment.
+		if ( false !== strpos( $search_term, ',' ) ) {
+			$parts       = explode( ',', $search_term );
+			$search_term = end( $parts );
+		}
+		$search_term = trim( $search_term );
+
+		/** This filter has been defined in /wp-admin/includes/ajax-actions.php */
+		$term_search_min_chars = (int) apply_filters( 'term_search_min_chars', 2, null, $search_term );
+
+		if ( 0 === $term_search_min_chars || strlen( $search_term ) < $term_search_min_chars ) {
+			wp_send_json_success( array() );
+		}
+
+		if ( 'public_taxonomies' === $endpoint ) {
+			$taxonomies = array_keys( (array) get_taxonomies( array( 'public' => true ) ) );
+		} else {
+			$tax = get_taxonomy( $endpoint );
+			if ( ! $tax ) {
+				wp_send_json_error( 'Invalid taxonomy' );
+			}
+			if ( ! current_user_can( $tax->cap->assign_terms ) ) {
+				wp_send_json_error( 'Insufficient permissions' );
+			}
+			$taxonomies = array( $endpoint );
+		}
+
+		$terms = get_terms(
+			array(
+				'taxonomy'   => $taxonomies,
+				'name__like' => $search_term,
+				'orderby'    => 'name',
+				'order'      => 'ASC',
+				'number'     => 20,
+				'hide_empty' => false,
+			)
+		);
+
+		$results = array();
+		foreach ( (array) $terms as $term ) {
+			$formatted_string = "{$term->name} ({$term->taxonomy}:{$term->term_taxonomy_id})";
+			$results[]        = array(
+				'value' => $formatted_string,
+				'text'  => $term->name,
+			);
+		}
+
+		wp_send_json_success( $results );
 	}
 }

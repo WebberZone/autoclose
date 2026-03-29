@@ -1,0 +1,16 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Variable \\$rows might not be defined\\.$#"
+			count: 1
+			path: includes/features/views/email-cron-summary.php
+
+		-
+			message: "#^Variable \\$site_name might not be defined\\.$#"
+			count: 1
+			path: includes/features/views/email-cron-summary.php
+
+		-
+			message: "#^Variable \\$site_url might not be defined\\.$#"
+			count: 1
+			path: includes/features/views/email-cron-summary.php

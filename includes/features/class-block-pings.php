@@ -8,7 +8,7 @@
 
 namespace WebberZone\AutoClose\Features;
 
-use WebberZone\AutoClose\Utilities\Options;
+use WebberZone\AutoClose\Util\Options;
 
 if ( ! defined( 'WPINC' ) ) {
 	die;

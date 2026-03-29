@@ -7,8 +7,8 @@
 
 namespace WebberZone\AutoClose\Features;
 
-use WebberZone\AutoClose\Utilities\Options;
-use WebberZone\AutoClose\Utilities\Helpers;
+use WebberZone\AutoClose\Util\Options;
+use WebberZone\AutoClose\Util\Helpers;
 
 /**
  * Comments class.
@@ -32,33 +32,43 @@ class Comments {
 	 * @since 3.0.0
 	 */
 	public function process_comments() {
-		$comment_age  = Options::get_option( 'comment_age' );
-		$comment_pids = Options::get_option( 'comment_pids' );
-		$pbtb_age     = Options::get_option( 'pbtb_age' );
-		$pbtb_pids    = Options::get_option( 'pbtb_pids' );
+		$comment_age     = Options::get_option( 'comment_age' );
+		$comment_pids    = Options::get_option( 'comment_pids' );
+		$pbtb_age        = Options::get_option( 'pbtb_age' );
+		$pbtb_pids       = Options::get_option( 'pbtb_pids' );
+		$comments_closed = 0;
+		$pings_closed    = 0;
 
 		// Get the post types.
 		$comment_post_types = Helpers::parse_post_types( Options::get_option( 'comment_post_types' ) );
 		$pbtb_post_types    = Helpers::parse_post_types( Options::get_option( 'pbtb_post_types' ) );
 
+		// Resolve exclude terms: prefer the sanitized ID field, fall back to the display field for backward compat.
+		$comment_exclude_terms = Options::get_option( 'comment_exclude_term_ids' );
+		$pbtb_exclude_terms    = Options::get_option( 'pbtb_exclude_term_ids' );
+
 		// Close Comments on posts.
 		if ( Options::get_option( 'close_comment' ) ) {
-			$this->close_comments(
+			$result          = $this->close_comments(
 				array(
-					'age'        => $comment_age,
-					'post_types' => $comment_post_types,
+					'age'           => $comment_age,
+					'post_types'    => $comment_post_types,
+					'exclude_terms' => $comment_exclude_terms,
 				)
 			);
+			$comments_closed = is_int( $result ) ? $result : 0;
 		}
 
 		// Close Pingbacks/Trackbacks on posts.
 		if ( Options::get_option( 'close_pbtb' ) ) {
-			$this->close_pingbacks(
+			$result       = $this->close_pingbacks(
 				array(
-					'age'        => $pbtb_age,
-					'post_types' => $pbtb_post_types,
+					'age'           => $pbtb_age,
+					'post_types'    => $pbtb_post_types,
+					'exclude_terms' => $pbtb_exclude_terms,
 				)
 			);
+			$pings_closed = is_int( $result ) ? $result : 0;
 		}
 
 		// Open Comments on these posts.
@@ -78,6 +88,16 @@ class Comments {
 				)
 			);
 		}
+
+		/**
+		 * Fires after comments and pings have been processed by the cron.
+		 *
+		 * @since 3.1.0
+		 *
+		 * @param int $comments_closed Number of posts whose comments were closed.
+		 * @param int $pings_closed    Number of posts whose pings were closed.
+		 */
+		do_action( 'acc_comments_processed', $comments_closed, $pings_closed );
 	}
 
 	/**
@@ -108,14 +128,15 @@ class Comments {
 				return false;
 		}
 
-		if ( ! in_array( $type, array( 'comment', 'ping' ), true ) || false === $action ) {
+		if ( ! in_array( $type, array( 'comment', 'ping' ), true ) ) {
 			return false;
 		}
 
 		$defaults = array(
-			'age'        => 0,
-			'post_types' => array(),
-			'post_ids'   => '',
+			'age'           => 0,
+			'post_types'    => array(),
+			'post_ids'      => '',
+			'exclude_terms' => '',
 		);
 
 		// Parse incoming $args into an array and merge it with $defaults.
@@ -136,6 +157,7 @@ class Comments {
 
 		if ( ! empty( $args['post_types'] ) ) {
 			$post_types = wp_parse_list( $args['post_types'] );
+			$post_types = array_map( 'sanitize_key', $post_types );
 
 			$sql .= " AND $wpdb->posts.post_type IN ('" . join( "', '", $post_types ) . "') ";
 		}
@@ -143,7 +165,26 @@ class Comments {
 		if ( ! empty( $args['post_ids'] ) ) {
 			$post_ids = wp_parse_id_list( $args['post_ids'] );
 
-			$sql .= " AND $wpdb->posts.ID IN ( {$post_ids} )";
+			$sql .= " AND $wpdb->posts.ID IN (" . implode( ',', $post_ids ) . ')';
+		}
+
+		if ( ! empty( $args['exclude_terms'] ) ) {
+			$term_ids = wp_parse_id_list( $args['exclude_terms'] );
+
+			if ( ! empty( $term_ids ) ) {
+				$sql .= " AND $wpdb->posts.ID NOT IN (
+					SELECT object_id FROM $wpdb->term_relationships
+					WHERE term_taxonomy_id IN (" . implode( ',', $term_ids ) . ')
+				) ';
+			}
+		}
+
+		if ( 'close' === $action ) {
+			$sql .= " AND $wpdb->posts.ID NOT IN (
+				SELECT post_id FROM $wpdb->postmeta
+				WHERE meta_key = '_acc_reopen_until'
+				AND CAST(meta_value AS UNSIGNED) > UNIX_TIMESTAMP()
+			) ";
 		}
 
 		$result = $wpdb->query( $sql ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
@@ -230,6 +271,6 @@ class Comments {
 			}
 		}
 
-		return count( $comments );
+		return $comments ? count( $comments ) : 0;
 	}
 }
