@@ -1,6 +1,6 @@
 {
     "name": "@webberzone/autoclose",
-    "version": "3.0.0",
+    "version": "3.1.0",
     "description": "Automatically close comments, pingbacks and trackbacks, and manage revisions.",
     "author": "WebberZone",
     "license": "GPL-2.0-or-later",

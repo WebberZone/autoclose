@@ -83,6 +83,10 @@ Major plugin changes. Check the Changelog and release post for complete informat
     * Reopen comments automatically when a published post is saved or updated, with a configurable number of days before they are closed again by the cron.
     * Email summary notification after each scheduled cron run, showing the number of comments closed, pings closed, and revisions deleted.
 
+* Bug fixes:
+    * Fixed undefined variable warnings when processing taxonomy term exclusions.
+    * Fixed Settings API repeater fields: form submission, hidden input names, and sanitization with row ID lookup.
+
 * Modifications:
     * Update Settings API and other reusable classes in line with the latest WebberZone plugins.
     * Email summary now uses an HTML template for improved readability.
