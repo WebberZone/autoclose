@@ -37,7 +37,7 @@ class Settings {
 	 * @since 3.0.0
 	 * @var   string
 	 */
-	public static $prefix;
+	public static $prefix = 'acc';
 
 	/**
 	 * Settings Key.
