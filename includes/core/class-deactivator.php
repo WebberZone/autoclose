@@ -2,7 +2,7 @@
 /**
  * Plugin deactivation logic.
  *
- * @package    AutoClose
+ * @package AutoClose
  */
 
 namespace WebberZone\AutoClose\Core;
@@ -14,6 +14,7 @@ namespace WebberZone\AutoClose\Core;
  */
 class Deactivator {
 
+
 	/**
 	 * Fired during plugin deactivation.
 	 *
@@ -24,5 +25,6 @@ class Deactivator {
 		if ( wp_next_scheduled( 'acc_cron_hook' ) ) {
 			wp_clear_scheduled_hook( 'acc_cron_hook' );
 		}
+		wp_clear_scheduled_hook( 'autoclose_close_comments_pings_event' );
 	}
 }

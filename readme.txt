@@ -76,6 +76,13 @@ Major plugin changes. Check the Changelog and release post for complete informat
 
 == Changelog ==
 
+= 3.2.0 =
+
+* Bug fixes:
+    * Plugin re-activation now correctly re-schedules the cron job if the scheduler was previously enabled. Previously, the cron remained unscheduled until settings were manually re-saved.
+    * Fixed per-post close date scheduling: when both a comments date and a pings date were set on the same post, only the first event was registered. Comments and pings events are now scheduled as distinct cron entries and both fire correctly.
+    * Fixed date comparison in the comment/ping closing query to use UTC time against `post_date_gmt`, preventing posts from being closed at the wrong time on servers where the PHP timezone differs from UTC.
+
 = 3.1.0 =
 Release post: [https://webberzone.com/announcements/auto-close-v3-1-0/](https://webberzone.com/announcements/auto-close-v3-1-0/)
 

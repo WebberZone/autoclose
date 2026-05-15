@@ -2,7 +2,7 @@
 /**
  * The main plugin class.
  *
- * @package    AutoClose
+ * @package AutoClose
  */
 
 namespace WebberZone\AutoClose;
@@ -15,6 +15,7 @@ use WebberZone\AutoClose\Util\Hook_Registry;
  * @since 3.0.0
  */
 class AutoClose {
+
 
 	/**
 	 * Instance of this class.
@@ -44,7 +45,7 @@ class AutoClose {
 	/**
 	 * Get a singleton instance of this class.
 	 *
-	 * @since 3.0.0
+	 * @since  3.0.0
 	 * @return AutoClose
 	 */
 	public static function get_instance() {
@@ -114,6 +115,9 @@ class AutoClose {
 		$close_date    = new Features\Close_Date();
 		$reopen        = new Features\Reopen();        // Feature: auto-reopen on post update.
 		$notifications = new Features\Notifications(); // Feature: email summary after cron.
+
+		// Register close date hooks.
+		Hook_Registry::add_action( 'autoclose_close_comments_pings_event', array( $close_date, 'maybe_close_due_comments_pings' ), 10, 2 );
 
 		// Register cron hooks.
 		Hook_Registry::add_action( 'acc_cron_hook', array( $comments, 'process_comments' ) );

@@ -53,6 +53,15 @@ class Activator {
 	 * @return void
 	 */
 	private static function single_activate() {
-		Options::get_options();
+		$options = Options::get_options();
+
+		if ( ! empty( $options['cron_on'] ) ) {
+			$cron = new \WebberZone\AutoClose\Util\Cron();
+			$cron->enable_run(
+				(int) ( $options['cron_hour'] ?? 0 ),
+				(int) ( $options['cron_min'] ?? 0 ),
+				$options['cron_recurrence'] ?? 'daily'
+			);
+		}
 	}
 }

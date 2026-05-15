@@ -142,9 +142,7 @@ class Comments {
 		// Parse incoming $args into an array and merge it with $defaults.
 		$args = wp_parse_args( $args, $defaults );
 
-		$current_time = strtotime( current_time( 'mysql' ) );
-		$close_date   = $current_time - ( max( 0, ( $args['age'] - 1 ) ) * DAY_IN_SECONDS );
-		$close_date   = gmdate( 'Y-m-d H:i:s', $close_date );
+		$close_date = gmdate( 'Y-m-d H:i:s', time() - ( max( 0, ( $args['age'] - 1 ) ) * DAY_IN_SECONDS ) );
 
 		$sql = "UPDATE {$wpdb->posts} ";
 
@@ -152,7 +150,7 @@ class Comments {
 		$sql .= $wpdb->prepare( " WHERE {$type}_status = %s ", $old_status ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		if ( $args['age'] > 0 ) {
-			$sql .= $wpdb->prepare( " AND $wpdb->posts.post_date < %s ", $close_date );
+			$sql .= $wpdb->prepare( " AND $wpdb->posts.post_date_gmt < %s ", $close_date );
 		}
 
 		if ( ! empty( $args['post_types'] ) ) {

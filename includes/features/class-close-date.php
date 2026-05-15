@@ -2,13 +2,11 @@
 /**
  * Feature: Per-post comment/trackback close date logic (scheduling & closing only).
  *
- * @package WebberZone\AutoClose
+ * @package    WebberZone\AutoClose
  * @subpackage Features
  */
 
 namespace WebberZone\AutoClose\Features;
-
-use WebberZone\AutoClose\Util\Hook_Registry;
 
 if ( ! defined( 'WPINC' ) ) {
 	die;
@@ -23,6 +21,7 @@ if ( ! defined( 'WPINC' ) ) {
  * @since 3.0.0
  */
 class Close_Date {
+
 	/**
 	 * Prefix for meta keys and filters.
 	 *
@@ -34,12 +33,11 @@ class Close_Date {
 	 * Constructor.
 	 */
 	public function __construct() {
-		Hook_Registry::add_action( 'init', array( $this, 'schedule_cron_for_due_posts' ) );
-		Hook_Registry::add_action( 'autoclose_close_comments_pings_event', array( $this, 'maybe_close_due_comments_pings' ) );
 	}
 
 	/**
-	 * Schedules cron if date/time is in the future, closes immediately if past.
+	 * Schedules cron if date/time is in the future, closes immediately if past,
+	 * and clears any existing scheduled event before (re-)scheduling.
 	 *
 	 * @param int $post_id Post ID.
 	 */
@@ -47,24 +45,30 @@ class Close_Date {
 		$comments_date = get_post_meta( $post_id, "_{$this->prefix}_comments_date", true );
 		$pings_date    = get_post_meta( $post_id, "_{$this->prefix}_pings_date", true );
 		$now           = current_time( 'Y-m-d\TH:i' );
+
+		wp_clear_scheduled_hook( 'autoclose_close_comments_pings_event', array( $post_id, 'comments' ) );
+		wp_clear_scheduled_hook( 'autoclose_close_comments_pings_event', array( $post_id, 'pings' ) );
+
 		if ( $comments_date && $comments_date <= $now ) {
 			$this->close_comments( $post_id );
 		} elseif ( $comments_date ) {
-			wp_schedule_single_event( strtotime( $comments_date ), 'autoclose_close_comments_pings_event', array( $post_id ) );
+			wp_schedule_single_event( strtotime( $comments_date ), 'autoclose_close_comments_pings_event', array( $post_id, 'comments' ) );
 		}
+
 		if ( $pings_date && $pings_date <= $now ) {
 			$this->close_pings( $post_id );
 		} elseif ( $pings_date ) {
-			wp_schedule_single_event( strtotime( $pings_date ), 'autoclose_close_comments_pings_event', array( $post_id ) );
+			wp_schedule_single_event( strtotime( $pings_date ), 'autoclose_close_comments_pings_event', array( $post_id, 'pings' ) );
 		}
 	}
 
 	/**
 	 * Cron callback to close comments/pings if due.
 	 *
-	 * @param int $post_id Post ID.
+	 * @param int    $post_id Post ID.
+	 * @param string $type    Event type ('comments' or 'pings'). Unused; both are re-evaluated.
 	 */
-	public function maybe_close_due_comments_pings( $post_id ): void {
+	public function maybe_close_due_comments_pings( $post_id, $type = '' ): void { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		$this->maybe_schedule_or_close( $post_id );
 	}
 
@@ -97,25 +101,6 @@ class Close_Date {
 					'ping_status' => 'closed',
 				)
 			);
-		}
-	}
-
-	/**
-	 * On plugin load, schedule cron for any due posts (fail-safe for missed events).
-	 */
-	public function schedule_cron_for_due_posts(): void {
-		foreach ( $this->get_supported_post_types() as $post_type ) {
-			$posts = get_posts(
-				array(
-					'post_type'      => $post_type,
-					'post_status'    => 'publish',
-					'posts_per_page' => -1,
-					'fields'         => 'ids',
-				)
-			);
-			foreach ( $posts as $post_id ) {
-				$this->maybe_schedule_or_close( $post_id );
-			}
 		}
 	}
 
