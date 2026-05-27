@@ -4,6 +4,7 @@ slug: installing-autoclose
 title: "Installing Auto-Close"
 products: [autoclose]
 sections: [01-acc-getting-started]
+tags: [autoclose,installation]
 status: publish
 order: 0
 ---
