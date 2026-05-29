@@ -6,6 +6,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Auto-Close Comments, Pingbacks and Trackbacks** (plugin slug: `autoclose`) is a WordPress plugin (v3.1.0) that automatically closes comments, pingbacks, and trackbacks on posts after a configurable age, manages post revision limits, and can block self-pings. It uses a WP-Cron job (`acc_cron_hook`) for scheduled processing. Namespace: `WebberZone\AutoClose`. Requires WordPress 6.6+, PHP 7.4+. No Freemius.
 
+WordPress.org: https://wordpress.org/plugins/autoclose/
+webberzone.com: https://webberzone.com/plugins/autoclose/
+
 Constants defined in `autoclose.php`: `ACC_PLUGIN_VERSION`, `ACC_PLUGIN_DIR`, `ACC_PLUGIN_URL`, `ACC_PLUGIN_FILE`.
 
 Settings prefix/key: `acc` / `acc_settings` (wp_options). Access via `WebberZone\AutoClose\Util\Options::get_option($key)` inside the codebase, or the legacy procedural wrapper `acc_get_settings()` from `includes/backward-compatibility.php`.
