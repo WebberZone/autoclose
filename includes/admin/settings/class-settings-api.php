@@ -5,7 +5,7 @@
  * Functions to register, read, write and update settings.
  * Portions of this code have been inspired by Easy Digital Downloads, WordPress Settings Sandbox, WordPress Settings API class, etc.
  *
- * @package    WebberZone\AutoClose\Admin
+ * @package    WebberZone\AutoClose
  */
 
 namespace WebberZone\AutoClose\Admin\Settings;
@@ -18,7 +18,7 @@ if ( ! defined( 'WPINC' ) ) {
 /**
  * Settings API wrapper class
  *
- * @version 2.8.2
+ * @version 2.9.0
  */
 class Settings_API {
 
@@ -27,7 +27,7 @@ class Settings_API {
 	 *
 	 * @var   string
 	 */
-	public const VERSION = '2.8.2';
+	public const VERSION = '2.9.0';
 
 	/**
 	 * Settings Key.

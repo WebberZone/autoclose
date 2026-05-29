@@ -2,7 +2,7 @@
 /**
  * Class to display and save a Metabox.
  *
- * @package WebberZone\AutoClose\Admin
+ * @package WebberZone\AutoClose
  */
 
 namespace WebberZone\AutoClose\Admin\Settings;

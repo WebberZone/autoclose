@@ -2,7 +2,7 @@
 /**
  * Sidebar template.
  *
- * @package WebberZone\AutoClose\Admin
+ * @package WebberZone\AutoClose
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
