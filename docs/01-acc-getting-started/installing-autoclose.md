@@ -1,5 +1,4 @@
 ---
-id: 213
 slug: installing-autoclose
 title: "Installing Auto-Close"
 products: [autoclose]
