@@ -51,5 +51,5 @@ function acc_delete_data() {
 
 	wp_clear_scheduled_hook( 'acc_cron_hook' );
 	wp_clear_scheduled_hook( 'ald_acc_hook' );
-	wp_clear_scheduled_hook( 'autoclose_close_comments_pings_event' );
+	wp_unschedule_hook( 'autoclose_close_comments_pings_event' );
 }

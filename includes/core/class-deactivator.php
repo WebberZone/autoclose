@@ -25,6 +25,6 @@ class Deactivator {
 		if ( wp_next_scheduled( 'acc_cron_hook' ) ) {
 			wp_clear_scheduled_hook( 'acc_cron_hook' );
 		}
-		wp_clear_scheduled_hook( 'autoclose_close_comments_pings_event' );
+		wp_unschedule_hook( 'autoclose_close_comments_pings_event' );
 	}
 }
