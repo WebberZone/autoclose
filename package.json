@@ -1,6 +1,6 @@
 {
     "name": "@webberzone/autoclose",
-    "version": "3.1.0",
+    "version": "3.1.1",
     "description": "Automatically close comments, pingbacks and trackbacks, and manage revisions.",
     "author": "WebberZone",
     "license": "GPL-2.0-or-later",
@@ -22,10 +22,10 @@
         "readme.txt"
     ],
     "devDependencies": {
-        "@wordpress/prettier-config": "^4.41.0",
-        "@wordpress/scripts": "^31.6.0",
+        "@wordpress/prettier-config": "^4.50.0",
+        "@wordpress/scripts": "^32.6.0",
         "clean-css-cli": "^5.6.3",
         "rtlcss": "^4.3.0",
-        "terser": "^5.46.0"
+        "terser": "^5.48.0"
     }
 }

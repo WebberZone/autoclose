@@ -724,7 +724,7 @@ class Settings {
 	/**
 	 * Get field attributes for Tom Select taxonomy search fields.
 	 *
-	 * @since 3.2.0
+	 * @since 3.1.1
 	 *
 	 * @param string $taxonomy Taxonomy name or 'public_taxonomies' to search all.
 	 * @return array Field attributes array.
@@ -741,7 +741,7 @@ class Settings {
 	/**
 	 * AJAX handler for Tom Select taxonomy search.
 	 *
-	 * @since 3.2.0
+	 * @since 3.1.1
 	 */
 	public static function taxonomy_search_tom_select(): void {
 		if ( ! isset( $_REQUEST['nonce'] ) ) {

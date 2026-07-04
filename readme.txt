@@ -2,7 +2,7 @@
 Tags: comments, pingback, revisions, spam, anti-spam
 Contributors: webberzone, Ajay
 Donate link: https://wzn.io/donate-wz
-Stable tag: 3.2.0
+Stable tag: 3.1.1
 Requires at least: 6.6
 Tested up to: 7.0
 Requires PHP: 7.4
@@ -71,12 +71,12 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 == Upgrade Notice ==
 
-= 3.2.0 =
-Major plugin changes. Check the Changelog and release post for complete information.
+= 3.1.1 =
+Bug fixes. Check the Changelog for complete information.
 
 == Changelog ==
 
-= 3.2.0 =
+= 3.1.1 =
 
 * Bug fixes:
     * Plugin re-activation now correctly re-schedules the cron job if the scheduler was previously enabled. Previously, the cron remained unscheduled until settings were manually re-saved.
