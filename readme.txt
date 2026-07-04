@@ -2,7 +2,7 @@
 Tags: comments, pingback, revisions, spam, anti-spam
 Contributors: webberzone, Ajay
 Donate link: https://wzn.io/donate-wz
-Stable tag: 3.1.0
+Stable tag: 3.2.0
 Requires at least: 6.6
 Tested up to: 7.0
 Requires PHP: 7.4
