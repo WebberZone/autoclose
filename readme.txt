@@ -71,7 +71,7 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 == Upgrade Notice ==
 
-= 3.1.0 =
+= 3.2.0 =
 Major plugin changes. Check the Changelog and release post for complete information.
 
 == Changelog ==
