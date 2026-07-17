@@ -4,10 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Plugin Overview
 
-**Auto-Close Comments, Pingbacks and Trackbacks** (plugin slug: `autoclose`) is a WordPress plugin (v3.1.0) that automatically closes comments, pingbacks, and trackbacks on posts after a configurable age, manages post revision limits, and can block self-pings. It uses a WP-Cron job (`acc_cron_hook`) for scheduled processing. Namespace: `WebberZone\AutoClose`. Requires WordPress 6.6+, PHP 7.4+. No Freemius.
-
-WordPress.org: <https://wordpress.org/plugins/autoclose/>
-webberzone.com: <https://webberzone.com/plugins/autoclose/>
+**Auto-Close Comments, Pingbacks and Trackbacks** (plugin slug: `autoclose`) is a WordPress plugin (v3.1.1) that automatically closes comments, pingbacks, and trackbacks on posts after a configurable age, manages post revision limits, and can block self-pings. It uses a WP-Cron job (`acc_cron_hook`) for scheduled processing. Namespace: `WebberZone\AutoClose`. Requires WordPress 6.6+, PHP 7.4+. No Freemius.
 
 Constants defined in `autoclose.php`: `ACC_PLUGIN_VERSION`, `ACC_PLUGIN_DIR`, `ACC_PLUGIN_URL`, `ACC_PLUGIN_FILE`.
 
@@ -39,7 +36,7 @@ No Gutenberg blocks; no `npm run build` / `npm start` scripts.
 
 ### Entry Point
 
-`autoclose.php` defines constants, loads `includes/class-autoloader.php` (a class-based autoloader — `Autoloader::register()`), loads `includes/backward-compatibility.php`, registers activation/deactivation hooks pointing to `Core\Activator` and `Core\Deactivator`, then calls `acc_init()` on `plugins_loaded` which instantiates `AutoClose::get_instance()` and calls `->run()`.
+`autoclose.php` defines constants, loads `includes/class-autoloader.php` (a class-based autoloader — `Autoloader::register()`), loads `includes/backward-compatibility.php`, registers activation/deactivation hooks pointing to `AutoClose::activate` and `AutoClose::deactivate` (which delegate to `Core\Activator` and `Core\Deactivator`), then calls `acc_init()` on `plugins_loaded` which instantiates `AutoClose::get_instance()` and calls `->run()`.
 
 ### Main class (`includes/class-autoclose.php`)
 
@@ -54,7 +51,7 @@ Singleton (`AutoClose::get_instance()`). Unlike the other WebberZone plugins, ho
 
 ### Features (`includes/features/`)
 
-Each feature class is instantiated once in `define_feature_hooks()`; hooks are registered there rather than in the feature class constructors.
+Each feature class is instantiated once in `define_feature_hooks()`. `Comments`, `Revisions`, `Block_Pings`, and `Close_Date` register their hooks in `define_feature_hooks()`; `Reopen` and `Notifications` register their hooks in their own constructors. All hook registration goes through `Util\Hook_Registry::add_action()` / `add_filter()`.
 
 - **`Comments`** — `process_comments()` runs on `acc_cron_hook`; closes comments on posts older than the configured age, per post type, with optional term exclusions.
 - **`Revisions`** — `process_revisions()` runs on `acc_cron_hook`; deletes revisions beyond the configured limit. `revisions_to_keep()` hooks `wp_revisions_to_keep` to enforce per-post-type limits on new saves.
