@@ -85,6 +85,7 @@ class Settings {
 			'help_tabs'         => $this->get_help_tabs(),
 			'admin_footer_text' => $this->get_admin_footer_text(),
 			'menus'             => $this->get_menus(),
+			'version'           => ACC_PLUGIN_VERSION,
 		);
 
 		$args = array(
@@ -114,7 +115,10 @@ class Settings {
 			'save_changes'         => esc_html__( 'Save Changes', 'autoclose' ),
 			'reset_settings'       => esc_html__( 'Reset all settings', 'autoclose' ),
 			'reset_button_confirm' => esc_html__( 'Do you really want to reset all these settings to their default values?', 'autoclose' ),
-			'checkbox_modified'    => esc_html__( 'Modified from default setting', 'autoclose' ),
+			'modified_field'       => esc_html__( 'Modified from default setting', 'autoclose' ),
+			'modified_legend'      => esc_html__( 'Setting modified from its default value', 'autoclose' ),
+			'default_label'        => esc_html__( 'Default', 'autoclose' ),
+			'default_none'         => esc_html__( 'None', 'autoclose' ),
 		);
 
 		/**
