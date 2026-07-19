@@ -2,7 +2,7 @@
 /**
  * Post revisions management.
  *
- * @package    AutoClose
+ * @package AutoClose
  */
 
 namespace WebberZone\AutoClose\Features;
@@ -73,8 +73,8 @@ class Revisions {
 	 *
 	 * @since 3.0.0
 	 *
-	 * @param int      $num  Number of revisions to store.
-	 * @param \WP_Post $post Post object.
+	 * @param  int      $num  Number of revisions to store.
+	 * @param  \WP_Post $post Post object.
 	 * @return int Number of revisions to keep.
 	 */
 	public function revisions_to_keep( $num, $post ) {
@@ -107,7 +107,7 @@ class Revisions {
 
 		foreach ( $post_types as $post_type ) {
 			if ( post_type_supports( $post_type->name, 'revisions' ) ) {
-				if ( property_exists( $post_type, 'labels' ) && property_exists( $post_type->labels, 'name' ) ) {
+				if ( property_exists( $post_type->labels, 'name' ) ) {
 					$name = $post_type->labels->name;
 				} else {
 					$name = $post_type->name;

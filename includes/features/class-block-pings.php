@@ -2,8 +2,8 @@
 /**
  * Block Self-Pings and Custom Ping URLs
  *
- * @since      3.0.0
- * @package    AutoClose
+ * @since   3.0.0
+ * @package AutoClose
  */
 
 namespace WebberZone\AutoClose\Features;
@@ -22,6 +22,7 @@ if ( ! defined( 'WPINC' ) ) {
  * @since 3.0.0
  */
 class Block_Pings {
+
 	/**
 	 * Constructor.
 	 */
@@ -50,7 +51,7 @@ class Block_Pings {
 				continue;
 			}
 			foreach ( $url_array as $url ) {
-				if ( '' !== $url && 0 === strpos( $link, $url ) ) {
+				if ( 0 === strpos( $link, $url ) ) {
 					unset( $links[ $l ] );
 					break;
 				}
