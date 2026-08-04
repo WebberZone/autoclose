@@ -22,10 +22,10 @@
         "readme.txt"
     ],
     "devDependencies": {
-        "@wordpress/prettier-config": "^4.50.0",
-        "@wordpress/scripts": "^32.6.0",
+        "@wordpress/prettier-config": "^4.52.0",
+        "@wordpress/scripts": "^34.0.0",
         "clean-css-cli": "^5.6.3",
         "rtlcss": "^4.3.0",
-        "terser": "^5.48.0"
+        "terser": "^5.49.1"
     }
 }
