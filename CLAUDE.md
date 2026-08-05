@@ -40,11 +40,12 @@ composer build:vendor   # Install production deps only
 ### JavaScript/CSS
 
 ```bash
-npm run build:assets    # Minify CSS/JS, generate RTL CSS (node build-assets.js)
-npm run zip             # Create distribution zip (wp-scripts plugin-zip)
+pnpm run build:assets    # Minify CSS/JS, generate RTL CSS (node build-assets.js)
+pnpm run zip             # Create distribution zip (wp-scripts plugin-zip)
+ncu -u && pnpm install   # Update dependencies to latest and reinstall
 ```
 
-No Gutenberg blocks; no `npm run build` / `npm start` scripts.
+No Gutenberg blocks; no `pnpm run build` / `pnpm start` scripts.
 
 ## Architecture
 
