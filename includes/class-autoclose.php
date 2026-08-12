@@ -35,6 +35,14 @@ class AutoClose {
 	public $settings;
 
 	/**
+	 * The admin instance.
+	 *
+	 * @since 3.1.2
+	 * @var   Admin\Admin
+	 */
+	public $admin;
+
+	/**
 	 * Plugin options.
 	 *
 	 * @since 3.0.0
@@ -92,15 +100,26 @@ class AutoClose {
 	 * @since 3.0.0
 	 */
 	private function define_admin_hooks() {
-		$admin = new Admin\Admin();
-		$tools = new Admin\Tools();
+		Hook_Registry::add_action( 'init', array( $this, 'init_admin' ) );
+	}
 
-		// Plugin links.
-		Hook_Registry::add_filter( 'plugin_row_meta', array( $admin, 'plugin_row_meta' ), 10, 2 );
-		Hook_Registry::add_filter( 'plugin_action_links_' . plugin_basename( ACC_PLUGIN_FILE ), array( $admin, 'plugin_actions_links' ) );
+	/**
+	 * Initialize admin components.
+	 *
+	 * @since 3.1.2
+	 */
+	public function init_admin(): void {
+		if ( is_admin() ) {
+			$this->admin = new Admin\Admin();
+			$tools       = new Admin\Tools();
 
-		// Tools page hooks.
-		Hook_Registry::add_action( 'admin_menu', array( $tools, 'add_tools_page' ) );
+			// Plugin links.
+			Hook_Registry::add_filter( 'plugin_row_meta', array( $this->admin, 'plugin_row_meta' ), 10, 2 );
+			Hook_Registry::add_filter( 'plugin_action_links_' . plugin_basename( ACC_PLUGIN_FILE ), array( $this->admin, 'plugin_actions_links' ) );
+
+			// Tools page hooks.
+			Hook_Registry::add_action( 'admin_menu', array( $tools, 'add_tools_page' ) );
+		}
 	}
 
 	/**

@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Copy-paste friendly: adjust namespaces and configuration per plugin.
  *
- * @since 3.2.0
+ * @since 3.1.2
  */
 class Admin_Banner {
 
