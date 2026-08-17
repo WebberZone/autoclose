@@ -10,7 +10,7 @@ if ( ! defined( 'WPINC' ) ) {
 	die( "Aren't you supposed to come here via WP-Admin?" );
 }
 
-use WebberZone\AutoClose\Util\Options;
+use WebberZone\AutoClose\Options_API;
 use WebberZone\AutoClose\Features\Comments;
 use WebberZone\AutoClose\Features\Revisions;
 
@@ -19,11 +19,16 @@ use WebberZone\AutoClose\Features\Revisions;
  *
  * Retrieves all plugin settings
  *
+ * Merges over the defaults so this always returns a complete array, even before
+ * the settings page has been visited for the first time — third-party code
+ * calling this documented function should not have to handle a partial or empty
+ * result.
+ *
  * @since  2.0.0
  * @return array AutoClose settings
  */
 function acc_get_settings() {
-	return Options::get_options();
+	return array_merge( Options_API::get_settings_defaults(), (array) Options_API::get_settings() );
 }
 
 /**

@@ -279,7 +279,7 @@ class Settings {
 	 * so that they match what `settings_defaults()` produces after its
 	 * `(int) (bool)` cast. This array is deliberately unfiltered — the
 	 * `acc_settings_defaults` filter is applied by the consumers
-	 * (`settings_defaults()` and `Util\Options::get_default_option()`) so that it
+	 * (`settings_defaults()` and `Options_API::get_default_option()`) so that it
 	 * runs exactly once on each path.
 	 *
 	 * The `revision_{$post_type}` entries are generated rather than listed: the set

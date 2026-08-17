@@ -7,7 +7,7 @@
 
 namespace WebberZone\AutoClose\Features;
 
-use WebberZone\AutoClose\Util\Options;
+use WebberZone\AutoClose\Options_API;
 
 /**
  * Revisions class.
@@ -33,7 +33,7 @@ class Revisions {
 	public function process_revisions() {
 		$deleted = 0;
 
-		if ( Options::get_option( 'delete_revisions' ) ) {
+		if ( Options_API::get_option( 'delete_revisions' ) ) {
 			$result  = $this->delete_revisions();
 			$deleted = is_int( $result ) ? $result : 0;
 		}
@@ -81,7 +81,7 @@ class Revisions {
 		$post_type           = $post->post_type;
 		$revision_post_types = array_keys( $this->get_revision_post_types() );
 
-		$revisions_to_keep = Options::get_option( "revision_{$post_type}" );
+		$revisions_to_keep = Options_API::get_option( "revision_{$post_type}" );
 
 		// If revisions to keep is -2, then we ignore.
 		if ( -2 === (int) $revisions_to_keep ) {

@@ -8,7 +8,7 @@
 
 namespace WebberZone\AutoClose\Features;
 
-use WebberZone\AutoClose\Util\Options;
+use WebberZone\AutoClose\Options_API;
 
 if ( ! defined( 'WPINC' ) ) {
 	die;
@@ -40,8 +40,8 @@ class Block_Pings {
 		$home = home_url();
 
 		// Retrieve user-defined blocked URLs and self-ping setting using the Options utility class.
-		$block_self_pings = Options::get_option( 'block_self_pings', true );
-		$extra_urls       = Options::get_option( 'block_ping_urls', '' );
+		$block_self_pings = Options_API::get_option( 'block_self_pings', true );
+		$extra_urls       = Options_API::get_option( 'block_ping_urls', '' );
 
 		$url_array = array_filter( array_map( 'trim', explode( PHP_EOL, $extra_urls ) ) );
 

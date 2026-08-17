@@ -7,7 +7,7 @@
 
 namespace WebberZone\AutoClose\Core;
 
-use WebberZone\AutoClose\Util\Options;
+use WebberZone\AutoClose\Options_API;
 
 /**
  * Fired during plugin activation.
@@ -53,15 +53,15 @@ class Activator {
 	 * @return void
 	 */
 	private static function single_activate() {
-		$options = Options::get_options();
-
-		if ( ! empty( $options['cron_on'] ) ) {
-			$cron = new \WebberZone\AutoClose\Util\Cron();
-			$cron->enable_run(
-				(int) ( $options['cron_hour'] ?? 0 ),
-				(int) ( $options['cron_min'] ?? 0 ),
-				$options['cron_recurrence'] ?? 'daily'
-			);
+		if ( ! Options_API::get_option( 'cron_on' ) ) {
+			return;
 		}
+
+		$cron = new \WebberZone\AutoClose\Util\Cron();
+		$cron->enable_run(
+			(int) Options_API::get_option( 'cron_hour' ),
+			(int) Options_API::get_option( 'cron_min' ),
+			Options_API::get_option( 'cron_recurrence' )
+		);
 	}
 }

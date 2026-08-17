@@ -8,7 +8,7 @@
 namespace WebberZone\AutoClose\Features;
 
 use WebberZone\AutoClose\Util\Hook_Registry;
-use WebberZone\AutoClose\Util\Options;
+use WebberZone\AutoClose\Options_API;
 use WebberZone\AutoClose\Util\Helpers;
 
 if ( ! defined( 'WPINC' ) ) {
@@ -58,12 +58,12 @@ class Reopen {
 			return;
 		}
 
-		if ( ! Options::get_option( 'reopen_on_update' ) ) {
+		if ( ! Options_API::get_option( 'reopen_on_update' ) ) {
 			return;
 		}
 
 		// Only act on post types configured for comment closing.
-		$post_types = Helpers::parse_post_types( Options::get_option( 'comment_post_types' ) );
+		$post_types = Helpers::parse_post_types( Options_API::get_option( 'comment_post_types' ) );
 		if ( ! empty( $post_types ) && ! in_array( $post->post_type, $post_types, true ) ) {
 			return;
 		}
@@ -79,7 +79,7 @@ class Reopen {
 		$processing = false;
 
 		// Store the reopen window as a Unix timestamp in post meta.
-		$days = (int) Options::get_option( 'reopen_days' );
+		$days = (int) Options_API::get_option( 'reopen_days' );
 		if ( $days > 0 ) {
 			update_post_meta( $post_id, '_acc_reopen_until', time() + ( $days * DAY_IN_SECONDS ) );
 		} else {

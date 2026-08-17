@@ -7,7 +7,7 @@
 
 namespace WebberZone\AutoClose\Features;
 
-use WebberZone\AutoClose\Util\Options;
+use WebberZone\AutoClose\Options_API;
 use WebberZone\AutoClose\Util\Helpers;
 
 /**
@@ -32,23 +32,23 @@ class Comments {
 	 * @since 3.0.0
 	 */
 	public function process_comments() {
-		$comment_age     = Options::get_option( 'comment_age' );
-		$comment_pids    = Options::get_option( 'comment_pids' );
-		$pbtb_age        = Options::get_option( 'pbtb_age' );
-		$pbtb_pids       = Options::get_option( 'pbtb_pids' );
+		$comment_age     = Options_API::get_option( 'comment_age' );
+		$comment_pids    = Options_API::get_option( 'comment_pids' );
+		$pbtb_age        = Options_API::get_option( 'pbtb_age' );
+		$pbtb_pids       = Options_API::get_option( 'pbtb_pids' );
 		$comments_closed = 0;
 		$pings_closed    = 0;
 
 		// Get the post types.
-		$comment_post_types = Helpers::parse_post_types( Options::get_option( 'comment_post_types' ) );
-		$pbtb_post_types    = Helpers::parse_post_types( Options::get_option( 'pbtb_post_types' ) );
+		$comment_post_types = Helpers::parse_post_types( Options_API::get_option( 'comment_post_types' ) );
+		$pbtb_post_types    = Helpers::parse_post_types( Options_API::get_option( 'pbtb_post_types' ) );
 
 		// Resolve exclude terms: prefer the sanitized ID field, fall back to the display field for backward compat.
-		$comment_exclude_terms = Options::get_option( 'comment_exclude_term_ids' );
-		$pbtb_exclude_terms    = Options::get_option( 'pbtb_exclude_term_ids' );
+		$comment_exclude_terms = Options_API::get_option( 'comment_exclude_term_ids' );
+		$pbtb_exclude_terms    = Options_API::get_option( 'pbtb_exclude_term_ids' );
 
 		// Close Comments on posts.
-		if ( Options::get_option( 'close_comment' ) ) {
+		if ( Options_API::get_option( 'close_comment' ) ) {
 			$result          = $this->close_comments(
 				array(
 					'age'           => $comment_age,
@@ -60,7 +60,7 @@ class Comments {
 		}
 
 		// Close Pingbacks/Trackbacks on posts.
-		if ( Options::get_option( 'close_pbtb' ) ) {
+		if ( Options_API::get_option( 'close_pbtb' ) ) {
 			$result       = $this->close_pingbacks(
 				array(
 					'age'           => $pbtb_age,

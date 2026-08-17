@@ -8,7 +8,7 @@
 namespace WebberZone\AutoClose\Features;
 
 use WebberZone\AutoClose\Util\Hook_Registry;
-use WebberZone\AutoClose\Util\Options;
+use WebberZone\AutoClose\Options_API;
 
 if ( ! defined( 'WPINC' ) ) {
 	die;
@@ -94,11 +94,11 @@ class Notifications {
 	 * @since 3.1.0
 	 */
 	public function maybe_send_email(): void {
-		if ( ! Options::get_option( 'email_notify' ) ) {
+		if ( ! Options_API::get_option( 'email_notify' ) ) {
 			return;
 		}
 
-		$to = Options::get_option( 'email_notify_address' );
+		$to = Options_API::get_option( 'email_notify_address' );
 		if ( ! $to || ! is_email( $to ) ) {
 			$to = get_option( 'admin_email' );
 		}

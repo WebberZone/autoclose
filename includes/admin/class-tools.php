@@ -9,7 +9,7 @@ namespace WebberZone\AutoClose\Admin;
 
 use WebberZone\AutoClose\Features\Comments;
 use WebberZone\AutoClose\Features\Revisions;
-use WebberZone\AutoClose\Util\Options;
+use WebberZone\AutoClose\Options_API;
 use WebberZone\AutoClose\Util\Hook_Registry;
 
 /**
@@ -96,27 +96,27 @@ class Tools {
 
 			$message = '';
 
-			if ( Options::get_option( 'close_comment' ) ) {
+			if ( Options_API::get_option( 'close_comment' ) ) {
 				/* translators: 1: Date. */
 				$message .= sprintf(
 					/* translators: 1. Date */
 					esc_html__( 'Comments closed up to %1$s', 'autoclose' ),
-					gmdate( $date_time_format, $current_time - Options::get_option( 'comment_age' ) * DAY_IN_SECONDS )
+					gmdate( $date_time_format, $current_time - Options_API::get_option( 'comment_age' ) * DAY_IN_SECONDS )
 				);
 				$message .= '<br />';
 			}
 
-			if ( Options::get_option( 'close_pbtb' ) ) {
+			if ( Options_API::get_option( 'close_pbtb' ) ) {
 				/* translators: 1: Date. */
 				$message .= sprintf(
 					/* translators: 1. Date */
 					esc_html__( 'Pingbacks/Trackbacks closed up to %1$s', 'autoclose' ),
-					gmdate( $date_time_format, $current_time - Options::get_option( 'pbtb_age' ) * DAY_IN_SECONDS )
+					gmdate( $date_time_format, $current_time - Options_API::get_option( 'pbtb_age' ) * DAY_IN_SECONDS )
 				);
 				$message .= '<br />';
 			}
 
-			if ( Options::get_option( 'delete_revisions' ) ) {
+			if ( Options_API::get_option( 'delete_revisions' ) ) {
 				$message .= esc_html__( 'Post revisions deleted', 'autoclose' );
 				$message .= '<br />';
 			}
