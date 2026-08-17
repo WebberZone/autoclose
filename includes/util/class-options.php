@@ -176,42 +176,18 @@ class Options {
 	/**
 	 * Get default settings.
 	 *
+	 * Delegates to the Settings class rather than rebuilding the array here. The
+	 * local implementation read each field's `options` key where the field
+	 * definitions declare `default`, so every checkbox and every text-like field
+	 * resolved to 0 regardless of what it declared. `settings_defaults()` reads
+	 * `default` and applies the `acc_settings_defaults` filter itself, so the
+	 * filter still fires exactly once.
+	 *
 	 * @since 3.0.0
 	 * @return array Default settings
 	 */
 	public static function get_defaults() {
-		$options = array();
-
-		// Always use Settings class to get registered settings.
-		$registered_settings = Settings::get_registered_settings();
-
-		// Populate default values.
-		foreach ( $registered_settings as $tab => $settings ) {
-			foreach ( $settings as $option ) {
-				// When checkbox is set to true, set this to 1.
-				if ( 'checkbox' === $option['type'] && ! empty( $option['options'] ) ) {
-					$options[ $option['id'] ] = 1;
-				} else {
-					$options[ $option['id'] ] = 0;
-				}
-				// If an option is set.
-				if ( in_array( $option['type'], array( 'textarea', 'css', 'html', 'text', 'url', 'csv', 'color', 'numbercsv', 'postids', 'posttypes', 'number', 'wysiwyg', 'file', 'password' ), true ) && isset( $option['options'] ) ) {
-					$options[ $option['id'] ] = $option['options'];
-				}
-				if ( in_array( $option['type'], array( 'multicheck', 'radio', 'select', 'radiodesc', 'thumbsizes' ), true ) && isset( $option['default'] ) ) {
-					$options[ $option['id'] ] = $option['default'];
-				}
-			}
-		}
-
-		/**
-		 * Filters the default settings array.
-		 *
-		 * @since 2.0.0
-		 *
-		 * @param array $options Default settings.
-		 */
-		return apply_filters( 'acc_settings_defaults', $options );
+		return Settings::settings_defaults();
 	}
 
 	/**
@@ -219,11 +195,26 @@ class Options {
 	 *
 	 * @since 3.0.0
 	 *
+	 * Reads `Settings::get_defaults()` rather than `get_defaults()` above: the raw
+	 * array carries no translation calls, so resolving one default does not build
+	 * every field definition and is safe before `init`.
+	 *
 	 * @param string $key Key of the option to fetch.
 	 * @return mixed Default value
 	 */
 	public static function get_default_option( $key = '' ) {
-		$default_settings = self::get_defaults();
+		/**
+		 * Filter the default settings array.
+		 *
+		 * Mirrors the filter applied in `Settings::settings_defaults()` so that this
+		 * translation-free path honours the same hook. `Settings::get_defaults()` is
+		 * unfiltered, so the filter runs exactly once on each path.
+		 *
+		 * @since 2.0.0
+		 *
+		 * @param array $defaults Default settings.
+		 */
+		$default_settings = apply_filters( 'acc_settings_defaults', Settings::get_defaults() );
 
 		if ( array_key_exists( $key, $default_settings ) ) {
 			return $default_settings[ $key ];

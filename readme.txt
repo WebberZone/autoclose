@@ -76,6 +76,15 @@ Fixed an incorrect early translation loading notice in WordPress 6.7 and later.
 
 == Changelog ==
 
+= 3.1.3 =
+
+* Bug fixes:
+    * Fixed settings falling back to 0 instead of their intended default when the saved settings did not yet contain that option, which affected every checkbox and every text, number and comma-separated field. This applied to newly introduced settings on existing installs; settings saved from the settings page were unaffected.
+    * Fixed the `acc_settings_defaults` filter being ignored when a default was read outside the admin area.
+
+* Improvements:
+    * Setting defaults are now resolved from a single lightweight list instead of building every settings field, so reading an option early in the page load no longer risks loading translations too early.
+
 = 3.1.2 =
 
 * Bug fixes:

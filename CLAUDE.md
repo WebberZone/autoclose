@@ -87,7 +87,9 @@ Each feature class is instantiated once in `define_feature_hooks()`. `Comments`,
 
 ### Options access
 
-Feature classes use `WebberZone\AutoClose\Util\Options::get_option($key)` (the internal static class in `includes/util/class-options.php`). `Options_API` in `includes/class-options-api.php` is a richer OOP variant used by settings sanitization. Avoid the legacy `acc_get_settings()` procedural wrapper in new code.
+Feature classes use `WebberZone\AutoClose\Util\Options::get_option($key)` (the internal static class in `includes/util/class-options.php`) — this is the only live options layer. `Options_API` in `includes/class-options-api.php` is currently dead code with no references anywhere in the plugin. Avoid the legacy `acc_get_settings()` procedural wrapper in new code.
+
+`Options::get_defaults()` delegates to `Admin\Settings::settings_defaults()`, and `Options::get_default_option()` reads the raw `Admin\Settings::get_defaults()` array. See the defaults contract in the `Settings_API` repo.
 
 ### Backward compatibility
 

@@ -268,19 +268,85 @@ class Settings {
 	}
 
 	/**
+	 * Raw default values for every setting, keyed by option ID.
+	 *
+	 * Single source of truth for field defaults. Deliberately contains no
+	 * translation calls so it is safe to invoke before `init` without triggering a
+	 * "translation loading triggered too early" notice. The field definition
+	 * methods below reference this array instead of duplicating literals.
+	 *
+	 * Values are pre-normalised: checkbox defaults use 1/0 rather than true/false
+	 * so that they match what `settings_defaults()` produces after its
+	 * `(int) (bool)` cast. This array is deliberately unfiltered — the
+	 * `acc_settings_defaults` filter is applied by the consumers
+	 * (`settings_defaults()` and `Util\Options::get_default_option()`) so that it
+	 * runs exactly once on each path.
+	 *
+	 * The `revision_{$post_type}` entries are generated rather than listed: the set
+	 * of post types supporting revisions differs per site, so they are built from
+	 * the same source `settings_revisions()` uses. Only the keys are needed here,
+	 * not the labels, so nothing translates.
+	 *
+	 * @since 3.1.3
+	 *
+	 * @return array Raw default values keyed by option ID.
+	 */
+	public static function get_defaults() {
+		$defaults = array(
+			// General.
+			'cron_on'               => 0,
+			'cron_hour'             => 0,
+			'cron_min'              => 0,
+			'cron_recurrence'       => 'daily',
+			'email_notify'          => 0,
+			'email_notify_address'  => '',
+
+			// Comments.
+			'close_comment'         => 0,
+			'comment_post_types'    => 'post',
+			'comment_age'           => 90,
+			'comment_pids'          => '',
+			'comment_exclude_terms' => '',
+			'reopen_on_update'      => 0,
+			'reopen_days'           => 30,
+
+			// Pings and trackbacks.
+			'close_pbtb'            => 0,
+			'pbtb_post_types'       => 'post',
+			'pbtb_age'              => 90,
+			'pbtb_pids'             => '',
+			'pbtb_exclude_terms'    => '',
+			'block_self_pings'      => 0,
+			'block_ping_urls'       => '',
+
+			// Revisions.
+			'delete_revisions'      => 0,
+		);
+
+		$revisions = new \WebberZone\AutoClose\Features\Revisions();
+
+		foreach ( array_keys( $revisions->get_revision_post_types() ) as $post_type ) {
+			$defaults[ 'revision_' . $post_type ] = -2;
+		}
+
+		return $defaults;
+	}
+
+	/**
 	 * Returns the general settings.
 	 *
 	 * @since 3.0.0
 	 * @return array General settings.
 	 */
 	public static function settings_general() {
+		$defaults = self::get_defaults();
 		$settings = array(
 			'cron_on'              => array(
 				'id'      => 'cron_on',
 				'name'    => esc_html__( 'Activate scheduled closing', 'autoclose' ),
 				'desc'    => esc_html__( 'This creates a WordPress cron job using the schedule settings below. This cron job will execute the tasks to close comments, pingbacks/trackbacks or delete post revisions based on the settings from the other tabs.', 'autoclose' ),
 				'type'    => 'checkbox',
-				'default' => false,
+				'default' => $defaults['cron_on'],
 			),
 			'cron_range_desc'      => array(
 				'id'   => 'cron_range_desc',
@@ -293,7 +359,7 @@ class Settings {
 				'name'    => esc_html__( 'Hour', 'autoclose' ),
 				'desc'    => '',
 				'type'    => 'number',
-				'default' => 0,
+				'default' => $defaults['cron_hour'],
 				'min'     => 0,
 				'max'     => 23,
 				'size'    => 'small',
@@ -303,7 +369,7 @@ class Settings {
 				'name'    => esc_html__( 'Minute', 'autoclose' ),
 				'desc'    => '',
 				'type'    => 'number',
-				'default' => 0,
+				'default' => $defaults['cron_min'],
 				'min'     => 0,
 				'max'     => 59,
 				'size'    => 'small',
@@ -313,7 +379,7 @@ class Settings {
 				'name'    => esc_html__( 'Run maintenance', 'autoclose' ),
 				'desc'    => '',
 				'type'    => 'radio',
-				'default' => 'daily',
+				'default' => $defaults['cron_recurrence'],
 				'options' => array(
 					'daily'       => esc_html__( 'Daily', 'autoclose' ),
 					'weekly'      => esc_html__( 'Weekly', 'autoclose' ),
@@ -326,14 +392,14 @@ class Settings {
 				'name'    => esc_html__( 'Send summary email after cron run', 'autoclose' ),
 				'desc'    => esc_html__( 'Send an email summary after each scheduled run showing what was closed/deleted.', 'autoclose' ),
 				'type'    => 'checkbox',
-				'default' => false,
+				'default' => $defaults['email_notify'],
 			),
 			'email_notify_address' => array(
 				'id'          => 'email_notify_address',
 				'name'        => esc_html__( 'Notification email address', 'autoclose' ),
 				'desc'        => esc_html__( 'Leave blank to use the site admin email address.', 'autoclose' ),
 				'type'        => 'text',
-				'default'     => '',
+				'default'     => $defaults['email_notify_address'],
 				'size'        => 'regular',
 				'placeholder' => get_option( 'admin_email' ),
 			),
@@ -355,34 +421,35 @@ class Settings {
 	 * @return array Comments settings.
 	 */
 	public static function settings_comments() {
+		$defaults = self::get_defaults();
 		$settings = array(
 			'close_comment'         => array(
 				'id'      => 'close_comment',
 				'name'    => esc_html__( 'Close comments', 'autoclose' ),
 				'desc'    => esc_html__( 'Enable to close comments - used for the automatic schedule as well as one time runs under the Tools tab.', 'autoclose' ),
 				'type'    => 'checkbox',
-				'default' => false,
+				'default' => $defaults['close_comment'],
 			),
 			'comment_post_types'    => array(
 				'id'      => 'comment_post_types',
 				'name'    => esc_html__( 'Post types to include', 'autoclose' ),
 				'desc'    => esc_html__( 'At least one option should be selected above. Select which post types on which you want comments closed.', 'autoclose' ),
 				'type'    => 'posttypes',
-				'default' => 'post',
+				'default' => $defaults['comment_post_types'],
 			),
 			'comment_age'           => array(
 				'id'      => 'comment_age',
 				'name'    => esc_html__( 'Close comments on posts/pages older than', 'autoclose' ),
 				'desc'    => esc_html__( 'Comments that are older than the above number, in days, will be closed automatically if the schedule is enabled', 'autoclose' ),
 				'type'    => 'number',
-				'default' => 90,
+				'default' => $defaults['comment_age'],
 			),
 			'comment_pids'          => array(
 				'id'      => 'comment_pids',
 				'name'    => esc_html__( 'Keep comments on these posts/pages open', 'autoclose' ),
 				'desc'    => esc_html__( 'Comma-separated list of post, page or custom post type IDs. e.g. 188,320,500', 'autoclose' ),
 				'type'    => 'numbercsv',
-				'default' => '',
+				'default' => $defaults['comment_pids'],
 				'size'    => 'large',
 			),
 			'comment_exclude_terms' => array(
@@ -390,7 +457,7 @@ class Settings {
 				'name'             => esc_html__( 'Exclude posts in these categories/tags', 'autoclose' ),
 				'desc'             => esc_html__( 'Start typing to search for categories, tags, or other taxonomy terms. Posts in these terms will not have comments closed. This field has an autocomplete — start typing and select from the options.', 'autoclose' ),
 				'type'             => 'csv',
-				'default'          => '',
+				'default'          => $defaults['comment_exclude_terms'],
 				'size'             => 'large',
 				'field_class'      => 'ts_autocomplete',
 				'field_attributes' => self::get_taxonomy_search_field_attributes( 'public_taxonomies' ),
@@ -400,14 +467,14 @@ class Settings {
 				'name'    => esc_html__( 'Reopen comments on post update', 'autoclose' ),
 				'desc'    => esc_html__( 'When a post is saved or updated, its comments will be reopened for the number of days set below.', 'autoclose' ),
 				'type'    => 'checkbox',
-				'default' => false,
+				'default' => $defaults['reopen_on_update'],
 			),
 			'reopen_days'           => array(
 				'id'      => 'reopen_days',
 				'name'    => esc_html__( 'Keep comments open for (days)', 'autoclose' ),
 				'desc'    => esc_html__( 'Number of days to keep comments open after a post update. Set to 0 to keep open until the next scheduled close.', 'autoclose' ),
 				'type'    => 'number',
-				'default' => 30,
+				'default' => $defaults['reopen_days'],
 				'min'     => 0,
 				'size'    => 'small',
 			),
@@ -429,34 +496,35 @@ class Settings {
 	 * @return array Pingbacks/trackbacks settings.
 	 */
 	public static function settings_pingtracks() {
+		$defaults = self::get_defaults();
 		$settings = array(
 			'close_pbtb'         => array(
 				'id'      => 'close_pbtb',
 				'name'    => esc_html__( 'Close Pingbacks/Trackbacks', 'autoclose' ),
 				'desc'    => esc_html__( 'Enable to close pingbacks and trackbacks - used for the automatic schedule as well as one time runs under the Tools tab.', 'autoclose' ),
 				'type'    => 'checkbox',
-				'default' => false,
+				'default' => $defaults['close_pbtb'],
 			),
 			'pbtb_post_types'    => array(
 				'id'      => 'pbtb_post_types',
 				'name'    => esc_html__( 'Post types to include', 'autoclose' ),
 				'desc'    => esc_html__( 'At least one option should be selected above. Select which post types on which you want pingbacks/trackbacks closed.', 'autoclose' ),
 				'type'    => 'posttypes',
-				'default' => 'post',
+				'default' => $defaults['pbtb_post_types'],
 			),
 			'pbtb_age'           => array(
 				'id'      => 'pbtb_age',
 				'name'    => esc_html__( 'Close pingbacks/trackbacks on posts/pages older than', 'autoclose' ),
 				'desc'    => esc_html__( 'Pingbacks/Trackbacks that are older than the above number, in days, will be closed automatically if the schedule is enabled', 'autoclose' ),
 				'type'    => 'number',
-				'default' => 90,
+				'default' => $defaults['pbtb_age'],
 			),
 			'pbtb_pids'          => array(
 				'id'      => 'pbtb_pids',
 				'name'    => esc_html__( 'Keep pingbacks/trackbacks on these posts/pages open', 'autoclose' ),
 				'desc'    => esc_html__( 'Comma-separated list of post, page or custom post type IDs. e.g. 188,320,500', 'autoclose' ),
 				'type'    => 'numbercsv',
-				'default' => '',
+				'default' => $defaults['pbtb_pids'],
 				'size'    => 'large',
 			),
 			'pbtb_exclude_terms' => array(
@@ -464,7 +532,7 @@ class Settings {
 				'name'             => esc_html__( 'Exclude posts in these categories/tags', 'autoclose' ),
 				'desc'             => esc_html__( 'Start typing to search for categories, tags, or other taxonomy terms. Posts in these terms will not have pingbacks/trackbacks closed. This field has an autocomplete — start typing and select from the options.', 'autoclose' ),
 				'type'             => 'csv',
-				'default'          => '',
+				'default'          => $defaults['pbtb_exclude_terms'],
 				'size'             => 'large',
 				'field_class'      => 'ts_autocomplete',
 				'field_attributes' => self::get_taxonomy_search_field_attributes( 'public_taxonomies' ),
@@ -474,14 +542,14 @@ class Settings {
 				'name'    => esc_html__( 'Block Self-Pings', 'autoclose' ),
 				'desc'    => esc_html__( 'Enable to block self-pings (pings to your own site).', 'autoclose' ),
 				'type'    => 'checkbox',
-				'default' => false,
+				'default' => $defaults['block_self_pings'],
 			),
 			'block_ping_urls'    => array(
 				'id'      => 'block_ping_urls',
 				'name'    => esc_html__( 'Block Ping URLs', 'autoclose' ),
 				'desc'    => esc_html__( 'Enter one URL per line. Pings to any of these URLs will be blocked in addition to self-pings.', 'autoclose' ),
 				'type'    => 'textarea',
-				'default' => '',
+				'default' => $defaults['block_ping_urls'],
 				'size'    => 'large',
 			),
 		);
@@ -502,13 +570,14 @@ class Settings {
 	 * @return array Revisions settings.
 	 */
 	public static function settings_revisions() {
+		$defaults = self::get_defaults();
 		$settings = array(
 			'delete_revisions'    => array(
 				'id'      => 'delete_revisions',
 				'name'    => esc_html__( 'Delete post revisions', 'autoclose' ),
 				'desc'    => esc_html__( 'The WordPress revisions system stores a record of each saved draft or published update. This can gather up a lot of overhead in the long run. Use this option to delete old post revisions.', 'autoclose' ),
 				'type'    => 'checkbox',
-				'default' => false,
+				'default' => $defaults['delete_revisions'],
 			),
 			'revision_post_types' => array(
 				'id'   => 'revision_post_types',
@@ -529,7 +598,7 @@ class Settings {
 				'name'    => $name,
 				'desc'    => '',
 				'type'    => 'number',
-				'default' => -2,
+				'default' => $defaults[ 'revision_' . $post_type ] ?? -2,
 				'min'     => -2,
 				'size'    => 'small',
 			);
