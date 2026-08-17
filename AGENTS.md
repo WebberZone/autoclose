@@ -22,7 +22,7 @@ This file provides guidance to Codex (Codex.ai/code) when working with code in t
 
 Constants defined in `autoclose.php`: `ACC_PLUGIN_VERSION`, `ACC_PLUGIN_DIR`, `ACC_PLUGIN_URL`, `ACC_PLUGIN_FILE`.
 
-Settings prefix/key: `acc` / `acc_settings` (wp_options). Access via `WebberZone\AutoClose\Util\Options::get_option($key)` inside the codebase, or the legacy procedural wrapper `acc_get_settings()` from `includes/backward-compatibility.php`.
+Settings prefix/key: `acc` / `acc_settings` (wp_options). Access via `WebberZone\AutoClose\Options_API::get_option($key)` inside the codebase, or the legacy procedural wrapper `acc_get_settings()` from `includes/backward-compatibility.php`.
 
 ## Commands
 
@@ -87,9 +87,9 @@ Each feature class is instantiated once in `define_feature_hooks()`. `Comments`,
 
 ### Options access
 
-Feature classes use `WebberZone\AutoClose\Util\Options::get_option($key)` (the internal static class in `includes/util/class-options.php`) — this is the only live options layer. `Options_API` in `includes/class-options-api.php` is currently dead code with no references anywhere in the plugin. Avoid the legacy `acc_get_settings()` procedural wrapper in new code.
+Feature classes use `WebberZone\AutoClose\Options_API::get_option($key)` (`includes/class-options-api.php`) — this is the only live options layer, with a blog-keyed cache for multisite correctness. Avoid the legacy `acc_get_settings()` procedural wrapper in new code.
 
-`Options::get_defaults()` delegates to `Admin\Settings::settings_defaults()`, and `Options::get_default_option()` reads the raw `Admin\Settings::get_defaults()` array. See the defaults contract in the `Settings_API` repo.
+`Options_API::get_default_option()` reads the raw `Admin\Settings::get_defaults()` array with the `acc_settings_defaults` filter applied directly. See the defaults contract in the `Settings_API` repo.
 
 ### Backward compatibility
 
