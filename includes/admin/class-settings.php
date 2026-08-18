@@ -270,22 +270,12 @@ class Settings {
 	/**
 	 * Raw default values for every setting, keyed by option ID.
 	 *
-	 * Single source of truth for field defaults. Deliberately contains no
-	 * translation calls so it is safe to invoke before `init` without triggering a
-	 * "translation loading triggered too early" notice. The field definition
-	 * methods below reference this array instead of duplicating literals.
-	 *
-	 * Values are pre-normalised: checkbox defaults use 1/0 rather than true/false
-	 * so that they match what `settings_defaults()` produces after its
-	 * `(int) (bool)` cast. This array is deliberately unfiltered — the
-	 * `acc_settings_defaults` filter is applied by the consumers
-	 * (`settings_defaults()` and `Options_API::get_default_option()`) so that it
-	 * runs exactly once on each path.
-	 *
-	 * The `revision_{$post_type}` entries are generated rather than listed: the set
-	 * of post types supporting revisions differs per site, so they are built from
-	 * the same source `settings_revisions()` uses. Only the keys are needed here,
-	 * not the labels, so nothing translates.
+	 * Deliberately contains no translation calls, so it is safe to invoke before `init`.
+	 * Values are pre-normalised (checkboxes as 1/0) matching what `settings_defaults()`
+	 * produces, and the array is intentionally unfiltered since consumers apply
+	 * `acc_settings_defaults` themselves. The `revision_{$post_type}` entries are generated
+	 * from `settings_revisions()` rather than listed, since only the keys are needed and
+	 * the supported post types differ per site.
 	 *
 	 * @since 3.1.3
 	 *
