@@ -12,6 +12,8 @@ order: 1
 
 This document describes all available settings for the [AutoClose](https://webberzone.com/plugins/autoclose/) plugin. Access settings via **Settings → AutoClose** in your WordPress admin.
 
+Since v3.1.2, a search box on the settings screen filters options across all tabs as you type — start typing to jump straight to the setting you are looking for.
+
 ## General
 
 ### Activate scheduled closing
