@@ -2,8 +2,8 @@
 slug: autoclose-tools-page
 title: "AutoClose Tools Page"
 products: [autoclose]
-sections: [01-acc-getting-started]
-tags: [autoclose,tools]
+sections: ["01-acc-getting-started"]
+tags: [autoclose, tools]
 status: publish
 order: 2
 ---

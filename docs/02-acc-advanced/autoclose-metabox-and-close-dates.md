@@ -2,8 +2,8 @@
 slug: autoclose-metabox-and-close-dates
 title: "AutoClose Metabox and Close Dates"
 products: [autoclose]
-sections: [02-acc-advanced]
-tags: [autoclose,metabox,scheduling]
+sections: ["02-acc-advanced"]
+tags: [autoclose, metabox, scheduling]
 status: publish
 order: 2
 ---

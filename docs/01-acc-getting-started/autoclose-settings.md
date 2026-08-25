@@ -2,13 +2,14 @@
 slug: autoclose-settings
 title: "AutoClose Settings"
 products: [autoclose]
-sections: [01-acc-getting-started]
-tags: [autoclose,settings]
+sections: ["01-acc-getting-started"]
+tags: [autoclose, settings]
 status: publish
 order: 1
+toc: true
 ---
 
-[kbtoc]
+[toc]
 
 This document describes all available settings for the [AutoClose](https://webberzone.com/plugins/autoclose/) plugin. Access settings via **Settings → AutoClose** in your WordPress admin.
 

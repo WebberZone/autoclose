@@ -2,10 +2,10 @@
 slug: installing-autoclose
 title: "Installing AutoClose"
 products: [autoclose]
-sections: [01-acc-getting-started]
-tags: [autoclose,installation]
+sections: ["01-acc-getting-started"]
+tags: [autoclose, installation]
 status: publish
-order: 0
+featured_image: "https://webberzone.com/wp-content/uploads/2020/05/Install-AutoClose-1.png"
 ---
 
 [AutoClose](https://webberzone.com/plugins/autoclose/) is hosted on WordPress.org. Installing it follows the standard WordPress plugin flow.
@@ -17,10 +17,7 @@ order: 0
 3. Find the plugin in the list (usually the first result) and click **Install Now**.
 4. Activate or Network activate the plugin under the **Plugins** screen.
 
-<figure class="wp-block-image size-large">
-<img src="https://webberzone.com/wp-content/uploads/2020/05/Install-AutoClose-1.png" class="wp-image-215" loading="lazy" decoding="async" srcset="https://webberzone.com/wp-content/uploads/2020/05/Install-AutoClose-1.png 624w, https://webberzone.com/wp-content/uploads/2020/05/Install-AutoClose-1-300x89.png 300w" sizes="auto, (max-width: 624px) 100vw, 624px" width="624" height="185" alt="Install AutoClose" />
-<figcaption>Install AutoClose</figcaption>
-</figure>
+![Install AutoClose](https://webberzone.com/wp-content/uploads/2020/05/Install-AutoClose-1.png)
 
 ## Manual install
 

@@ -2,8 +2,8 @@
 slug: excluding-posts-and-terms
 title: "Excluding Posts and Terms from AutoClose"
 products: [autoclose]
-sections: [02-acc-advanced]
-tags: [autoclose,exclude,terms]
+sections: ["02-acc-advanced"]
+tags: [autoclose, exclude, terms]
 status: publish
 order: 1
 ---

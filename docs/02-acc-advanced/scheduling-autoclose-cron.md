@@ -2,10 +2,9 @@
 slug: scheduling-autoclose-cron
 title: "Scheduling the AutoClose Cron"
 products: [autoclose]
-sections: [02-acc-advanced]
-tags: [autoclose,cron,scheduling]
+sections: ["02-acc-advanced"]
+tags: [autoclose, cron, scheduling]
 status: publish
-order: 0
 ---
 
 [AutoClose](https://webberzone.com/plugins/autoclose/) uses a WordPress cron event named `acc_cron_hook` to run its maintenance tasks on a schedule. Understanding how the schedule is built helps when you want to debug missed runs, run at a different time, or migrate to a real server cron.
@@ -54,7 +53,7 @@ The plugin's own `acc_cron_hook` event is registered with the standard WordPress
 
 When `acc_cron_hook` fires, the plugin calls into the registered feature classes:
 
-- `WebberZone\AutoClose\Features\Comments::process_comments()` — closes comments and pingbacks/trackbacks on posts older than the configured ages, then re-opens comments on the post IDs in the keep-open list.
-- `WebberZone\AutoClose\Features\Revisions::process_revisions()` — deletes revisions beyond the per-post-type limit.
+- `WebberZoneAutoCloseFeaturesComments::process_comments()` — closes comments and pingbacks/trackbacks on posts older than the configured ages, then re-opens comments on the post IDs in the keep-open list.
+- `WebberZoneAutoCloseFeaturesRevisions::process_revisions()` — deletes revisions beyond the per-post-type limit.
 
 If **Send summary email after cron run** is enabled, an HTML email is sent to the configured address (or the site admin email) summarizing how many comments, pingbacks/trackbacks, and revisions were processed.
