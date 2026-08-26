@@ -5,6 +5,7 @@ products: [autoclose]
 sections: ["01-acc-getting-started"]
 tags: [autoclose, installation]
 status: publish
+order: 0
 featured_image: "https://webberzone.com/wp-content/uploads/2020/05/Install-AutoClose-1.png"
 ---
 

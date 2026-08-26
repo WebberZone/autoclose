@@ -5,6 +5,7 @@ products: [autoclose]
 sections: ["02-acc-advanced"]
 tags: [autoclose, cron, scheduling]
 status: publish
+order: 0
 ---
 
 [AutoClose](https://webberzone.com/plugins/autoclose/) uses a WordPress cron event named `acc_cron_hook` to run its maintenance tasks on a schedule. Understanding how the schedule is built helps when you want to debug missed runs, run at a different time, or migrate to a real server cron.
