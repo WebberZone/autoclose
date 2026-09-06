@@ -829,7 +829,7 @@ class Settings {
 			$parts       = explode( ',', $search_term );
 			$search_term = end( $parts );
 		}
-		$search_term = trim( $search_term );
+		$search_term = trim( $search_term, " \t\n\r\0\x0B" );
 
 		/** This filter has been defined in /wp-admin/includes/ajax-actions.php */
 		$term_search_min_chars = (int) apply_filters( 'term_search_min_chars', 2, null, $search_term );
