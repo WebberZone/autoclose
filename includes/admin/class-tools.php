@@ -2,7 +2,7 @@
 /**
  * Tools page functionality.
  *
- * @package    AutoClose
+ * @package AutoClose
  */
 
 namespace WebberZone\AutoClose\Admin;
@@ -19,6 +19,7 @@ use WebberZone\AutoClose\Util\Hook_Registry;
  * @since 3.0.0
  */
 class Tools {
+
 
 	/**
 	 * Constructor.
@@ -55,12 +56,12 @@ class Tools {
 		$screen = get_current_screen();
 
 		$screen->set_help_sidebar(
-			/* translators: 1: Plugin support site link. */
+		/* translators: 1: Plugin support site link. */
 			'<p>' . sprintf( __( 'For more information or how to get support visit the <a href="%s">support site</a>.', 'autoclose' ), esc_url( 'https://webberzone.com/support/' ) ) . '</p>' .
 			/* translators: 1: WordPress.org support forums link. */
 			'<p>' . sprintf( __( 'Support queries should be posted in the <a href="%s">WordPress.org support forums</a>.', 'autoclose' ), esc_url( 'https://wordpress.org/support/plugin/autoclose' ) ) . '</p>' .
 			'<p>' . sprintf(
-				/* translators: 1: Github issues link, 2: Github plugin page link. */
+			/* translators: 1: Github issues link, 2: Github plugin page link. */
 				__( '<a href="%1$s">Post an issue</a> on <a href="%2$s">GitHub</a> (bug reports only).', 'autoclose' ),
 				esc_url( 'https://github.com/ajaydsouza/autoclose/issues' ),
 				esc_url( 'https://github.com/ajaydsouza/autoclose' )
@@ -73,7 +74,7 @@ class Tools {
 				'title'   => __( 'Tools', 'autoclose' ),
 				'content' =>
 				'<p>' . __( 'This screen gives you a few tools namely one click buttons to run the closing algorithm or open comments, pingbacks/trackbacks.', 'autoclose' ) . '</p>' .
-					'<p>' . __( 'You can also delete the old settings from prior to v2.0.0', 'autoclose' ) . '</p>',
+				'<p>' . __( 'You can also delete the old settings from prior to v2.0.0', 'autoclose' ) . '</p>',
 			)
 		);
 	}
@@ -100,7 +101,7 @@ class Tools {
 			if ( Options_API::get_option( 'close_comment' ) ) {
 				/* translators: 1: Date. */
 				$message .= sprintf(
-					/* translators: 1. Date */
+				/* translators: 1. Date */
 					esc_html__( 'Comments closed up to %1$s', 'autoclose' ),
 					gmdate( $date_time_format, $current_time - Options_API::get_option( 'comment_age' ) * DAY_IN_SECONDS )
 				);
@@ -110,7 +111,7 @@ class Tools {
 			if ( Options_API::get_option( 'close_pbtb' ) ) {
 				/* translators: 1: Date. */
 				$message .= sprintf(
-					/* translators: 1. Date */
+				/* translators: 1. Date */
 					esc_html__( 'Pingbacks/Trackbacks closed up to %1$s', 'autoclose' ),
 					gmdate( $date_time_format, $current_time - Options_API::get_option( 'pbtb_age' ) * DAY_IN_SECONDS )
 				);
@@ -118,7 +119,19 @@ class Tools {
 			}
 
 			if ( Options_API::get_option( 'delete_revisions' ) ) {
-				$message .= esc_html__( 'Post revisions deleted', 'autoclose' );
+				$revision_age = max( 0, (int) Options_API::get_option( 'revision_age' ) );
+
+				if ( $revision_age > 0 ) {
+					$message .= sprintf(
+					/* translators: 1: Date. */
+						esc_html__( 'Post revisions beyond the retention limit and older than %1$s deleted', 'autoclose' ),
+						// Pruning compares against UTC time(), so render that same instant in the site timezone.
+						wp_date( $date_time_format, time() - $revision_age * DAY_IN_SECONDS )
+					);
+				} else {
+					$message .= esc_html__( 'Post revisions beyond the retention limit deleted', 'autoclose' );
+				}
+
 				$message .= '<br />';
 			}
 
@@ -161,8 +174,24 @@ class Tools {
 
 		/* Delete revisions */
 		if ( isset( $_POST['acc_delete_revisions'] ) && check_admin_referer( 'acc-tools-settings' ) ) {
-			$revisions->delete_revisions();
-			add_settings_error( 'acc-notices', '', esc_html__( 'Revisions deleted on all post types', 'autoclose' ), 'updated' );
+			$result  = $revisions->delete_all_revisions();
+			$deleted = (int) $result['deleted'];
+			$message = sprintf(
+			/* translators: 1: Number of revisions. */
+				esc_html( _n( '%s revision deleted on all post types, ignoring retention limits and age', '%s revisions deleted on all post types, ignoring retention limits and age', $deleted, 'autoclose' ) ),
+				number_format_i18n( $deleted )
+			);
+
+			if ( 'success' === $result['status'] ) {
+				add_settings_error( 'acc-notices', '', $message, 'updated' );
+			} else {
+				add_settings_error(
+					'acc-notices',
+					'',
+					$message . '<br />' . esc_html( implode( ' ', $result['errors'] ) ),
+					'error'
+				);
+			}
 		}
 
 		// Include the view file.

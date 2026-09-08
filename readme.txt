@@ -83,9 +83,16 @@ Release date: 8 September 2026
 **Added**
 
 * Added WP-CLI commands for status, maintenance, discussions, revisions, pingbacks, close dates, and cron.
+* Added a revision age cutoff. Scheduled cleanup now deletes a revision only when it is beyond the number of revisions its post keeps and is older than the configured age. Defaults to 90 days.
+* Added `wp autoclose revisions prune` for age and retention aware cleanup, and `--all` on `wp autoclose revisions preview`.
+* Added the `acc_revisions_prune_limit` and `acc_revisions_prune_cutoff` filters to override how many revisions a cleanup run may delete and the instant a revision must predate to be eligible.
 
 **Changed**
 
+* Scheduled revision cleanup no longer deletes every revision on each run. It follows the retention and age policy above, and never deletes autosaves. Existing settings are preserved; the one-time Delete all revisions button on the Tools page still deletes everything. Sites that already had Delete post revisions enabled see a one-time dismissible notice explaining the change.
+* Revisions are now deleted through the WordPress deletion API, so metadata, caches, and the `wp_delete_post_revision` action are handled by core. Term relationships are cleaned up separately, since WordPress only clears those for taxonomies registered against the post type and none is registered for revisions.
+* Revision cleanup runs are bounded per run and report how many revisions were scanned and whether more remain, so a large site is cleaned up over several runs instead of one long request.
+* Revision cleanup reports partial progress and the reason for a failure instead of a bare count, on the Tools page, in WP-CLI, and in the cron summary.
 * Improved bulk operations with batched updates and cache invalidation.
 * Limited default CLI scopes to supported public post types, excluding attachments and revisions.
 
@@ -95,6 +102,7 @@ Release date: 8 September 2026
 * Fixed incorrect close-date results and missing date controls.
 * Removed orphaned revision metadata and term relationships.
 * Fixed stale caches and restored `clean_post_cache` notifications.
+* Fixed the cutoff date shown after running the closing algorithm being an hour out for revisions when the cutoff fell the other side of a daylight-saving change.
 * Improved daylight-saving date validation.
 
 = Earlier versions =

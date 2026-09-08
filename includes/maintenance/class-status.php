@@ -102,6 +102,9 @@ class Status {
 			'comments_opened'   => (int) ( $summary['comments_opened'] ?? 0 ),
 			'pings_opened'      => (int) ( $summary['pings_opened'] ?? 0 ),
 			'revisions_deleted' => (int) ( $summary['revisions_deleted'] ?? 0 ),
+			'revisions_scanned' => (int) ( $summary['revisions_scanned'] ?? 0 ),
+			// True when the run hit its per-run bound, so revisions still await the next run.
+			'revisions_pending' => (bool) ( $summary['revisions_remaining'] ?? false ),
 		);
 		$status['last_errors']       = array_values( (array) ( $summary['errors'] ?? array() ) );
 		$status['last_error']        = empty( $status['last_errors'] ) ? null : (string) reset( $status['last_errors'] );
@@ -159,6 +162,7 @@ class Status {
 				'close_comments'   => (bool) Options_API::get_option( 'close_comment' ),
 				'close_pings'      => (bool) Options_API::get_option( 'close_pbtb' ),
 				'delete_revisions' => (bool) Options_API::get_option( 'delete_revisions' ),
+				'revision_age'     => max( 0, (int) Options_API::get_option( 'revision_age' ) ),
 			),
 			'schedule' => array(
 				'enabled'          => $cron_enabled,
