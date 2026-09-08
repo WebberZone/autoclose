@@ -192,8 +192,10 @@ class AutoClose {
 	 * Deactivate the plugin.
 	 *
 	 * @since 3.0.0
+	 *
+	 * @param bool $network_wide Whether to deactivate network-wide.
 	 */
-	public static function deactivate() {
-		Core\Deactivator::deactivate();
+	public static function deactivate( $network_wide = false ) {
+		Core\Deactivator::deactivate( $network_wide );
 	}
 }

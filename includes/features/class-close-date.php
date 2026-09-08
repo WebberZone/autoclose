@@ -23,6 +23,13 @@ if ( ! defined( 'WPINC' ) ) {
 class Close_Date {
 
 	/**
+	 * Number of posts inspected per activation batch.
+	 *
+	 * @var int
+	 */
+	private const RESTORE_BATCH_SIZE = 100;
+
+	/**
 	 * Prefix for meta keys and filters.
 	 *
 	 * @var string
@@ -56,6 +63,67 @@ class Close_Date {
 			$result['closed']    += $type_result['closed'];
 			$result['errors']     = array_merge( $result['errors'], $type_result['errors'] );
 		}
+
+		if ( ! empty( $result['errors'] ) ) {
+			$result['status'] = 'failed';
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Restore one-off close events from persisted post metadata.
+	 *
+	 * @since 3.2.0
+	 *
+	 * @return array Restoration result.
+	 */
+	public function restore_scheduled_events(): array {
+		global $wpdb;
+
+		$last_id = 0;
+		$result  = array(
+			'status'    => 'success',
+			'posts'     => 0,
+			'scheduled' => 0,
+			'closed'    => 0,
+			'errors'    => array(),
+		);
+
+		do {
+			$comments_key = "_{$this->prefix}_comments_date";
+			$pings_key    = "_{$this->prefix}_pings_date";
+			$post_ids     = $wpdb->get_col( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+				$wpdb->prepare(
+					"SELECT DISTINCT pm.post_id FROM {$wpdb->postmeta} pm INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id WHERE pm.post_id > %d AND pm.meta_key IN (%s, %s) AND pm.meta_value <> '' ORDER BY pm.post_id ASC LIMIT %d",
+					$last_id,
+					$comments_key,
+					$pings_key,
+					self::RESTORE_BATCH_SIZE
+				)
+			);
+
+			if ( null === $post_ids ) {
+				$result['errors'][] = ! empty( $wpdb->last_error ) ? $wpdb->last_error : __( 'The close-date restoration query failed.', 'autoclose' );
+				break;
+			}
+
+			$post_ids    = array_map( 'intval', $post_ids );
+			$batch_count = count( $post_ids );
+			if ( empty( $post_ids ) ) {
+				break;
+			}
+
+			foreach ( $post_ids as $post_id ) {
+				++$result['posts'];
+				$post_result          = $this->maybe_schedule_or_close( $post_id );
+				$result['scheduled'] += $post_result['scheduled'];
+				$result['closed']    += $post_result['closed'];
+				$result['errors']     = array_merge( $result['errors'], $post_result['errors'] );
+			}
+
+			$last_id = (int) end( $post_ids );
+		} while ( self::RESTORE_BATCH_SIZE === $batch_count );
 
 		if ( ! empty( $result['errors'] ) ) {
 			$result['status'] = 'failed';

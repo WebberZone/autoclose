@@ -17,6 +17,13 @@ use WebberZone\AutoClose\Options_API;
 class Activator {
 
 	/**
+	 * Number of sites inspected per activation batch.
+	 *
+	 * @var int
+	 */
+	private const SITE_BATCH_SIZE = 100;
+
+	/**
 	 * Fired for each blog when the plugin is activated.
 	 *
 	 * @since 3.0.0
@@ -24,23 +31,32 @@ class Activator {
 	 * @param bool $network_wide True if WPMU superadmin uses "Network Activate" action, false if WPMU is disabled or plugin is activated on an individual blog.
 	 */
 	public static function activate( $network_wide ) {
-		global $wpdb;
-
 		if ( is_multisite() && $network_wide ) {
-			// Get all blogs in the network and activate plugin on each one.
-			$sites = get_sites(
-				array(
-					'archived' => 0,
-					'spam'     => 0,
-					'deleted'  => 0,
-				)
-			);
+			$offset = 0;
+			do {
+				$site_ids = get_sites(
+					array(
+						'archived' => 0,
+						'spam'     => 0,
+						'deleted'  => 0,
+						'number'   => self::SITE_BATCH_SIZE,
+						'offset'   => $offset,
+						'fields'   => 'ids',
+					)
+				);
 
-			foreach ( $sites as $site ) {
-				switch_to_blog( (int) $site->blog_id );
-				self::single_activate();
-				restore_current_blog();
-			}
+				foreach ( $site_ids as $site_id ) {
+					switch_to_blog( (int) $site_id );
+					try {
+						self::single_activate();
+					} finally {
+						restore_current_blog();
+					}
+				}
+
+				$batch_count = count( $site_ids );
+				$offset     += $batch_count;
+			} while ( self::SITE_BATCH_SIZE === $batch_count );
 		} else {
 			self::single_activate();
 		}
@@ -53,6 +69,8 @@ class Activator {
 	 * @return void
 	 */
 	private static function single_activate() {
+		( new \WebberZone\AutoClose\Features\Close_Date() )->restore_scheduled_events();
+
 		if ( ! Options_API::get_option( 'cron_on' ) ) {
 			return;
 		}

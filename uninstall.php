@@ -12,20 +12,31 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 
 if ( is_multisite() ) {
 
-	// Get all blogs in the network and activate plugin on each one.
-	$sites = get_sites(
-		array(
-			'archived' => 0,
-			'spam'     => 0,
-			'deleted'  => 0,
-		)
-	);
+	$offset = 0;
+	do {
+		$site_ids = get_sites(
+			array(
+				'archived' => 0,
+				'spam'     => 0,
+				'deleted'  => 0,
+				'number'   => 100,
+				'offset'   => $offset,
+				'fields'   => 'ids',
+			)
+		);
 
-	foreach ( $sites as $site ) {
-		switch_to_blog( $site->blog_id );
-		acc_delete_data();
-		restore_current_blog();
-	}
+		foreach ( $site_ids as $site_id ) {
+			switch_to_blog( (int) $site_id );
+			try {
+				acc_delete_data();
+			} finally {
+				restore_current_blog();
+			}
+		}
+
+		$batch_count = count( $site_ids );
+		$offset     += $batch_count;
+	} while ( 100 === $batch_count );
 } else {
 	acc_delete_data();
 }
