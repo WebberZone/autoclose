@@ -99,6 +99,27 @@ class RevisionsTest extends WP_UnitTestCase
     }
 
     /**
+     * Pin a revision's dates to an exact UTC timestamp.
+     *
+     * @param int $revision_id Revision ID.
+     * @param int $timestamp   UTC timestamp.
+     */
+    private function set_revision_date( int $revision_id, int $timestamp )
+    {
+        global $wpdb;
+
+        $wpdb->update(
+            $wpdb->posts,
+            array(
+                'post_date'     => get_date_from_gmt(gmdate('Y-m-d H:i:s', $timestamp)),
+                'post_date_gmt' => gmdate('Y-m-d H:i:s', $timestamp),
+            ),
+            array( 'ID' => $revision_id )
+        );
+        clean_post_cache($revision_id);
+    }
+
+    /**
      * Return the surviving revision IDs for a post.
      *
      * @param  int $parent_id Parent post ID.
@@ -192,6 +213,43 @@ class RevisionsTest extends WP_UnitTestCase
         $this->assertSame(1, $result['deleted']);
         $this->assertNotContains($past_edge, $remaining);
         $this->assertContains($at_edge, $remaining);
+    }
+
+    /**
+     * A revision exactly at the cutoff is kept; one second older is pruned.
+     */
+    public function test_revision_exactly_at_the_cutoff_is_kept()
+    {
+        $this->set_settings(
+            array(
+            'delete_revisions' => 1,
+            'revision_age'     => 30,
+            'revision_post'    => 0,
+            )
+        );
+
+        $parent = $this->create_parent();
+        $at_cutoff = $this->create_revision($parent, 30);
+        $older     = $this->create_revision($parent, 30);
+
+        // Pin both rows either side of a fixed instant so the boundary is exact.
+        $cutoff = strtotime('2026-01-01 00:00:00 +0000');
+        $this->set_revision_date($at_cutoff, $cutoff);
+        $this->set_revision_date($older, $cutoff - 1);
+
+        $pin = static function () use ($cutoff) {
+            return $cutoff;
+        };
+        add_filter('acc_revisions_prune_cutoff', $pin);
+
+        $result = $this->revisions->prune_revisions();
+
+        remove_filter('acc_revisions_prune_cutoff', $pin);
+
+        $remaining = $this->get_revision_ids($parent);
+        $this->assertSame(1, $result['deleted']);
+        $this->assertContains($at_cutoff, $remaining);
+        $this->assertNotContains($older, $remaining);
     }
 
     /**

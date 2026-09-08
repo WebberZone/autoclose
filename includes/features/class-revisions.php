@@ -362,9 +362,24 @@ class Revisions {
 			)
 		);
 
-		$ids       = wp_parse_id_list( $args['post_ids'] );
-		$age_days  = null === $args['age_days'] ? $this->get_revision_age() : max( 0, (int) $args['age_days'] );
-		$cutoff    = $age_days > 0 ? time() - ( $age_days * DAY_IN_SECONDS ) : null;
+		$ids      = wp_parse_id_list( $args['post_ids'] );
+		$age_days = null === $args['age_days'] ? $this->get_revision_age() : max( 0, (int) $args['age_days'] );
+		$cutoff   = $age_days > 0 ? time() - ( $age_days * DAY_IN_SECONDS ) : null;
+
+		/**
+		 * Filters the UTC timestamp a revision must predate to be pruned.
+		 *
+		 * A revision is pruned only when it is strictly older than this instant.
+		 * Null disables the age condition entirely.
+		 *
+		 * @since 3.2.0
+		 *
+		 * @param int|null $cutoff   Cutoff timestamp in UTC, or null for no age condition.
+		 * @param int      $age_days Age in days the cutoff was derived from.
+		 */
+		$cutoff = apply_filters( 'acc_revisions_prune_cutoff', $cutoff, $age_days );
+		$cutoff = null === $cutoff ? null : (int) $cutoff;
+
 		$limit     = max( 0, (int) $args['limit'] );
 		$id_clause = empty( $ids ) ? '' : ' AND post_parent IN (' . implode( ',', $ids ) . ')';
 
