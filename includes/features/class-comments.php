@@ -475,12 +475,47 @@ class Comments {
 			wp_cache_delete_multiple( $post_ids, 'posts' );
 			wp_cache_delete_multiple( $post_parent_keys, 'posts' );
 			wp_cache_delete_multiple( $post_ids, 'post_meta' );
+			$this->fire_clean_post_cache_actions( $post_ids );
 			wp_cache_set_posts_last_changed();
 			return;
 		}
 
 		foreach ( $post_ids as $post_id ) {
 			clean_post_cache( $post_id );
+		}
+	}
+
+	/**
+	 * Preserve the clean_post_cache hook for bulk discussion updates.
+	 *
+	 * The bulk path above replaces clean_post_cache()'s cache work, but the
+	 * action is also used by page-cache purgers and search-index integrations.
+	 * Load the affected posts in one query only when an integration is listening.
+	 *
+	 * @since 3.2.0
+	 *
+	 * @param array<int, int> $post_ids Affected post IDs.
+	 */
+	private function fire_clean_post_cache_actions( array $post_ids ): void {
+		if ( false === has_action( 'clean_post_cache' ) ) {
+			return;
+		}
+
+		$posts = get_posts(
+			array(
+				'post__in'               => $post_ids,
+				'post_type'              => 'any',
+				'post_status'            => 'any',
+				'posts_per_page'         => count( $post_ids ),
+				'orderby'                => 'post__in',
+				'no_found_rows'          => true,
+				'update_post_meta_cache' => false,
+				'update_post_term_cache' => false,
+			)
+		);
+
+		foreach ( $posts as $post ) {
+			do_action( 'clean_post_cache', (int) $post->ID, $post );
 		}
 	}
 
