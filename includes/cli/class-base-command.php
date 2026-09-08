@@ -183,18 +183,20 @@ abstract class Base_Command {
 	}
 
 	/**
-	 * Return public post types that support comments.
+	 * Return public post types that support the requested discussion type.
 	 *
 	 * @since 3.2.0
 	 *
+	 * @param string $support Post type support to check.
 	 * @return array<int, string> Default discussion post types.
 	 */
-	protected function get_discussion_post_types(): array {
+	protected function get_discussion_post_types( string $support = 'comments' ): array {
+		$support    = in_array( $support, array( 'comments', 'trackbacks' ), true ) ? $support : 'comments';
 		$post_types = get_post_types( array( 'public' => true ), 'objects' );
 		$default    = array();
 
 		foreach ( $post_types as $post_type ) {
-			if ( ! in_array( $post_type->name, array( 'attachment', 'revision' ), true ) && post_type_supports( $post_type->name, 'comments' ) ) {
+			if ( ! in_array( $post_type->name, array( 'attachment', 'revision' ), true ) && post_type_supports( $post_type->name, $support ) ) {
 				$default[] = $post_type->name;
 			}
 		}

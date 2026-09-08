@@ -61,7 +61,7 @@ class Discussions_Command extends Base_Command {
 	 * ## OPTIONS
 	 *
 	 * [<id>...]
-	 * : Post IDs. Omit to operate on every matching public non-attachment post type.
+	 * : Post IDs. Omit to operate on every matching public non-attachment post type supporting the selected discussion type.
 	 *
 	 * [--post-ids=<ids>]
 	 * : Comma-separated post IDs. Can be used instead of positional IDs.
@@ -70,7 +70,7 @@ class Discussions_Command extends Base_Command {
 	 * : Only match posts older than this many days. Default: 0 (no age filter).
 	 *
 	 * [--post-types=<types>]
-	 * : Comma-separated post types to include. Default: public post types supporting comments.
+	 * : Comma-separated post types to include. Default: public post types supporting the selected discussion type.
 	 *
 	 * [--exclude-terms=<ids>]
 	 * : Comma-separated term taxonomy IDs to exclude.
@@ -105,7 +105,7 @@ class Discussions_Command extends Base_Command {
 	 * ## OPTIONS
 	 *
 	 * [<id>...]
-	 * : Post IDs. Omit to operate on every matching public non-attachment post type.
+	 * : Post IDs. Omit to operate on every matching public non-attachment post type supporting the selected discussion type.
 	 *
 	 * [--post-ids=<ids>]
 	 * : Comma-separated post IDs. Can be used instead of positional IDs.
@@ -114,7 +114,7 @@ class Discussions_Command extends Base_Command {
 	 * : Only match posts older than this many days. Default: 0 (no age filter).
 	 *
 	 * [--post-types=<types>]
-	 * : Comma-separated post types to include. Default: public post types supporting comments.
+	 * : Comma-separated post types to include. Default: public post types supporting the selected discussion type.
 	 *
 	 * [--exclude-terms=<ids>]
 	 * : Comma-separated term taxonomy IDs to exclude.
@@ -152,18 +152,19 @@ class Discussions_Command extends Base_Command {
 	 * @param array  $assoc_args Associative arguments.
 	 */
 	private function execute( string $action, array $args, array $assoc_args ): void {
-		$format       = $this->get_format( $assoc_args );
-		$dry_run      = isset( $assoc_args['dry-run'] );
-		$sample_limit = $this->get_non_negative_int( $assoc_args, 'sample', 10 );
-		$age          = $this->get_non_negative_int( $assoc_args, 'age' );
-		$sample_limit = $this->validate_sample_limit( $sample_limit );
-		$post_ids     = $this->parse_ids( $args, $assoc_args );
-		$term_ids     = isset( $assoc_args['exclude-terms'] )
+		$format             = $this->get_format( $assoc_args );
+		$dry_run            = isset( $assoc_args['dry-run'] );
+		$sample_limit       = $this->get_non_negative_int( $assoc_args, 'sample', 10 );
+		$age                = $this->get_non_negative_int( $assoc_args, 'age' );
+		$sample_limit       = $this->validate_sample_limit( $sample_limit );
+		$post_ids           = $this->parse_ids( $args, $assoc_args );
+		$term_ids           = isset( $assoc_args['exclude-terms'] )
 			? $this->parse_integer_list( $assoc_args['exclude-terms'], __( 'Exclude term IDs must be positive integers.', 'autoclose' ) )
 			: array();
-		$post_types   = $this->get_post_types( $assoc_args );
-		$post_types   = empty( $post_types ) ? $this->get_discussion_post_types() : $post_types;
-		$query_args   = array(
+		$post_types         = $this->get_post_types( $assoc_args );
+		$discussion_support = 'comment' === $this->type ? 'comments' : 'trackbacks';
+		$post_types         = empty( $post_types ) ? $this->get_discussion_post_types( $discussion_support ) : $post_types;
+		$query_args         = array(
 			'age'           => $age,
 			'post_types'    => $post_types,
 			'post_ids'      => implode( ',', $post_ids ),

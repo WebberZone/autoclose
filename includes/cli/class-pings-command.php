@@ -37,7 +37,7 @@ class Pings_Command extends Discussions_Command {
 	 * ## OPTIONS
 	 *
 	 * [<id>...]
-	 * : Post IDs. Omit to operate on every matching public non-attachment post type.
+	 * : Post IDs. Omit to operate on every matching public non-attachment post type supporting trackbacks.
 	 *
 	 * [--post-ids=<ids>]
 	 * : Comma-separated post IDs. Can be used instead of positional IDs.
@@ -81,7 +81,7 @@ class Pings_Command extends Discussions_Command {
 	 * ## OPTIONS
 	 *
 	 * [<id>...]
-	 * : Post IDs. Omit to operate on every matching public non-attachment post type.
+	 * : Post IDs. Omit to operate on every matching public non-attachment post type supporting trackbacks.
 	 *
 	 * [--post-ids=<ids>]
 	 * : Comma-separated post IDs. Can be used instead of positional IDs.

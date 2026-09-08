@@ -167,6 +167,20 @@ class Revisions {
 		}
 
 		$this->clean_revision_caches( $revision_ids, $parent_ids );
+		if ( ! empty( $revision_ids ) ) {
+			$revision_id_list = implode( ',', $revision_ids );
+
+			$meta_result = $wpdb->query( "DELETE FROM {$wpdb->postmeta} WHERE post_id IN ({$revision_id_list})" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			if ( false === $meta_result ) {
+				return false;
+			}
+
+			$term_result = $wpdb->query( "DELETE FROM {$wpdb->term_relationships} WHERE object_id IN ({$revision_id_list})" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			if ( false === $term_result ) {
+				return false;
+			}
+		}
+
 		$result = $wpdb->query( "DELETE FROM {$wpdb->posts} {$where}" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		return $result;
@@ -208,6 +222,8 @@ class Revisions {
 					wp_cache_delete( $revision_id, 'post_meta' );
 				}
 			}
+
+			clean_object_term_cache( $revision_ids, 'revision' );
 		}
 
 		foreach ( $parent_ids as $parent_id ) {

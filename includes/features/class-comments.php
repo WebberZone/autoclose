@@ -459,8 +459,28 @@ class Comments {
 	 * @param array<int, int> $post_ids Affected post IDs.
 	 */
 	private function clean_discussion_caches( array $post_ids ): void {
+		$post_ids = array_values( array_unique( array_filter( array_map( 'intval', $post_ids ) ) ) );
+		if ( empty( $post_ids ) ) {
+			return;
+		}
+
+		if ( function_exists( 'wp_cache_supports' ) && wp_cache_supports( 'delete_multiple' ) ) {
+			$post_parent_keys = array_map(
+				static function ( $post_id ) {
+					return 'post_parent:' . (string) $post_id;
+				},
+				$post_ids
+			);
+
+			wp_cache_delete_multiple( $post_ids, 'posts' );
+			wp_cache_delete_multiple( $post_parent_keys, 'posts' );
+			wp_cache_delete_multiple( $post_ids, 'post_meta' );
+			wp_cache_set_posts_last_changed();
+			return;
+		}
+
 		foreach ( $post_ids as $post_id ) {
-			clean_post_cache( (int) $post_id );
+			clean_post_cache( $post_id );
 		}
 	}
 
