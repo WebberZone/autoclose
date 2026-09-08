@@ -58,12 +58,13 @@ class Revisions {
 			++$operations;
 			$result = $this->prune_revisions();
 
+			// Counts are reported even on failure: a partial run still deleted what it deleted.
+			$deleted   = (int) $result['deleted'];
+			$scanned   = (int) $result['scanned'];
+			$remaining = (bool) $result['limit_reached'];
+
 			if ( 'failed' === $result['status'] ) {
 				$errors = array_merge( $errors, $result['errors'] );
-			} else {
-				$deleted   = (int) $result['deleted'];
-				$scanned   = (int) $result['scanned'];
-				$remaining = (bool) $result['limit_reached'];
 			}
 		}
 
@@ -312,9 +313,12 @@ class Revisions {
 			}
 		}
 
-		$this->remove_orphaned_term_relationships( $deleted_ids );
-
 		$errors = array();
+
+		if ( ! $this->remove_orphaned_term_relationships( $deleted_ids ) ) {
+			$errors[] = __( 'Removing term relationships left by deleted revisions failed.', 'autoclose' );
+		}
+
 		if ( $failed > 0 ) {
 			$errors[] = sprintf(
 			/* translators: 1: Number of revisions. */
@@ -429,7 +433,9 @@ class Revisions {
 
 					$candidates[] = $revision;
 
-					if ( $limit > 0 && count( $candidates ) >= $limit ) {
+					// Collect one past the limit so "more remaining" reflects a real extra candidate.
+					if ( $limit > 0 && count( $candidates ) > $limit ) {
+						array_pop( $candidates );
 						$limit_reached = true;
 						break 3;
 					}
@@ -538,24 +544,27 @@ class Revisions {
 	 * WordPress only clears relationships for taxonomies registered against
 	 * the post's own type, and no taxonomy is registered for `revision`, so rows
 	 * attached to a revision survive the delete. Revisions are excluded from term
-	 * counts, so the rows can be dropped without recounting.
+	 * counts, so the rows can be dropped without recounting. clean_object_term_cache()
+	 * is likewise a no-op for `revision`, so relationship caches are cleared for every
+	 * registered taxonomy instead.
 	 *
 	 * @since 3.2.0
 	 *
-	 * @param array<int, int> $revision_ids Deleted revision IDs.
+	 * @param  array<int, int> $revision_ids Deleted revision IDs.
+	 * @return bool True on success, false when the cleanup query failed.
 	 */
-	private function remove_orphaned_term_relationships( array $revision_ids ): void {
+	private function remove_orphaned_term_relationships( array $revision_ids ): bool {
 		global $wpdb;
 
 		$revision_ids = array_values( array_unique( array_map( 'intval', $revision_ids ) ) );
 
 		if ( empty( $revision_ids ) ) {
-			return;
+			return true;
 		}
 
 		$placeholders = implode( ', ', array_fill( 0, count( $revision_ids ), '%d' ) );
 
-		$wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
+		$result = $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 				"DELETE FROM {$wpdb->term_relationships} WHERE object_id IN ({$placeholders})",
@@ -563,7 +572,15 @@ class Revisions {
 			)
 		);
 
-		clean_object_term_cache( $revision_ids, 'revision' );
+		foreach ( get_taxonomies() as $taxonomy ) {
+			foreach ( $revision_ids as $revision_id ) {
+				wp_cache_delete( $revision_id, $taxonomy . '_relationships' );
+			}
+		}
+
+		wp_cache_set_terms_last_changed();
+
+		return false !== $result;
 	}
 
 	/**
@@ -575,14 +592,32 @@ class Revisions {
 	 * @since 3.0.0
 	 *
 	 * @param  array|string $post_ids Optional parent post IDs to limit the deletion.
-	 * @return int|bool Number of revisions deleted. Boolean false on error.
+	 * @return int|bool Number of revisions deleted. Boolean false when anything failed.
 	 */
 	public function delete_revisions( $post_ids = array() ) {
+		$result = $this->delete_all_revisions( $post_ids );
+
+		return 'success' === $result['status'] ? $result['deleted'] : false;
+	}
+
+	/**
+	 * Delete every post revision and report what happened.
+	 *
+	 * Same operation as delete_revisions(), but reports partial progress and the
+	 * reason for a failure instead of collapsing to boolean false.
+	 *
+	 * @since 3.2.0
+	 *
+	 * @param  array|string $post_ids Optional parent post IDs to limit the deletion.
+	 * @return array Deletion result.
+	 */
+	public function delete_all_revisions( $post_ids = array() ): array {
 		global $wpdb;
 
 		$ids     = wp_parse_id_list( $post_ids );
 		$where   = "WHERE post_type = 'revision'";
 		$deleted = 0;
+		$errors  = array();
 
 		if ( ! empty( $ids ) ) {
 			$where .= ' AND post_parent IN (' . implode( ',', $ids ) . ')';
@@ -598,7 +633,8 @@ class Revisions {
 			);
 
 			if ( ! empty( $wpdb->last_error ) ) {
-				return false;
+				$errors[] = $wpdb->last_error;
+				break;
 			}
 
 			if ( empty( $revision_ids ) ) {
@@ -617,17 +653,28 @@ class Revisions {
 				}
 			}
 
-			$this->remove_orphaned_term_relationships( $deleted_ids );
+			if ( ! $this->remove_orphaned_term_relationships( $deleted_ids ) ) {
+				$errors[] = __( 'Removing term relationships left by deleted revisions failed.', 'autoclose' );
+			}
 
 			$deleted += $batch_deleted;
 
 			// Nothing was removed, so the same rows would be selected forever.
-			if ( 0 === $batch_deleted ) {
+			if ( $batch_deleted < count( $revision_ids ) ) {
+				$errors[] = sprintf(
+					/* translators: 1: Number of revisions. */
+					_n( '%d revision could not be deleted.', '%d revisions could not be deleted.', count( $revision_ids ) - $batch_deleted, 'autoclose' ),
+					count( $revision_ids ) - $batch_deleted
+				);
 				break;
 			}
 		}
 
-		return $deleted;
+		return array(
+			'status'  => empty( $errors ) ? 'success' : 'failed',
+			'deleted' => $deleted,
+			'errors'  => $errors,
+		);
 	}
 
 	/**

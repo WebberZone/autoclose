@@ -172,20 +172,22 @@ class Tools {
 
 		/* Delete revisions */
 		if ( isset( $_POST['acc_delete_revisions'] ) && check_admin_referer( 'acc-tools-settings' ) ) {
-			$result = $revisions->delete_revisions();
+			$result  = $revisions->delete_all_revisions();
+			$deleted = (int) $result['deleted'];
+			$message = sprintf(
+				/* translators: 1: Number of revisions. */
+				esc_html( _n( '%s revision deleted on all post types, ignoring retention limits and age', '%s revisions deleted on all post types, ignoring retention limits and age', $deleted, 'autoclose' ) ),
+				number_format_i18n( $deleted )
+			);
 
-			if ( false === $result ) {
-				add_settings_error( 'acc-notices', '', esc_html__( 'Deleting revisions failed.', 'autoclose' ), 'error' );
+			if ( 'success' === $result['status'] ) {
+				add_settings_error( 'acc-notices', '', $message, 'updated' );
 			} else {
 				add_settings_error(
 					'acc-notices',
 					'',
-					sprintf(
-						/* translators: 1: Number of revisions. */
-						esc_html( _n( '%s revision deleted on all post types, ignoring retention limits and age', '%s revisions deleted on all post types, ignoring retention limits and age', (int) $result, 'autoclose' ) ),
-						number_format_i18n( (int) $result )
-					),
-					'updated'
+					$message . '<br />' . esc_html( implode( ' ', $result['errors'] ) ),
+					'error'
 				);
 			}
 		}

@@ -243,15 +243,16 @@ class Revisions_Command extends Base_Command {
 	 * @return array Operation result.
 	 */
 	private function run_delete_all( array $post_ids ): array {
-		$result = $this->revisions->delete_revisions( $post_ids );
+		$result = $this->revisions->delete_all_revisions( $post_ids );
 
 		return array(
-			'status'        => false === $result ? 'failed' : 'success',
+			'status'        => $result['status'],
 			'mode'          => 'all',
-			'affected'      => false === $result ? 0 : (int) $result,
-			'scanned'       => false === $result ? 0 : (int) $result,
+			'age'           => 0,
+			'affected'      => (int) $result['deleted'],
+			'scanned'       => (int) $result['deleted'],
 			'limit_reached' => false,
-			'errors'        => false === $result ? array( $this->get_database_error() ) : array(),
+			'errors'        => $result['errors'],
 		);
 	}
 
@@ -376,18 +377,5 @@ class Revisions_Command extends Base_Command {
 		}
 
 		return $sample_limit;
-	}
-
-	/**
-	 * Return the latest database error.
-	 *
-	 * @since 3.2.0
-	 *
-	 * @return string Database error message.
-	 */
-	private function get_database_error(): string {
-		global $wpdb;
-
-		return ! empty( $wpdb->last_error ) ? $wpdb->last_error : __( 'Revision deletion failed.', 'autoclose' );
 	}
 }

@@ -371,6 +371,188 @@ class RevisionsTest extends WP_UnitTestCase
     }
 
     /**
+     * A limit exactly equal to the candidate count does not claim more remain.
+     */
+    public function test_limit_equal_to_candidate_count_reports_nothing_remaining()
+    {
+        $this->set_settings(
+            array(
+            'delete_revisions' => 1,
+            'revision_age'     => 30,
+            'revision_post'    => 0,
+            )
+        );
+
+        $parent = $this->create_parent();
+        $this->create_revision($parent, 400);
+        $this->create_revision($parent, 300);
+
+        $result = $this->revisions->prune_revisions(array( 'limit' => 2 ));
+
+        $this->assertSame(2, $result['deleted']);
+        $this->assertFalse($result['limit_reached']);
+        $this->assertSame(array(), $this->get_revision_ids($parent));
+    }
+
+    /**
+     * Retention limits are resolved per parent, not shared across posts.
+     */
+    public function test_retention_is_resolved_per_parent()
+    {
+        $this->set_settings(
+            array(
+            'delete_revisions' => 1,
+            'revision_age'     => 30,
+            'revision_post'    => 1,
+            'revision_page'    => -1,
+            )
+        );
+
+        $post = $this->create_parent();
+        $this->create_revision($post, 400);
+        $kept_post = $this->create_revision($post, 300);
+
+        $page = self::factory()->post->create(
+            array(
+            'post_type'   => 'page',
+            'post_status' => 'publish',
+            )
+        );
+        $this->create_revision($page, 400);
+        $this->create_revision($page, 300);
+
+        $result = $this->revisions->prune_revisions();
+
+        $this->assertSame(1, $result['deleted']);
+        $this->assertSame(array( $kept_post ), $this->get_revision_ids($post));
+        $this->assertCount(2, $this->get_revision_ids($page));
+    }
+
+    /**
+     * A partially failed run still reports what it deleted.
+     */
+    public function test_partial_failures_keep_their_counts()
+    {
+        $this->set_settings(
+            array(
+            'delete_revisions' => 1,
+            'revision_age'     => 30,
+            'revision_post'    => 0,
+            )
+        );
+
+        $parent   = $this->create_parent();
+        $doomed   = $this->create_revision($parent, 400);
+        $blocked  = $this->create_revision($parent, 300);
+        $blocker  = static function ($delete, $post) use ($blocked) {
+            return (int) $post->ID === $blocked ? false : $delete;
+        };
+
+        add_filter('pre_delete_post', $blocker, 10, 2);
+
+        $result = $this->revisions->process_revisions();
+
+        remove_filter('pre_delete_post', $blocker, 10);
+
+        $this->assertSame('failed', $result['status']);
+        $this->assertSame(1, $result['revisions_deleted']);
+        $this->assertSame(2, $result['revisions_scanned']);
+        $this->assertNotEmpty($result['errors']);
+        $this->assertSame(array( $blocked ), $this->get_revision_ids($parent));
+        $this->assertNotContains($doomed, $this->get_revision_ids($parent));
+    }
+
+    /**
+     * Delete-all reports failure rather than a success count when a delete is blocked.
+     */
+    public function test_delete_all_reports_blocked_deletions()
+    {
+        $parent  = $this->create_parent();
+        $this->create_revision($parent, 400);
+        $blocked = $this->create_revision($parent, 300);
+        $blocker = static function ($delete, $post) use ($blocked) {
+            return (int) $post->ID === $blocked ? false : $delete;
+        };
+
+        add_filter('pre_delete_post', $blocker, 10, 2);
+
+        $result = $this->revisions->delete_all_revisions();
+        $legacy = $this->revisions->delete_revisions();
+
+        remove_filter('pre_delete_post', $blocker, 10);
+
+        $this->assertSame('failed', $result['status']);
+        $this->assertSame(1, $result['deleted']);
+        $this->assertNotEmpty($result['errors']);
+        $this->assertFalse($legacy);
+    }
+
+    /**
+     * Warmed taxonomy relationship caches are invalidated by the deletion.
+     */
+    public function test_warmed_term_relationship_cache_is_invalidated()
+    {
+        $this->set_settings(
+            array(
+            'delete_revisions' => 1,
+            'revision_age'     => 30,
+            'revision_post'    => 0,
+            )
+        );
+
+        $parent   = $this->create_parent();
+        $revision = $this->create_revision($parent, 400);
+        $term     = self::factory()->term->create(array( 'taxonomy' => 'post_tag' ));
+        wp_set_object_terms($revision, array( $term ), 'post_tag');
+
+        // Warm the relationship cache that clean_object_term_cache() cannot reach for revisions.
+        update_object_term_cache(array( $revision ), 'post');
+        $this->assertNotFalse(wp_cache_get($revision, 'post_tag_relationships'));
+
+        $this->revisions->prune_revisions();
+
+        $this->assertFalse(wp_cache_get($revision, 'post_tag_relationships'));
+        $this->assertSame(array(), wp_get_object_terms($revision, 'post_tag', array( 'fields' => 'ids' )));
+    }
+
+    /**
+     * The cutoff comparison uses UTC even when the site runs another timezone.
+     */
+    public function test_cutoff_uses_utc_in_a_non_utc_timezone()
+    {
+        global $wpdb;
+
+        update_option('timezone_string', 'Asia/Kolkata');
+
+        $this->set_settings(
+            array(
+            'delete_revisions' => 1,
+            'revision_age'     => 30,
+            'revision_post'    => 0,
+            )
+        );
+
+        $parent = $this->create_parent();
+        $old    = $this->create_revision($parent, 31);
+        $recent = $this->create_revision($parent, 29);
+
+        // A revision whose GMT date was never populated must fall back to post_date.
+        $zeroed = $this->create_revision($parent, 400);
+        $wpdb->update($wpdb->posts, array( 'post_date_gmt' => '0000-00-00 00:00:00' ), array( 'ID' => $zeroed ));
+        clean_post_cache($zeroed);
+
+        $result = $this->revisions->prune_revisions();
+
+        update_option('timezone_string', '');
+
+        $remaining = $this->get_revision_ids($parent);
+        $this->assertSame(2, $result['deleted']);
+        $this->assertNotContains($old, $remaining);
+        $this->assertNotContains($zeroed, $remaining);
+        $this->assertContains($recent, $remaining);
+    }
+
+    /**
      * Pruning is limited to the requested parent posts.
      */
     public function test_pruning_respects_post_id_scope()
