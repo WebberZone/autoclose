@@ -100,7 +100,7 @@ class Reopen {
 			return;
 		}
 
-		if ( wp_is_post_autosave( $post_id ) || wp_is_post_revision( $post_id ) ) {
+		if ( ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) || wp_is_post_autosave( $post_id ) || wp_is_post_revision( $post_id ) ) {
 			return;
 		}
 
@@ -120,13 +120,16 @@ class Reopen {
 
 		// Reopen comments on the post.
 		$processing = true;
-		wp_update_post(
-			array(
-				'ID'             => $post_id,
-				'comment_status' => 'open',
-			)
-		);
-		$processing = false;
+		try {
+			wp_update_post(
+				array(
+					'ID'             => $post_id,
+					'comment_status' => 'open',
+				)
+			);
+		} finally {
+			$processing = false;
+		}
 
 		// Store the reopen window as a Unix timestamp in post meta.
 		$days = (int) Options_API::get_option( 'reopen_days' );
