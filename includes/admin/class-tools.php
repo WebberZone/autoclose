@@ -94,7 +94,7 @@ class Tools {
 			$this->process_all();
 
 			$date_time_format = get_option( 'date_format' ) . ', ' . get_option( 'time_format' );
-			$current_time     = strtotime( current_time( 'mysql' ) );
+			$current_time     = time();
 
 			$message = '';
 
@@ -103,7 +103,7 @@ class Tools {
 				$message .= sprintf(
 				/* translators: 1. Date */
 					esc_html__( 'Comments closed up to %1$s', 'autoclose' ),
-					gmdate( $date_time_format, $current_time - Options_API::get_option( 'comment_age' ) * DAY_IN_SECONDS )
+					wp_date( $date_time_format, $current_time - max( 0, (int) Options_API::get_option( 'comment_age' ) ) * DAY_IN_SECONDS )
 				);
 				$message .= '<br />';
 			}
@@ -113,7 +113,7 @@ class Tools {
 				$message .= sprintf(
 				/* translators: 1. Date */
 					esc_html__( 'Pingbacks/Trackbacks closed up to %1$s', 'autoclose' ),
-					gmdate( $date_time_format, $current_time - Options_API::get_option( 'pbtb_age' ) * DAY_IN_SECONDS )
+					wp_date( $date_time_format, $current_time - max( 0, (int) Options_API::get_option( 'pbtb_age' ) ) * DAY_IN_SECONDS )
 				);
 				$message .= '<br />';
 			}

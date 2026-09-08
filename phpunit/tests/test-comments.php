@@ -138,4 +138,20 @@ class CommentsTest extends WP_UnitTestCase {
 		$this->assertSame( 0, $result['comments_closed'] );
 		$this->assertSame( 1, $result['pings_closed'] );
 	}
+
+	/**
+	 * Age cutoffs use the configured number of complete elapsed days.
+	 */
+	public function test_age_cutoff_uses_configured_days() {
+		$method = new ReflectionMethod( Comments::class, 'get_cutoff' );
+		$method->setAccessible( true );
+		$now = time();
+
+		$this->assertSame(
+			gmdate( 'Y-m-d H:i:s', $now - ( 90 * DAY_IN_SECONDS ) ),
+			$method->invoke( $this->comments, 90 )
+		);
+		$this->assertNull( $method->invoke( $this->comments, 0 ) );
+		$this->assertNull( $method->invoke( $this->comments, -1 ) );
+	}
 }
