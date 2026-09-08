@@ -163,6 +163,7 @@ class Status {
 			'schedule' => array(
 				'enabled'          => $cron_enabled,
 				'event_exists'     => null !== $next_run,
+				'timezone'         => 'UTC',
 				'next_run'         => $next_run,
 				'next_run_at'      => null === $next_run ? null : wp_date( DATE_ATOM, $next_run ),
 				'recurrence'       => (string) Options_API::get_option( 'cron_recurrence' ),

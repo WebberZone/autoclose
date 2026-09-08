@@ -183,6 +183,26 @@ abstract class Base_Command {
 	}
 
 	/**
+	 * Return public post types that support comments.
+	 *
+	 * @since 3.2.0
+	 *
+	 * @return array<int, string> Default discussion post types.
+	 */
+	protected function get_discussion_post_types(): array {
+		$post_types = get_post_types( array( 'public' => true ), 'objects' );
+		$default    = array();
+
+		foreach ( $post_types as $post_type ) {
+			if ( ! in_array( $post_type->name, array( 'attachment', 'revision' ), true ) && post_type_supports( $post_type->name, 'comments' ) ) {
+				$default[] = $post_type->name;
+			}
+		}
+
+		return $default;
+	}
+
+	/**
 	 * Get IDs from a preview sample.
 	 *
 	 * @since 3.2.0

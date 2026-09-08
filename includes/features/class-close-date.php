@@ -99,11 +99,15 @@ class Close_Date {
 	 */
 	protected function close_comments( $post_id ): void {
 		if ( 'closed' !== get_post_field( 'comment_status', $post_id ) ) {
-			wp_update_post(
-				array(
-					'ID'             => $post_id,
-					'comment_status' => 'closed',
-				)
+			Reopen::without_reopening(
+				static function () use ( $post_id ) {
+					wp_update_post(
+						array(
+							'ID'             => $post_id,
+							'comment_status' => 'closed',
+						)
+					);
+				}
 			);
 		}
 	}
@@ -115,11 +119,15 @@ class Close_Date {
 	 */
 	protected function close_pings( $post_id ): void {
 		if ( 'closed' !== get_post_field( 'ping_status', $post_id ) ) {
-			wp_update_post(
-				array(
-					'ID'          => $post_id,
-					'ping_status' => 'closed',
-				)
+			Reopen::without_reopening(
+				static function () use ( $post_id ) {
+					wp_update_post(
+						array(
+							'ID'          => $post_id,
+							'ping_status' => 'closed',
+						)
+					);
+				}
 			);
 		}
 	}

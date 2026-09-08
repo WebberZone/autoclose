@@ -61,7 +61,7 @@ class Discussions_Command extends Base_Command {
 	 * ## OPTIONS
 	 *
 	 * [<id>...]
-	 * : Post IDs. Omit to operate on every matching post.
+	 * : Post IDs. Omit to operate on every matching public non-attachment post type.
 	 *
 	 * [--post-ids=<ids>]
 	 * : Comma-separated post IDs. Can be used instead of positional IDs.
@@ -70,7 +70,7 @@ class Discussions_Command extends Base_Command {
 	 * : Only match posts older than this many days. Default: 0 (no age filter).
 	 *
 	 * [--post-types=<types>]
-	 * : Comma-separated post types to include. Default: all post types.
+	 * : Comma-separated post types to include. Default: public post types supporting comments.
 	 *
 	 * [--exclude-terms=<ids>]
 	 * : Comma-separated term taxonomy IDs to exclude.
@@ -105,7 +105,7 @@ class Discussions_Command extends Base_Command {
 	 * ## OPTIONS
 	 *
 	 * [<id>...]
-	 * : Post IDs. Omit to operate on every matching post.
+	 * : Post IDs. Omit to operate on every matching public non-attachment post type.
 	 *
 	 * [--post-ids=<ids>]
 	 * : Comma-separated post IDs. Can be used instead of positional IDs.
@@ -114,7 +114,7 @@ class Discussions_Command extends Base_Command {
 	 * : Only match posts older than this many days. Default: 0 (no age filter).
 	 *
 	 * [--post-types=<types>]
-	 * : Comma-separated post types to include. Default: all post types.
+	 * : Comma-separated post types to include. Default: public post types supporting comments.
 	 *
 	 * [--exclude-terms=<ids>]
 	 * : Comma-separated term taxonomy IDs to exclude.
@@ -162,6 +162,7 @@ class Discussions_Command extends Base_Command {
 			? $this->parse_integer_list( $assoc_args['exclude-terms'], __( 'Exclude term IDs must be positive integers.', 'autoclose' ) )
 			: array();
 		$post_types   = $this->get_post_types( $assoc_args );
+		$post_types   = empty( $post_types ) ? $this->get_discussion_post_types() : $post_types;
 		$query_args   = array(
 			'age'           => $age,
 			'post_types'    => $post_types,

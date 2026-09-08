@@ -88,10 +88,6 @@ class CLI extends Base_Command {
 	 * @return void
 	 */
 	public function status( $args, $assoc_args ) {
-		if ( ! empty( $args ) ) {
-			\WP_CLI::error( __( 'The status command does not accept positional arguments.', 'autoclose' ), self::EXIT_INVALID );
-		}
-
 		$format = $this->get_format( $assoc_args );
 		$data   = Status::get();
 
@@ -107,7 +103,7 @@ class CLI extends Base_Command {
 	 * : Show the effective filters, counts, and a sample without changing content, settings, events, or notifications.
 	 *
 	 * [--sample=<number>]
-	 * : Maximum sample rows per operation in dry-run output. Default: 10. Maximum: 100.
+	 * : Maximum sample rows per operation in dry-run output. Only available with --dry-run. Default: 10. Maximum: 100.
 	 *
 	 * [--yes]
 	 * : Skip confirmation when configured revision deletion makes the run destructive. Use this for unattended runs.
@@ -129,13 +125,13 @@ class CLI extends Base_Command {
 	 * @return void
 	 */
 	public function run( $args, $assoc_args ) {
-		if ( ! empty( $args ) ) {
-			\WP_CLI::error( __( 'The run command does not accept positional arguments.', 'autoclose' ), self::EXIT_INVALID );
-		}
-
 		$format       = $this->get_format( $assoc_args );
 		$dry_run      = isset( $assoc_args['dry-run'] );
 		$sample_limit = isset( $assoc_args['sample'] ) ? absint( $assoc_args['sample'] ) : 10;
+
+		if ( ! $dry_run && isset( $assoc_args['sample'] ) ) {
+			\WP_CLI::error( __( 'The sample option is only available with --dry-run.', 'autoclose' ), self::EXIT_INVALID );
+		}
 
 		if ( $sample_limit < 1 || $sample_limit > 100 ) {
 			\WP_CLI::error( __( 'The sample size must be between 1 and 100.', 'autoclose' ), self::EXIT_INVALID );
@@ -175,6 +171,7 @@ class CLI extends Base_Command {
 			$this->row( 'Multisite', $this->format_value( $status['site']['multisite'] ?? false ) ),
 			$this->row( 'Schedule enabled', $this->format_value( $schedule['enabled'] ?? false ) ),
 			$this->row( 'Cron event registered', $this->format_value( $schedule['event_exists'] ?? false ) ),
+			$this->row( 'Schedule timezone', $schedule['timezone'] ?? 'UTC' ),
 			$this->row( 'Next run', $schedule['next_run_at'] ?? 'Never' ),
 			$this->row( 'Recurrence', $schedule['recurrence'] ?? '' ),
 			$this->row( 'Schedule overdue', $this->format_value( $schedule['overdue'] ?? false ) ),

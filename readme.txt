@@ -2,7 +2,7 @@
 Tags: comments, pingback, revisions, spam, anti-spam
 Contributors: webberzone, Ajay
 Donate link: https://wzn.io/donate-wz
-Stable tag: 3.1.2
+Stable tag: 3.2.0
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 7.4
@@ -71,10 +71,23 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 == Upgrade Notice ==
 
+= 3.2.0 =
+Added the expanded WP-CLI command suite for status, settings inspection, scoped discussion operations, revision and pingback cleanup, per-post close dates, and cron repair.
+
 = 3.1.2 =
 Fixed an incorrect early translation loading notice in WordPress 6.7 and later.
 
 == Changelog ==
+
+= 3.2.0 =
+
+* New features:
+    * Added a complete WP-CLI command suite with dry-run, JSON, CSV, scoped filtering, destructive-operation confirmation, close-date management, and cron repair.
+    * Added maintenance status reporting and shared execution logic for scheduled, admin, and command-line runs.
+
+* Bug fixes:
+    * Prevented close-date operations and revision restores from being undone by automatic comment reopening.
+    * Added cache invalidation when revisions are deleted.
 
 = 3.1.3 =
 

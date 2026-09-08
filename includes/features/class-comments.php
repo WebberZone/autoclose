@@ -18,6 +18,13 @@ use WebberZone\AutoClose\Util\Helpers;
 class Comments {
 
 	/**
+	 * Maximum number of posts to update and invalidate in one batch.
+	 *
+	 * @since 3.2.0
+	 */
+	private const EDIT_BATCH_SIZE = 500;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 3.0.0
@@ -168,19 +175,50 @@ class Comments {
 		}
 
 		$new_status = 'close' === $action ? 'closed' : 'open';
-		$post_ids   = $this->get_discussion_ids( $where );
-		$sql        = $wpdb->prepare(
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			"UPDATE {$wpdb->posts} SET {$type}_status = %s {$where}",
-			$new_status
-		);
-		$result = $wpdb->query( $sql ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
+		$last_id    = 0;
+		$affected   = 0;
 
-		if ( false !== $result && $result > 0 ) {
+		do {
+			$batch_where = $where;
+			if ( $last_id > 0 ) {
+				$batch_where .= $wpdb->prepare( ' AND ID > %d', $last_id );
+			}
+
+			$post_ids = $wpdb->get_col( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+				$wpdb->prepare(
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					"SELECT ID FROM {$wpdb->posts} {$batch_where} ORDER BY ID ASC LIMIT %d",
+					self::EDIT_BATCH_SIZE
+				)
+			);
+
+			if ( null === $post_ids ) {
+				return false;
+			}
+
+			$post_ids    = array_map( 'intval', $post_ids );
+			$batch_count = count( $post_ids );
+			if ( empty( $post_ids ) ) {
+				break;
+			}
+
+			$sql = $wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared
+				"UPDATE {$wpdb->posts} SET {$type}_status = %s WHERE ID IN (" . implode( ',', $post_ids ) . ')',
+				$new_status
+			);
+			$result = $wpdb->query( $sql ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
+
+			if ( false === $result ) {
+				return false;
+			}
+
+			$affected += (int) $result;
 			$this->clean_discussion_caches( $post_ids );
-		}
+			$last_id = (int) end( $post_ids );
+		} while ( self::EDIT_BATCH_SIZE === $batch_count );
 
-		return $result;
+		return $affected;
 	}
 
 	/**
@@ -424,22 +462,6 @@ class Comments {
 		foreach ( $post_ids as $post_id ) {
 			clean_post_cache( (int) $post_id );
 		}
-	}
-
-	/**
-	 * Get the posts matched by an eligibility clause.
-	 *
-	 * @since 3.2.0
-	 *
-	 * @param string $where Prepared eligibility clause.
-	 * @return array<int, int> Matching post IDs.
-	 */
-	private function get_discussion_ids( string $where ): array {
-		global $wpdb;
-
-		$post_ids = $wpdb->get_col( "SELECT ID FROM {$wpdb->posts} {$where}" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-
-		return array_map( 'intval', (array) $post_ids );
 	}
 
 	/**

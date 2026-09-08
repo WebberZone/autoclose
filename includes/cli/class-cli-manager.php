@@ -30,8 +30,8 @@ class CLI_Manager {
 
 		\WP_CLI::add_command( 'autoclose', new CLI() );
 		\WP_CLI::add_command( 'autoclose settings', new Settings_Command() );
-		\WP_CLI::add_command( 'autoclose comments', new Discussions_Command( 'comment' ) );
-		\WP_CLI::add_command( 'autoclose pings', new Discussions_Command( 'ping' ) );
+		\WP_CLI::add_command( 'autoclose comments', new Comments_Command() );
+		\WP_CLI::add_command( 'autoclose pings', new Pings_Command() );
 		\WP_CLI::add_command( 'autoclose revisions', new Revisions_Command() );
 		\WP_CLI::add_command( 'autoclose pingbacks', new Pingbacks_Command() );
 		\WP_CLI::add_command( 'autoclose close-date', new Close_Date_Command() );

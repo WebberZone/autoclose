@@ -38,7 +38,7 @@ Use `--format=json` or `--format=csv` for scripts and monitoring. On multisite, 
 
 ## `wp autoclose settings`
 
-Displays the effective site-local configuration, including the schedule, comment and ping filters, reopen settings, self-ping blocking, revision retention, and notification settings.
+Displays the effective site-local configuration, including the schedule (configured in UTC), comment and ping filters, reopen settings, self-ping blocking, revision retention, and notification settings.
 
 ```bash
 wp autoclose settings
@@ -70,6 +70,8 @@ wp autoclose pings open --dry-run --format=json
 ```
 
 Both command groups accept `--age`, `--post-types`, `--exclude-terms`, `--dry-run`, `--sample`, and `--format`. `--exclude-terms` uses term-taxonomy IDs. These operations do not send email or alter AutoClose settings.
+
+When `--post-types` is omitted, the commands target public non-attachment post types that support comments. Pass `--post-types=attachment` or another explicit value to override that scope.
 
 ## `wp autoclose revisions`
 
@@ -139,8 +141,8 @@ All commands accept `--format=table`, `--format=json`, or `--format=csv` where d
 | Exit code | Meaning |
 | --- | --- |
 | `0` | Completed successfully, including no eligible changes. |
-| `1` | The command or preview failed and no processor completed successfully. |
+| `1` | The command or preview failed and no processor completed successfully. WP-CLI also uses `1` for synopsis errors such as extra positional arguments. |
 | `2` | The command completed partially; at least one processor failed. |
 | `3` | Invalid command arguments or output format. |
 
-Destructive commands use the same exit codes and require `--yes` for unattended execution.
+Declining a destructive confirmation follows WP-CLI's convention and exits successfully without making changes. Destructive commands use the same exit codes and require `--yes` for unattended execution. The root `run` command rejects `--sample` unless `--dry-run` is also supplied.

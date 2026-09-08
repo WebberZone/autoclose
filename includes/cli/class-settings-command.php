@@ -42,10 +42,6 @@ class Settings_Command extends Base_Command {
 	 * @param array $assoc_args Associative arguments.
 	 */
 	public function __invoke( $args, $assoc_args ): void {
-		if ( ! empty( $args ) ) {
-			\WP_CLI::error( __( 'The settings command does not accept positional arguments.', 'autoclose' ), CLI::EXIT_INVALID );
-		}
-
 		$data = $this->get_settings();
 		$this->output( $data, $this->get_format( $assoc_args ), $this->get_rows( $data ) );
 	}
@@ -75,6 +71,7 @@ class Settings_Command extends Base_Command {
 				'enabled'    => (bool) Options_API::get_option( 'cron_on' ),
 				'hour'       => (int) Options_API::get_option( 'cron_hour' ),
 				'minute'     => (int) Options_API::get_option( 'cron_min' ),
+				'timezone'   => 'UTC',
 				'recurrence' => (string) Options_API::get_option( 'cron_recurrence' ),
 			),
 			'comments'      => array(

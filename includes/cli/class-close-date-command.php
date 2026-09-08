@@ -104,8 +104,11 @@ class Close_Date_Command extends Base_Command {
 	 *
 	 * ## OPTIONS
 	 *
-	 * <id>
+	 * [<id>]
 	 * : Post ID.
+	 *
+	 * [--post-ids=<ids>]
+	 * : Comma-separated post IDs. Exactly one ID is required.
 	 *
 	 * [--comments=<datetime>]
 	 * : Site-local close date in Y-m-dTH:i format.
@@ -159,18 +162,34 @@ class Close_Date_Command extends Base_Command {
 			$this->close_date->maybe_schedule_or_close( $post_id );
 		}
 
-		$item = $this->get_item( $post_id );
+		$item   = $this->get_item( $post_id );
+		$errors = array();
+		if ( ! $dry_run ) {
+			foreach ( $values as $type => $date ) {
+				if ( $this->is_due( $date ) ) {
+					$status = 'comments' === $type ? $item['comment_status'] : $item['ping_status'];
+					if ( 'closed' !== $status ) {
+						$errors[] = sprintf( __( 'The %s close date was due, but the status is still %s.', 'autoclose' ), $type, $status );
+					}
+				} elseif ( false === wp_next_scheduled( 'autoclose_close_comments_pings_event', array( $post_id, $type ) ) ) {
+					$errors[] = sprintf( __( 'The %s close event could not be scheduled.', 'autoclose' ), $type );
+				}
+			}
+		}
+
 		$data = array(
 			'mode'     => $dry_run ? 'dry-run' : 'run',
-			'outcome'  => 'success',
+			'outcome'  => empty( $errors ) ? 'success' : 'failed',
 			'blog_id'  => (int) get_current_blog_id(),
 			'site_url' => home_url( '/' ),
 			'post_id'  => $post_id,
 			'set'      => $values,
 			'item'     => $item,
+			'errors'   => $errors,
 		);
 
 		$this->output( $data, $format, $this->get_action_rows( $data ) );
+		$this->exit_for_outcome( $data['outcome'] );
 	}
 
 	/**
@@ -178,8 +197,11 @@ class Close_Date_Command extends Base_Command {
 	 *
 	 * ## OPTIONS
 	 *
-	 * <id>...
+	 * [<id>...]
 	 * : Post IDs.
+	 *
+	 * [--post-ids=<ids>]
+	 * : Comma-separated post IDs.
 	 *
 	 * [--comments]
 	 * : Clear only comment close dates.
@@ -320,14 +342,34 @@ class Close_Date_Command extends Base_Command {
 	 */
 	private function parse_date( $value ): string {
 		$value  = trim( (string) $value, " \n\r\t\v\x00" );
-		$parsed = \DateTimeImmutable::createFromFormat( '!Y-m-d\\TH:i', $value, wp_timezone() );
+		$format = '!Y-m-d\\TH:i';
+		$utc    = \DateTimeImmutable::createFromFormat( $format, $value, new \DateTimeZone( 'UTC' ) );
 		$errors = \DateTimeImmutable::getLastErrors();
 
-		if ( false === $parsed || ( false !== $errors && ( $errors['warning_count'] > 0 || $errors['error_count'] > 0 ) ) || $parsed->format( 'Y-m-d\\TH:i' ) !== $value ) {
+		if ( false === $utc || ( false !== $errors && ( $errors['warning_count'] > 0 || $errors['error_count'] > 0 ) ) || $utc->format( 'Y-m-d\\TH:i' ) !== $value ) {
 			\WP_CLI::error( __( 'Dates must use the site-local Y-m-dTH:i format, for example 2026-10-01T09:00.', 'autoclose' ), CLI::EXIT_INVALID );
 		}
 
+		$parsed = \DateTimeImmutable::createFromFormat( $format, $value, wp_timezone() );
+		if ( false === $parsed || $parsed->format( 'Y-m-d\\TH:i' ) !== $value ) {
+			\WP_CLI::error( __( 'That local time does not exist in the site timezone because of a daylight-saving transition. Choose another time.', 'autoclose' ), CLI::EXIT_INVALID );
+		}
+
 		return $parsed->format( 'Y-m-d\\TH:i' );
+	}
+
+	/**
+	 * Determine whether a validated date is due.
+	 *
+	 * @since 3.2.0
+	 *
+	 * @param string $date Site-local date.
+	 * @return bool Whether the date is due.
+	 */
+	private function is_due( string $date ): bool {
+		$parsed = \DateTimeImmutable::createFromFormat( '!Y-m-d\\TH:i', $date, wp_timezone() );
+
+		return false !== $parsed && $parsed->getTimestamp() <= time();
 	}
 
 	/**
@@ -381,6 +423,7 @@ class Close_Date_Command extends Base_Command {
 		if ( isset( $data['clear'] ) ) {
 			$rows[] = $this->row( 'Cleared', $data['clear'] );
 		}
+		$rows[] = $this->row( 'Errors', empty( $data['errors'] ?? array() ) ? 'None' : implode( '; ', $data['errors'] ) );
 
 		return $rows;
 	}

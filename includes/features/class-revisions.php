@@ -147,9 +147,76 @@ class Revisions {
 			$where .= ' AND post_parent IN (' . implode( ',', $ids ) . ')';
 		}
 
+		$revisions = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			"SELECT ID, post_parent FROM {$wpdb->posts} {$where}",
+			ARRAY_A
+		);
+
+		if ( null === $revisions && ! empty( $wpdb->last_error ) ) {
+			return false;
+		}
+
+		$revision_ids = array();
+		$parent_ids   = array();
+		foreach ( (array) $revisions as $revision ) {
+			$revision_ids[] = (int) $revision['ID'];
+			if ( ! empty( $revision['post_parent'] ) ) {
+				$parent_ids[] = (int) $revision['post_parent'];
+			}
+		}
+
+		$this->clean_revision_caches( $revision_ids, $parent_ids );
 		$result = $wpdb->query( "DELETE FROM {$wpdb->posts} {$where}" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		return $result;
+	}
+
+	/**
+	 * Invalidate revision and parent post caches before deletion.
+	 *
+	 * Clean_post_cache() cannot invalidate a revision after it has been deleted,
+	 * because get_post() can no longer load the revision object. Revision cache
+	 * keys are therefore deleted directly, while parent posts use WordPress's
+	 * complete cache invalidation routine.
+	 *
+	 * @since 3.2.0
+	 *
+	 * @param array<int, int> $revision_ids Revision IDs.
+	 * @param array<int, int> $parent_ids   Parent post IDs.
+	 */
+	private function clean_revision_caches( array $revision_ids, array $parent_ids ): void {
+		$revision_ids = array_values( array_unique( array_map( 'intval', $revision_ids ) ) );
+		$parent_ids   = array_values( array_unique( array_map( 'intval', $parent_ids ) ) );
+
+		if ( ! empty( $revision_ids ) ) {
+			$post_parent_keys = array_map(
+				static function ( $revision_id ) {
+					return 'post_parent:' . (string) $revision_id;
+				},
+				$revision_ids
+			);
+
+			if ( function_exists( 'wp_cache_delete_multiple' ) ) {
+				wp_cache_delete_multiple( $revision_ids, 'posts' );
+				wp_cache_delete_multiple( $post_parent_keys, 'posts' );
+				wp_cache_delete_multiple( $revision_ids, 'post_meta' );
+			} else {
+				foreach ( $revision_ids as $revision_id ) {
+					wp_cache_delete( $revision_id, 'posts' );
+					wp_cache_delete( 'post_parent:' . (string) $revision_id, 'posts' );
+					wp_cache_delete( $revision_id, 'post_meta' );
+				}
+			}
+		}
+
+		foreach ( $parent_ids as $parent_id ) {
+			clean_post_cache( $parent_id );
+		}
+
+		if ( ! empty( $revision_ids ) && function_exists( 'wp_cache_set_posts_last_changed' ) ) {
+			wp_cache_set_posts_last_changed();
+		}
 	}
 
 	/**

@@ -46,10 +46,6 @@ class Cron_Command extends Base_Command {
 	 * @param array $assoc_args Associative arguments.
 	 */
 	public function repair( $args, $assoc_args ): void {
-		if ( ! empty( $args ) ) {
-			\WP_CLI::error( __( 'The cron repair command does not accept positional arguments.', 'autoclose' ), CLI::EXIT_INVALID );
-		}
-
 		$format  = $this->get_format( $assoc_args );
 		$force   = isset( $assoc_args['force'] );
 		$before  = wp_next_scheduled( 'acc_cron_hook' );

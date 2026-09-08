@@ -341,7 +341,7 @@ class Settings {
 			'cron_range_desc'      => array(
 				'id'   => 'cron_range_desc',
 				'name' => '<strong>' . esc_html__( 'Time to run closing', 'autoclose' ) . '</strong>',
-				'desc' => esc_html__( 'The next two options allow you to set the time to run the cron. The cron job will run now if the hour:min set below if before the current time. e.g. if the time now is 20:30 hours and you set the schedule to 9:00. Else it will run later today at the scheduled time.', 'autoclose' ),
+				'desc' => esc_html__( 'The next two options set the scheduled time in UTC. The cron job will run on the next occurrence of the configured hour and minute. The next run shown in AutoClose status is converted to the site timezone.', 'autoclose' ),
 				'type' => 'descriptive_text',
 			),
 			'cron_hour'            => array(
