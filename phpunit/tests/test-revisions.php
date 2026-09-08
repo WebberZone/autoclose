@@ -743,4 +743,28 @@ class RevisionsTest extends WP_UnitTestCase
         $this->assertContains($recent, $remaining);
         $this->assertNotContains($old, $remaining);
     }
+
+    /**
+     * The policy notice targets sites that already had scheduled deletion enabled.
+     */
+    public function test_policy_notice_only_targets_affected_sites()
+    {
+        $notice = new \WebberZone\AutoClose\Admin\Revision_Policy_Notice();
+
+        wp_set_current_user(self::factory()->user->create(array( 'role' => 'administrator' )));
+        delete_option(\WebberZone\AutoClose\Admin\Revision_Policy_Notice::ACK_OPTION);
+
+        $this->set_settings(array( 'delete_revisions' => 0 ));
+        $this->assertFalse($notice->should_display());
+
+        $this->set_settings(array( 'delete_revisions' => 1 ));
+        $this->assertTrue($notice->should_display());
+
+        update_option(\WebberZone\AutoClose\Admin\Revision_Policy_Notice::ACK_OPTION, 1);
+        $this->assertFalse($notice->should_display());
+
+        delete_option(\WebberZone\AutoClose\Admin\Revision_Policy_Notice::ACK_OPTION);
+        wp_set_current_user(self::factory()->user->create(array( 'role' => 'subscriber' )));
+        $this->assertFalse($notice->should_display());
+    }
 }

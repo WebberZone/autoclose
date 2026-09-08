@@ -88,7 +88,7 @@ Release date: 8 September 2026
 
 **Changed**
 
-* Scheduled revision cleanup no longer deletes every revision on each run. It follows the retention and age policy above, and never deletes autosaves. Existing settings are preserved; the one-time Delete all revisions button on the Tools page still deletes everything.
+* Scheduled revision cleanup no longer deletes every revision on each run. It follows the retention and age policy above, and never deletes autosaves. Existing settings are preserved; the one-time Delete all revisions button on the Tools page still deletes everything. Sites that already had Delete post revisions enabled see a one-time dismissible notice explaining the change.
 * Revisions are now deleted through the WordPress deletion API, so metadata, term relationships, caches, and the `wp_delete_post_revision` action are handled by core.
 * Revision cleanup runs are bounded per run, filterable via `acc_revisions_prune_limit`, and report how many revisions were scanned and whether more remain.
 * Improved bulk operations with batched updates and cache invalidation.

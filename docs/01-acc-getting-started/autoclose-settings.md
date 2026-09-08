@@ -161,7 +161,7 @@ Scheduled cleanup deletes a revision only when both conditions hold:
 
 Autosaves are never deleted by scheduled cleanup, so autosave recovery data stays intact.
 
-Before v3.2.0, enabling **Delete post revisions** deleted every revision on each scheduled run. Existing settings are preserved and nothing is enabled on upgrade, but scheduled runs now follow the policy above. To delete every revision regardless of retention and age, use the **Delete all revisions** button on the [Tools page](autoclose-tools-page.md).
+Before v3.2.0, enabling **Delete post revisions** deleted every revision on each scheduled run. Existing settings are preserved and nothing is enabled on upgrade, but scheduled runs now follow the policy above. Sites that already had the option enabled see a one-time dismissible admin notice explaining the change. To delete every revision regardless of retention and age, use the **Delete all revisions** button on the [Tools page](autoclose-tools-page.md).
 
 Each run is bounded so a large site is cleaned up over several runs rather than in one long request. The bound is filterable:
 

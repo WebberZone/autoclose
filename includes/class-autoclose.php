@@ -111,8 +111,13 @@ class AutoClose {
 	 */
 	public function init_admin(): void {
 		if ( is_admin() ) {
-			$this->admin = new Admin\Admin();
-			$tools       = new Admin\Tools();
+			$this->admin     = new Admin\Admin();
+			$tools           = new Admin\Tools();
+			$revision_notice = new Admin\Revision_Policy_Notice();
+
+			// Revision cleanup policy change notice.
+			Hook_Registry::add_action( 'admin_init', array( $revision_notice, 'maybe_dismiss' ) );
+			Hook_Registry::add_action( 'admin_notices', array( $revision_notice, 'display' ) );
 
 			// Plugin links.
 			Hook_Registry::add_filter( 'plugin_row_meta', array( $this->admin, 'plugin_row_meta' ), 10, 2 );
