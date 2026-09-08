@@ -118,7 +118,18 @@ class Tools {
 			}
 
 			if ( Options_API::get_option( 'delete_revisions' ) ) {
-				$message .= esc_html__( 'Post revisions deleted', 'autoclose' );
+				$revision_age = max( 0, (int) Options_API::get_option( 'revision_age' ) );
+
+				if ( $revision_age > 0 ) {
+					$message .= sprintf(
+						/* translators: 1: Date. */
+						esc_html__( 'Post revisions beyond the retention limit and older than %1$s deleted', 'autoclose' ),
+						gmdate( $date_time_format, $current_time - $revision_age * DAY_IN_SECONDS )
+					);
+				} else {
+					$message .= esc_html__( 'Post revisions beyond the retention limit deleted', 'autoclose' );
+				}
+
 				$message .= '<br />';
 			}
 
@@ -161,8 +172,22 @@ class Tools {
 
 		/* Delete revisions */
 		if ( isset( $_POST['acc_delete_revisions'] ) && check_admin_referer( 'acc-tools-settings' ) ) {
-			$revisions->delete_revisions();
-			add_settings_error( 'acc-notices', '', esc_html__( 'Revisions deleted on all post types', 'autoclose' ), 'updated' );
+			$result = $revisions->delete_revisions();
+
+			if ( false === $result ) {
+				add_settings_error( 'acc-notices', '', esc_html__( 'Deleting revisions failed.', 'autoclose' ), 'error' );
+			} else {
+				add_settings_error(
+					'acc-notices',
+					'',
+					sprintf(
+						/* translators: 1: Number of revisions. */
+						esc_html( _n( '%s revision deleted on all post types, ignoring retention limits and age', '%s revisions deleted on all post types, ignoring retention limits and age', (int) $result, 'autoclose' ) ),
+						number_format_i18n( (int) $result )
+					),
+					'updated'
+				);
+			}
 		}
 
 		// Include the view file.

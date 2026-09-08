@@ -159,6 +159,7 @@ class Status {
 				'close_comments'   => (bool) Options_API::get_option( 'close_comment' ),
 				'close_pings'      => (bool) Options_API::get_option( 'close_pbtb' ),
 				'delete_revisions' => (bool) Options_API::get_option( 'delete_revisions' ),
+				'revision_age'     => max( 0, (int) Options_API::get_option( 'revision_age' ) ),
 			),
 			'schedule' => array(
 				'enabled'          => $cron_enabled,

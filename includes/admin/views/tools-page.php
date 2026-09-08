@@ -76,14 +76,17 @@ if ( ! defined( 'WPINC' ) ) {
 
 			<div class="postbox">
 				<div class="postbox-header">
-					<h2 class="hndle ui-sortable-handle"><?php esc_html_e( 'Delete Revisions', 'autoclose' ); ?></h2>
+					<h2 class="hndle ui-sortable-handle"><?php esc_html_e( 'Delete All Revisions', 'autoclose' ); ?></h2>
 				</div>
 				<div class="inside">
 					<p>
-						<input name="acc_delete_revisions" type="submit" id="acc_delete_revisions" value="<?php esc_attr_e( 'Delete revisions', 'autoclose' ); ?>" class="button button-secondary" onclick="if (!confirm('<?php esc_attr_e( 'This will delete all revisions permanently. Proceed?', 'autoclose' ); ?>')) return false;" />
+						<input name="acc_delete_revisions" type="submit" id="acc_delete_revisions" value="<?php esc_attr_e( 'Delete all revisions', 'autoclose' ); ?>" class="button button-secondary" onclick="if (!confirm('<?php esc_attr_e( 'This deletes every revision permanently, ignoring retention limits and the age setting, and includes autosaves. Proceed?', 'autoclose' ); ?>')) return false;" />
 					</p>
 					<p class="description">
 						<?php esc_html_e( 'This is a permanent change. Once you go through with this, there is no way to restore your revisions. Please backup your database before proceeding.', 'autoclose' ); ?>
+					</p>
+					<p class="description">
+						<?php esc_html_e( 'Unlike scheduled cleanup, this button ignores the number of revisions each post type keeps and the age setting, and it also removes autosaves. To delete only revisions beyond the retention limit and older than the configured age, use the Run closing algorithm button above.', 'autoclose' ); ?>
 					</p>
 				</div>
 			</div>

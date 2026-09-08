@@ -19,7 +19,7 @@ wp autoclose settings
 wp autoclose run
 wp autoclose comments close|open
 wp autoclose pings close|open
-wp autoclose revisions preview|delete
+wp autoclose revisions preview|prune|delete
 wp autoclose pingbacks preview|delete
 wp autoclose close-date list|set|clear
 wp autoclose cron repair
@@ -75,15 +75,22 @@ When `--post-types` is omitted, the commands target public non-attachment post t
 
 ## `wp autoclose revisions`
 
-Preview or permanently delete revisions. Positional IDs identify parent posts; without IDs, the operation applies to all revisions.
+Preview, prune, or permanently delete revisions. Positional IDs identify parent posts; without IDs, the operation applies to every post.
+
+`prune` follows the same policy as scheduled cleanup: it deletes only revisions beyond the post's retention limit and older than the age cutoff, and never deletes autosaves. `delete` is the explicit delete-all action and ignores both limits.
 
 ```bash
 wp autoclose revisions preview --format=json
+wp autoclose revisions preview --all
+wp autoclose revisions prune --dry-run
+wp autoclose revisions prune --age=30 --limit=500 --yes
 wp autoclose revisions delete 1234 --yes
 wp autoclose revisions delete --dry-run --sample=25
 ```
 
-Deletion always asks for confirmation unless `--yes` is supplied. The command is explicit and is not limited by the scheduled **Delete revisions** setting.
+`--age` overrides the saved age cutoff for that run; `0` ignores age entirely. `--limit` overrides the per-run bound. Output reports the revisions scanned and whether more remain beyond the bound.
+
+Both `prune` and `delete` ask for confirmation unless `--yes` is supplied. The commands are explicit and are not limited by the scheduled **Delete revisions** setting.
 
 ## `wp autoclose pingbacks`
 

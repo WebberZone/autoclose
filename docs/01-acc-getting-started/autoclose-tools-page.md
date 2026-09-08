@@ -36,9 +36,11 @@ Sets `ping_status` to `closed` on every post in the configured post types, regar
 
 Permanently removes all pingback and trackback comments on every post in the configured post types.
 
-### Delete revisions on all post types
+### Delete all revisions
 
-Permanently removes post revisions on every post in the configured post types.
+Permanently removes **every** post revision, including autosaves, ignoring the retention limits and the age cutoff configured on the settings page. The confirmation prompt spells this out, and the result message reports how many revisions were deleted.
+
+For ordinary cleanup that respects retention and age, use **Run closing algorithm** above, or `wp autoclose revisions prune`.
 
 ## Notes
 

@@ -220,6 +220,9 @@ class Runner {
 			'comments_opened'        => (int) ( $comments['comments_opened'] ?? 0 ),
 			'pings_opened'           => (int) ( $comments['pings_opened'] ?? 0 ),
 			'revisions_deleted'      => (int) ( $revisions['revisions_deleted'] ?? 0 ),
+			'revisions_affected'     => (int) ( $revisions['revisions_deleted'] ?? $revisions['affected'] ?? 0 ),
+			'revisions_scanned'      => (int) ( $revisions['revisions_scanned'] ?? $revisions['scanned'] ?? 0 ),
+			'revisions_remaining'    => (bool) ( $revisions['revisions_limit_reached'] ?? $revisions['limit_reached'] ?? false ),
 			'errors'                 => $errors,
 			'components'             => $components,
 		);

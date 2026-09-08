@@ -152,21 +152,44 @@ One URL per line. Pings to any of these URLs are blocked in addition to self-pin
 
 ## Revisions
 
+### Cleanup policy
+
+Scheduled cleanup deletes a revision only when both conditions hold:
+
+1. It is beyond the number of revisions its post keeps (**Number of revisions** below).
+2. It is older than **Delete revisions older than**.
+
+Autosaves are never deleted by scheduled cleanup, so autosave recovery data stays intact.
+
+Before v3.2.0, enabling **Delete post revisions** deleted every revision on each scheduled run. Existing settings are preserved and nothing is enabled on upgrade, but scheduled runs now follow the policy above. To delete every revision regardless of retention and age, use the **Delete all revisions** button on the [Tools page](autoclose-tools-page.md).
+
+Each run is bounded so a large site is cleaned up over several runs rather than in one long request. The bound is filterable:
+
+```php
+add_filter( 'acc_revisions_prune_limit', fn() => 5000 );
+```
+
 ### Delete post revisions
 
 WordPress stores a record of each saved draft or published update. This can build up over time. Enable to delete old post revisions when the cron runs.
 
 **Default:** Disabled
 
+### Delete revisions older than
+
+Age cutoff in days. Only revisions older than this — and beyond the retention limit — are deleted. Set to `0` to delete every revision beyond the retention limit regardless of age.
+
+**Default:** `90`
+
 ### Number of revisions
 
-Limit the number of revisions that WordPress stores in the database for each post type. Old revisions are deleted automatically.
+Limit the number of revisions that WordPress stores in the database for each post type. This is both the limit WordPress applies when saving and the retention floor that scheduled cleanup will not delete below.
 
 The setting is per post type. Value semantics:
 
-- `-2` — ignore this plugin's setting (use WordPress default).
-- `-1` — store every revision.
-- `0` — do not store any revisions.
-- `>0` — store that many revisions per post.
+- `-2` — ignore this plugin's setting (use the WordPress default, `WP_POST_REVISIONS`, or another plugin's filter).
+- `-1` — store every revision. Scheduled cleanup never prunes this post type.
+- `0` — do not store any revisions. Every revision older than the age cutoff is eligible.
+- `>0` — store that many revisions per post. The newest that many are kept.
 
 **Default:** `-2` for every supported post type.

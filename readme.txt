@@ -83,9 +83,14 @@ Release date: 8 September 2026
 **Added**
 
 * Added WP-CLI commands for status, maintenance, discussions, revisions, pingbacks, close dates, and cron.
+* Added a revision age cutoff. Scheduled cleanup now deletes a revision only when it is beyond the number of revisions its post keeps and is older than the configured age. Defaults to 90 days.
+* Added `wp autoclose revisions prune` for age and retention aware cleanup, and `--all` on `wp autoclose revisions preview`.
 
 **Changed**
 
+* Scheduled revision cleanup no longer deletes every revision on each run. It follows the retention and age policy above, and never deletes autosaves. Existing settings are preserved; the one-time Delete all revisions button on the Tools page still deletes everything.
+* Revisions are now deleted through the WordPress deletion API, so metadata, term relationships, caches, and the `wp_delete_post_revision` action are handled by core.
+* Revision cleanup runs are bounded per run, filterable via `acc_revisions_prune_limit`, and report how many revisions were scanned and whether more remain.
 * Improved bulk operations with batched updates and cache invalidation.
 * Limited default CLI scopes to supported public post types, excluding attachments and revisions.
 

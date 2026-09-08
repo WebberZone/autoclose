@@ -311,6 +311,7 @@ class Settings {
 
 			// Revisions.
 			'delete_revisions'      => 0,
+			'revision_age'          => 90,
 		);
 
 		$revisions = new \WebberZone\AutoClose\Features\Revisions();
@@ -562,12 +563,27 @@ class Settings {
 	public static function settings_revisions() {
 		$defaults = self::get_defaults();
 		$settings = array(
+			'revision_policy'     => array(
+				'id'   => 'revision_policy',
+				'name' => '<strong>' . esc_html__( 'Cleanup policy', 'autoclose' ) . '</strong>',
+				'desc' => esc_html__( 'Scheduled cleanup deletes a revision only when it is beyond the number of revisions its post keeps and is older than the age below. Autosaves are never deleted by scheduled cleanup. Before v3.2.0 this setting deleted every revision on each run; it now follows the safer policy described here. To delete every revision regardless of these limits, use the one-time Delete revisions button on the AutoClose Tools page.', 'autoclose' ),
+				'type' => 'descriptive_text',
+			),
 			'delete_revisions'    => array(
 				'id'      => 'delete_revisions',
 				'name'    => esc_html__( 'Delete post revisions', 'autoclose' ),
-				'desc'    => esc_html__( 'The WordPress revisions system stores a record of each saved draft or published update. This can gather up a lot of overhead in the long run. Use this option to delete old post revisions.', 'autoclose' ),
+				'desc'    => esc_html__( 'The WordPress revisions system stores a record of each saved draft or published update. This can gather up a lot of overhead in the long run. Use this option to delete old post revisions when the scheduled maintenance runs.', 'autoclose' ),
 				'type'    => 'checkbox',
 				'default' => $defaults['delete_revisions'],
+			),
+			'revision_age'        => array(
+				'id'      => 'revision_age',
+				'name'    => esc_html__( 'Delete revisions older than', 'autoclose' ),
+				'desc'    => esc_html__( 'Number of days. Only revisions older than this and beyond the retention limit below are deleted. Set to 0 to delete every revision beyond the retention limit regardless of age.', 'autoclose' ),
+				'type'    => 'number',
+				'default' => $defaults['revision_age'],
+				'min'     => 0,
+				'size'    => 'small',
 			),
 			'revision_post_types' => array(
 				'id'   => 'revision_post_types',
@@ -676,8 +692,10 @@ class Settings {
 				'id'      => 'acc-settings-revisions',
 				'title'   => __( 'Revisions', 'autoclose' ),
 				'content' => '<p>' . __( 'This screen provides settings to automatically delete post revisions.', 'autoclose' ) . '</p>' .
-					'<p>' . __( 'Enable the Delete post revisions option to delete post revisions when the scheduled maintenance runs.', 'autoclose' ) . '</p>' .
-					'<p>' . __( 'You can also set the number of revisions to keep for each post type. Set to 0 to delete all revisions.', 'autoclose' ) . '</p>',
+					'<p>' . __( 'Enable the Delete post revisions option to delete post revisions when the scheduled maintenance runs. A revision is deleted only when it is beyond the number of revisions its post keeps and is older than the age you set. Autosaves are never deleted by scheduled cleanup.', 'autoclose' ) . '</p>' .
+					'<p>' . __( 'Before v3.2.0 this option deleted every revision on each scheduled run. Existing settings are preserved, but scheduled runs now follow the retention and age policy above.', 'autoclose' ) . '</p>' .
+					'<p>' . __( 'You can also set the number of revisions to keep for each post type. Set to -1 to keep every revision and never prune that post type, 0 to keep none, or -2 to use whatever WordPress or another plugin decides.', 'autoclose' ) . '</p>' .
+					'<p>' . __( 'To delete every revision regardless of retention and age, use the Delete revisions button on the AutoClose Tools page.', 'autoclose' ) . '</p>',
 			),
 		);
 
