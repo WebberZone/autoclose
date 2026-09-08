@@ -497,25 +497,20 @@ class Comments {
 	 * @param array<int, int> $post_ids Affected post IDs.
 	 */
 	private function fire_clean_post_cache_actions( array $post_ids ): void {
+		global $wpdb;
+
 		if ( false === has_action( 'clean_post_cache' ) ) {
 			return;
 		}
 
-		$posts = get_posts(
-			array(
-				'post__in'               => $post_ids,
-				'post_type'              => 'any',
-				'post_status'            => 'any',
-				'posts_per_page'         => count( $post_ids ),
-				'orderby'                => 'post__in',
-				'no_found_rows'          => true,
-				'update_post_meta_cache' => false,
-				'update_post_term_cache' => false,
-			)
+		$post_id_list = implode( ',', array_map( 'absint', $post_ids ) );
+		$posts        = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+			"SELECT * FROM {$wpdb->posts} WHERE ID IN ({$post_id_list})", // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			OBJECT
 		);
 
 		foreach ( $posts as $post ) {
-			do_action( 'clean_post_cache', (int) $post->ID, $post );
+			do_action( 'clean_post_cache', (int) $post->ID, new \WP_Post( $post ) );
 		}
 	}
 
