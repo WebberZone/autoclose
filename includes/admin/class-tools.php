@@ -9,6 +9,7 @@ namespace WebberZone\AutoClose\Admin;
 
 use WebberZone\AutoClose\Features\Comments;
 use WebberZone\AutoClose\Features\Revisions;
+use WebberZone\AutoClose\Maintenance\Runner;
 use WebberZone\AutoClose\Options_API;
 use WebberZone\AutoClose\Util\Hook_Registry;
 
@@ -174,10 +175,7 @@ class Tools {
 	 * @since 3.0.0
 	 */
 	public function process_all() {
-		$comments = new Comments();
-		$comments->process_comments();
-
-		$revisions = new Revisions();
-		$revisions->process_revisions();
+		$runner = new Runner();
+		$runner->run();
 	}
 }

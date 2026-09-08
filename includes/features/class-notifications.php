@@ -56,6 +56,7 @@ class Notifications {
 	 * @since 3.1.0
 	 */
 	public function __construct() {
+		Hook_Registry::add_action( 'acc_maintenance_run_started', array( $this, 'reset_counts' ), 1 );
 		Hook_Registry::add_action( 'acc_comments_processed', array( $this, 'collect_comments' ), 10, 2 );
 		Hook_Registry::add_action( 'acc_revisions_processed', array( $this, 'collect_revisions' ) );
 		Hook_Registry::add_action( 'acc_cron_hook', array( $this, 'maybe_send_email' ), 20 );
@@ -83,6 +84,17 @@ class Notifications {
 	 */
 	public function collect_revisions( int $deleted ): void {
 		$this->revisions_deleted += $deleted;
+	}
+
+	/**
+	 * Reset counters before every maintenance pipeline.
+	 *
+	 * @since 3.2.0
+	 */
+	public function reset_counts(): void {
+		$this->comments_closed   = 0;
+		$this->pings_closed      = 0;
+		$this->revisions_deleted = 0;
 	}
 
 	/**
@@ -120,5 +132,6 @@ class Notifications {
 		$body = ob_get_clean();
 
 		wp_mail( $to, $subject, $body, array( 'Content-Type: text/html; charset=UTF-8' ) );
+		$this->reset_counts();
 	}
 }

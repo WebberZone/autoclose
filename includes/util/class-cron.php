@@ -31,9 +31,13 @@ class Cron {
 	 * @param int    $hour       Hour.
 	 * @param int    $min        Minute.
 	 * @param string $recurrence Frequency.
+	 * @param bool   $future     Ensure the first occurrence is in the future.
 	 */
-	public function enable_run( $hour, $min, $recurrence ) {
+	public function enable_run( $hour, $min, $recurrence, $future = false ) {
 		$on = gmmktime( $hour, $min, 0, (int) gmdate( 'm' ), (int) gmdate( 'd' ), (int) gmdate( 'Y' ) );
+		if ( $future && $on <= time() ) {
+			$on = gmmktime( $hour, $min, 0, (int) gmdate( 'm' ), (int) gmdate( 'd' ) + 1, (int) gmdate( 'Y' ) );
+		}
 
 		if ( ! wp_next_scheduled( 'acc_cron_hook' ) ) {
 			wp_schedule_event( $on, $recurrence, 'acc_cron_hook' );

@@ -13,6 +13,7 @@ if ( ! defined( 'WPINC' ) ) {
 use WebberZone\AutoClose\Options_API;
 use WebberZone\AutoClose\Features\Comments;
 use WebberZone\AutoClose\Features\Revisions;
+use WebberZone\AutoClose\Maintenance\Runner;
 
 /**
  * Get Settings.
@@ -76,9 +77,6 @@ function acc_delete_revisions() {
  * @since 1.0.0
  */
 function acc_run_cron() {
-	$comments = new Comments();
-	$comments->process_comments();
-
-	$revisions = new Revisions();
-	$revisions->process_revisions();
+	$runner = new Runner();
+	$runner->run();
 }

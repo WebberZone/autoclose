@@ -40,6 +40,7 @@ function acc_delete_data() {
 
 	delete_option( 'acc_settings' );
 	delete_option( 'ald_acc_settings' );
+	delete_option( 'acc_maintenance_status' );
 
 	// Wizard options.
 	delete_option( 'acc_wizard_completed' );

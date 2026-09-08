@@ -73,6 +73,7 @@ class AutoClose {
 		$this->set_locale();
 		$this->define_admin_hooks();
 		$this->define_feature_hooks();
+		$this->define_cli_hooks();
 	}
 
 	/**
@@ -138,15 +139,26 @@ class AutoClose {
 		// Register close date hooks.
 		Hook_Registry::add_action( 'autoclose_close_comments_pings_event', array( $close_date, 'maybe_close_due_comments_pings' ), 10, 2 );
 
-		// Register cron hooks.
-		Hook_Registry::add_action( 'acc_cron_hook', array( $comments, 'process_comments' ) );
-		Hook_Registry::add_action( 'acc_cron_hook', array( $revisions, 'process_revisions' ) );
+		// Register the shared maintenance runner for cron and CLI execution.
+		$runner = new Maintenance\Runner( $comments, $revisions );
+		Hook_Registry::add_action( 'acc_cron_hook', array( $runner, 'run' ) );
 
 		// Register revisions hooks.
 		Hook_Registry::add_filter( 'wp_revisions_to_keep', array( $revisions, 'revisions_to_keep' ), 999999, 2 );
 
 		// Register ping hooks.
 		Hook_Registry::add_action( 'pre_ping', array( $block_pings, 'block_pings' ) );
+	}
+
+	/**
+	 * Register WP-CLI commands when WP-CLI is available.
+	 *
+	 * @since 3.2.0
+	 */
+	private function define_cli_hooks(): void {
+		if ( defined( 'WP_CLI' ) && WP_CLI ) {
+			( new CLI\CLI_Manager() )->register();
+		}
 	}
 
 	/**

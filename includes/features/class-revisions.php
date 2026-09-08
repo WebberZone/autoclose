@@ -30,12 +30,19 @@ class Revisions {
 	 *
 	 * @since 3.0.0
 	 */
-	public function process_revisions() {
-		$deleted = 0;
+	public function process_revisions(): array {
+		$deleted    = 0;
+		$operations = 0;
+		$errors     = array();
 
 		if ( Options_API::get_option( 'delete_revisions' ) ) {
-			$result  = $this->delete_revisions();
-			$deleted = is_int( $result ) ? $result : 0;
+			++$operations;
+			$result = $this->delete_revisions();
+			if ( false === $result ) {
+				$errors[] = __( 'Deleting revisions failed.', 'autoclose' );
+			} else {
+				$deleted = (int) $result;
+			}
 		}
 
 		/**
@@ -46,6 +53,80 @@ class Revisions {
 		 * @param int $deleted Number of revisions deleted.
 		 */
 		do_action( 'acc_revisions_processed', $deleted );
+
+		return array(
+			'status'            => empty( $errors ) ? ( $operations > 0 ? 'success' : 'skipped' ) : 'failed',
+			'operations'        => $operations,
+			'revisions_deleted' => $deleted,
+			'errors'            => $errors,
+		);
+	}
+
+	/**
+	 * Preview revision deletion without changing content.
+	 *
+	 * @since 3.2.0
+	 *
+	 * @param int          $sample_limit   Maximum sample rows.
+	 * @param array|string $post_ids       Optional parent post IDs to limit the preview.
+	 * @param bool         $respect_setting Whether to skip when deletion is disabled.
+	 * @return array Preview data.
+	 */
+	public function get_preview( int $sample_limit = 10, $post_ids = array(), bool $respect_setting = true ): array {
+		global $wpdb;
+
+		if ( $respect_setting && ! Options_API::get_option( 'delete_revisions' ) ) {
+			return array(
+				'status'   => 'skipped',
+				'enabled'  => false,
+				'affected' => 0,
+				'post_ids' => wp_parse_id_list( $post_ids ),
+				'sample'   => array(),
+				'errors'   => array(),
+			);
+		}
+
+		$sample_limit = max( 1, min( 100, $sample_limit ) );
+		$ids          = wp_parse_id_list( $post_ids );
+		$where        = "WHERE post_type = 'revision'";
+
+		if ( ! empty( $ids ) ) {
+			$where .= ' AND post_parent IN (' . implode( ',', $ids ) . ')';
+		}
+
+		$count = $wpdb->get_var( "SELECT COUNT(ID) FROM {$wpdb->posts} {$where}" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		if ( null === $count && ! empty( $wpdb->last_error ) ) {
+			return array(
+				'status' => 'failed',
+				'errors' => array( $wpdb->last_error ),
+			);
+		}
+
+		$sample = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT ID, post_parent, post_title, post_date FROM {$wpdb->posts} {$where} ORDER BY ID ASC LIMIT %d",
+				$sample_limit
+			),
+			ARRAY_A
+		);
+
+		if ( null === $sample && ! empty( $wpdb->last_error ) ) {
+			return array(
+				'status' => 'failed',
+				'errors' => array( $wpdb->last_error ),
+			);
+		}
+
+		return array(
+			'status'   => 'success',
+			'enabled'  => true,
+			'affected' => (int) $count,
+			'post_ids' => $ids,
+			'sample'   => is_array( $sample ) ? $sample : array(),
+			'errors'   => array(),
+		);
 	}
 
 	/**
@@ -53,17 +134,20 @@ class Revisions {
 	 *
 	 * @since 3.0.0
 	 *
+	 * @param array|string $post_ids Optional parent post IDs to limit the deletion.
 	 * @return int|bool Number of rows affected/selected for all other queries. Boolean false on error.
 	 */
-	public function delete_revisions() {
+	public function delete_revisions( $post_ids = array() ) {
 		global $wpdb;
 
-		$result = $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			"
-			DELETE FROM {$wpdb->posts}
-			WHERE post_type = 'revision'
-			"
-		);
+		$ids   = wp_parse_id_list( $post_ids );
+		$where = "WHERE post_type = 'revision'";
+
+		if ( ! empty( $ids ) ) {
+			$where .= ' AND post_parent IN (' . implode( ',', $ids ) . ')';
+		}
+
+		$result = $wpdb->query( "DELETE FROM {$wpdb->posts} {$where}" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		return $result;
 	}
