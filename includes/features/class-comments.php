@@ -25,6 +25,13 @@ class Comments {
 	private const EDIT_BATCH_SIZE = 500;
 
 	/**
+	 * Maximum number of legacy status rows migrated in one batch.
+	 *
+	 * @since 3.2.0
+	 */
+	private const STATUS_MIGRATION_BATCH_SIZE = 500;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 3.0.0
@@ -49,6 +56,15 @@ class Comments {
 		$pings_opened    = 0;
 		$operations      = 0;
 		$errors          = array();
+		$migrated        = $this->migrate_legacy_statuses();
+
+		if ( 'failed' === $migrated['status'] ) {
+			$errors = array_merge( $errors, $migrated['errors'] );
+		} elseif ( $migrated['updated'] > 0 ) {
+			++$operations;
+			$comments_closed = (int) $migrated['comments'];
+			$pings_closed    = (int) $migrated['pings'];
+		}
 
 		// Get the post types.
 		$comment_post_types = Helpers::parse_post_types( Options_API::get_option( 'comment_post_types' ) );
@@ -61,64 +77,72 @@ class Comments {
 		// Close Comments on posts.
 		if ( Options_API::get_option( 'close_comment' ) ) {
 			++$operations;
-			$result = $this->close_comments(
+			$result = $this->edit_discussions_result(
+				'comment',
+				'close',
 				array(
 					'age'           => $comment_age,
 					'post_types'    => $comment_post_types,
 					'exclude_terms' => $comment_exclude_terms,
 				)
 			);
-			if ( false === $result ) {
-				$errors[] = __( 'Closing comments failed.', 'autoclose' );
+			if ( 'failed' === $result['status'] ) {
+				$errors = array_merge( $errors, $result['errors'] );
 			} else {
-				$comments_closed = (int) $result;
+				$comments_closed += (int) $result['affected'];
 			}
 		}
 
 		// Close Pingbacks/Trackbacks on posts.
 		if ( Options_API::get_option( 'close_pbtb' ) ) {
 			++$operations;
-			$result = $this->close_pingbacks(
+			$result = $this->edit_discussions_result(
+				'ping',
+				'close',
 				array(
 					'age'           => $pbtb_age,
 					'post_types'    => $pbtb_post_types,
 					'exclude_terms' => $pbtb_exclude_terms,
 				)
 			);
-			if ( false === $result ) {
-				$errors[] = __( 'Closing pingbacks/trackbacks failed.', 'autoclose' );
+			if ( 'failed' === $result['status'] ) {
+				$errors = array_merge( $errors, $result['errors'] );
 			} else {
-				$pings_closed = (int) $result;
+				$pings_closed += (int) $result['affected'];
 			}
 		}
 
 		// Open Comments on these posts.
 		if ( ! empty( $comment_pids ) ) {
 			++$operations;
-			$result = $this->open_comments(
+			$result = $this->edit_discussions_result(
+				'comment',
+				'open',
 				array(
 					'post_ids' => $comment_pids,
 				)
 			);
-			if ( false === $result ) {
-				$errors[] = __( 'Opening selected comments failed.', 'autoclose' );
+			if ( 'failed' === $result['status'] ) {
+				$errors = array_merge( $errors, $result['errors'] );
 			} else {
-				$comments_opened = (int) $result;
+				$comments_opened = (int) $result['affected'];
 			}
 		}
 
 		// Open Pingbacks / Trackbacks on these posts.
 		if ( ! empty( $pbtb_pids ) ) {
 			++$operations;
-			$result = $this->open_pingbacks(
+			$result = $this->edit_discussions_result(
+				'ping',
+				'open',
 				array(
 					'post_ids' => $pbtb_pids,
 				)
 			);
-			if ( false === $result ) {
-				$errors[] = __( 'Opening selected pingbacks/trackbacks failed.', 'autoclose' );
+			if ( 'failed' === $result['status'] ) {
+				$errors = array_merge( $errors, $result['errors'] );
 			} else {
-				$pings_opened = (int) $result;
+				$pings_opened = (int) $result['affected'];
 			}
 		}
 
@@ -144,6 +168,76 @@ class Comments {
 	}
 
 	/**
+	 * Migrate the legacy `close` status to WordPress's canonical `closed` value.
+	 *
+	 * @since 3.2.0
+	 *
+	 * @return array Migration result.
+	 */
+	public function migrate_legacy_statuses(): array {
+		global $wpdb;
+
+		$updated  = 0;
+		$comments = 0;
+		$pings    = 0;
+		$errors   = array();
+
+		foreach ( array( 'comment', 'ping' ) as $type ) {
+			$status_column = 'comment' === $type ? 'comment_status' : 'ping_status';
+			$last_id       = 0;
+
+			do {
+				$ids = $wpdb->get_col( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+					$wpdb->prepare(
+						"SELECT ID FROM {$wpdb->posts} WHERE {$status_column} = 'close' AND ID > %d ORDER BY ID ASC LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+						$last_id,
+						self::STATUS_MIGRATION_BATCH_SIZE
+					)
+				);
+
+				if ( null === $ids ) {
+					$errors[] = $this->get_database_error( __( 'Legacy discussion status migration failed.', 'autoclose' ) );
+					break 2;
+				}
+
+				if ( empty( $ids ) ) {
+					break;
+				}
+
+				$ids    = array_map( 'intval', $ids );
+				$result = $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					"UPDATE {$wpdb->posts} SET {$status_column} = 'closed' WHERE {$status_column} = 'close' AND ID IN (" . implode( ',', $ids ) . ')' // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				);
+
+				if ( false === $result ) {
+					$errors[] = $this->get_database_error( __( 'Legacy discussion status migration failed.', 'autoclose' ) );
+					break 2;
+				}
+
+				$result      = (int) $result;
+				$batch_count = count( $ids );
+				$updated    += $result;
+				if ( 'comment' === $type ) {
+					$comments += $result;
+				} else {
+					$pings += $result;
+				}
+
+				$this->clean_discussion_caches( $ids );
+				$last_id = (int) end( $ids );
+			} while ( self::STATUS_MIGRATION_BATCH_SIZE === $batch_count );
+		}
+
+		return array(
+			'status'   => empty( $errors ) ? 'success' : 'failed',
+			'updated'  => $updated,
+			'comments' => $comments,
+			'pings'    => $pings,
+			'errors'   => $errors,
+		);
+	}
+
+	/**
 	 * Function to open/close comments or pingback/trackbacks
 	 *
 	 * @since 3.0.0
@@ -154,10 +248,26 @@ class Comments {
 	 * @return int|bool Number of rows affected/selected for all other queries. Boolean false on error.
 	 */
 	public function edit_discussions( $type = 'comment', $action = 'open', $args = array() ) {
+		$result = $this->edit_discussions_result( $type, $action, $args );
+
+		return 'success' === $result['status'] ? $result['affected'] : false;
+	}
+
+	/**
+	 * Open or close discussions and preserve partial progress on failure.
+	 *
+	 * @since 3.2.0
+	 *
+	 * @param string       $type   'comment' or 'ping'.
+	 * @param string       $action 'open' or 'close'.
+	 * @param string|array $args   Optional arguments.
+	 * @return array Discussion operation result.
+	 */
+	public function edit_discussions_result( $type = 'comment', $action = 'open', $args = array() ): array {
 		global $wpdb;
 
 		if ( ! in_array( $type, array( 'comment', 'ping' ), true ) || ! in_array( $action, array( 'open', 'close' ), true ) ) {
-			return false;
+			return $this->failed_discussion_result( 0, __( 'Invalid discussion operation.', 'autoclose' ) );
 		}
 
 		$defaults = array(
@@ -171,7 +281,7 @@ class Comments {
 		$where = $this->get_discussion_where_sql( $type, $action, $args );
 
 		if ( false === $where ) {
-			return false;
+			return $this->failed_discussion_result( 0, __( 'Invalid discussion operation.', 'autoclose' ) );
 		}
 
 		$new_status = 'close' === $action ? 'closed' : 'open';
@@ -193,7 +303,7 @@ class Comments {
 			);
 
 			if ( null === $post_ids ) {
-				return false;
+				return $this->failed_discussion_result( $affected, $this->get_database_error( __( 'The discussion selection failed.', 'autoclose' ) ) );
 			}
 
 			$post_ids    = array_map( 'intval', $post_ids );
@@ -210,7 +320,7 @@ class Comments {
 			$result = $wpdb->query( $sql ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
 
 			if ( false === $result ) {
-				return false;
+				return $this->failed_discussion_result( $affected, $this->get_database_error( __( 'The discussion update failed.', 'autoclose' ) ) );
 			}
 
 			$affected += (int) $result;
@@ -218,7 +328,42 @@ class Comments {
 			$last_id = (int) end( $post_ids );
 		} while ( self::EDIT_BATCH_SIZE === $batch_count );
 
-		return $affected;
+		return array(
+			'status'   => 'success',
+			'affected' => $affected,
+			'errors'   => array(),
+		);
+	}
+
+	/**
+	 * Build a failed discussion operation result.
+	 *
+	 * @since 3.2.0
+	 *
+	 * @param int    $affected Number of successful updates.
+	 * @param string $error    Error message.
+	 * @return array Discussion operation result.
+	 */
+	private function failed_discussion_result( int $affected, string $error ): array {
+		return array(
+			'status'   => 'failed',
+			'affected' => $affected,
+			'errors'   => array( $error ),
+		);
+	}
+
+	/**
+	 * Return a database error or fallback message.
+	 *
+	 * @since 3.2.0
+	 *
+	 * @param string $fallback Fallback message.
+	 * @return string Error message.
+	 */
+	private function get_database_error( string $fallback ): string {
+		global $wpdb;
+
+		return ! empty( $wpdb->last_error ) ? $wpdb->last_error : $fallback;
 	}
 
 	/**
