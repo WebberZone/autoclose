@@ -794,9 +794,21 @@ class Settings {
 
 		$cron = new \WebberZone\AutoClose\Util\Cron();
 		if ( ! empty( $settings['cron_on'] ) ) {
-			$cron->enable_run( $settings['cron_hour'], $settings['cron_min'], $settings['cron_recurrence'] );
-		} else {
-			$cron->disable_run();
+			if ( ! $cron->enable_run( $settings['cron_hour'], $settings['cron_min'], $settings['cron_recurrence'] ) ) {
+				add_settings_error(
+					'acc_settings',
+					'acc_cron_schedule',
+					esc_html__( 'The AutoClose cron event could not be registered.', 'autoclose' ),
+					'error'
+				);
+			}
+		} elseif ( ! $cron->disable_run() ) {
+			add_settings_error(
+				'acc_settings',
+				'acc_cron_schedule',
+				esc_html__( 'The AutoClose cron event could not be cleared.', 'autoclose' ),
+				'error'
+			);
 		}
 
 		return $settings;

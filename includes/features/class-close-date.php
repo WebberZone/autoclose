@@ -40,27 +40,28 @@ class Close_Date {
 	 * and clears any existing scheduled event before (re-)scheduling.
 	 *
 	 * @param int $post_id Post ID.
+	 * @return array Result data.
 	 */
-	public function maybe_schedule_or_close( $post_id ): void {
-		$comments_date      = get_post_meta( $post_id, "_{$this->prefix}_comments_date", true );
-		$pings_date         = get_post_meta( $post_id, "_{$this->prefix}_pings_date", true );
-		$comments_timestamp = $this->get_date_timestamp( $comments_date );
-		$pings_timestamp    = $this->get_date_timestamp( $pings_date );
+	public function maybe_schedule_or_close( $post_id ): array {
+		$result = array(
+			'status'    => 'success',
+			'scheduled' => 0,
+			'closed'    => 0,
+			'errors'    => array(),
+		);
 
-		wp_clear_scheduled_hook( 'autoclose_close_comments_pings_event', array( $post_id, 'comments' ) );
-		wp_clear_scheduled_hook( 'autoclose_close_comments_pings_event', array( $post_id, 'pings' ) );
-
-		if ( false !== $comments_timestamp && $comments_timestamp <= time() ) {
-			$this->close_comments( $post_id );
-		} elseif ( false !== $comments_timestamp ) {
-			wp_schedule_single_event( $comments_timestamp, 'autoclose_close_comments_pings_event', array( $post_id, 'comments' ) );
+		foreach ( array( 'comments', 'pings' ) as $type ) {
+			$type_result          = $this->schedule_or_close_type( $post_id, $type );
+			$result['scheduled'] += $type_result['scheduled'];
+			$result['closed']    += $type_result['closed'];
+			$result['errors']     = array_merge( $result['errors'], $type_result['errors'] );
 		}
 
-		if ( false !== $pings_timestamp && $pings_timestamp <= time() ) {
-			$this->close_pings( $post_id );
-		} elseif ( false !== $pings_timestamp ) {
-			wp_schedule_single_event( $pings_timestamp, 'autoclose_close_comments_pings_event', array( $post_id, 'pings' ) );
+		if ( ! empty( $result['errors'] ) ) {
+			$result['status'] = 'failed';
 		}
+
+		return $result;
 	}
 
 	/**
@@ -75,7 +76,8 @@ class Close_Date {
 		}
 
 		$parsed = \DateTimeImmutable::createFromFormat( '!Y-m-d\\TH:i', (string) $date, wp_timezone() );
-		if ( false === $parsed ) {
+		$errors = \DateTimeImmutable::getLastErrors();
+		if ( false === $parsed || ( false !== $errors && ( $errors['warning_count'] > 0 || $errors['error_count'] > 0 ) ) || (string) $date !== $parsed->format( 'Y-m-d\\TH:i' ) ) {
 			return false;
 		}
 
@@ -86,50 +88,120 @@ class Close_Date {
 	 * Cron callback to close comments/pings if due.
 	 *
 	 * @param int    $post_id Post ID.
-	 * @param string $type    Event type ('comments' or 'pings'). Unused; both are re-evaluated.
+	 * @param string $type    Event type ('comments' or 'pings').
 	 */
-	public function maybe_close_due_comments_pings( $post_id, $type = '' ): void { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+	public function maybe_close_due_comments_pings( $post_id, $type = '' ): void {
+		if ( in_array( $type, array( 'comments', 'pings' ), true ) ) {
+			$this->schedule_or_close_type( $post_id, $type );
+			return;
+		}
+
 		$this->maybe_schedule_or_close( $post_id );
+	}
+
+	/**
+	 * Schedule or close one discussion type.
+	 *
+	 * @since 3.2.0
+	 *
+	 * @param int    $post_id Post ID.
+	 * @param string $type    Discussion type.
+	 * @return array Result data.
+	 */
+	private function schedule_or_close_type( $post_id, string $type ): array {
+		$date      = get_post_meta( $post_id, "_{$this->prefix}_{$type}_date", true );
+		$timestamp = $this->get_date_timestamp( $date );
+		$result    = array(
+			'scheduled' => 0,
+			'closed'    => 0,
+			'errors'    => array(),
+		);
+
+		$cleared = wp_clear_scheduled_hook( 'autoclose_close_comments_pings_event', array( $post_id, $type ) );
+		if ( false === $cleared ) {
+			$result['errors'][] = sprintf( __( 'The %s close event could not be cleared.', 'autoclose' ), $type );
+			return $result;
+		}
+
+		if ( false === $timestamp ) {
+			if ( ! empty( $date ) ) {
+				$result['errors'][] = sprintf( __( 'The %s close date is invalid.', 'autoclose' ), $type );
+			}
+			return $result;
+		}
+
+		if ( $timestamp <= time() ) {
+			$closed = 'comments' === $type ? $this->close_comments( $post_id ) : $this->close_pings( $post_id );
+			if ( ! $closed ) {
+				$result['errors'][] = sprintf( __( 'The %s status could not be closed.', 'autoclose' ), $type );
+			} else {
+				$result['closed'] = 1;
+			}
+			return $result;
+		}
+
+		$scheduled = wp_schedule_single_event( $timestamp, 'autoclose_close_comments_pings_event', array( $post_id, $type ), true );
+		if ( is_wp_error( $scheduled ) ) {
+			$result['errors'][] = sprintf( __( 'The %s close event could not be scheduled.', 'autoclose' ), $type );
+		} else {
+			$result['scheduled'] = 1;
+		}
+
+		return $result;
 	}
 
 	/**
 	 * Actually close comments for a post.
 	 *
 	 * @param int $post_id Post ID.
+	 * @return bool Whether the status was closed.
 	 */
-	protected function close_comments( $post_id ): void {
+	protected function close_comments( $post_id ): bool {
 		if ( 'closed' !== get_post_field( 'comment_status', $post_id ) ) {
+			$updated = false;
 			Reopen::without_reopening(
-				static function () use ( $post_id ) {
-					wp_update_post(
+				static function () use ( $post_id, &$updated ) {
+					$result  = wp_update_post(
 						array(
 							'ID'             => $post_id,
 							'comment_status' => 'closed',
-						)
+						),
+						true
 					);
+					$updated = ! is_wp_error( $result );
 				}
 			);
+			return $updated;
 		}
+
+		return true;
 	}
 
 	/**
 	 * Actually close pings/trackbacks for a post.
 	 *
 	 * @param int $post_id Post ID.
+	 * @return bool Whether the status was closed.
 	 */
-	protected function close_pings( $post_id ): void {
+	protected function close_pings( $post_id ): bool {
 		if ( 'closed' !== get_post_field( 'ping_status', $post_id ) ) {
+			$updated = false;
 			Reopen::without_reopening(
-				static function () use ( $post_id ) {
-					wp_update_post(
+				static function () use ( $post_id, &$updated ) {
+					$result  = wp_update_post(
 						array(
 							'ID'          => $post_id,
 							'ping_status' => 'closed',
-						)
+						),
+						true
 					);
+					$updated = ! is_wp_error( $result );
 				}
 			);
+			return $updated;
 		}
+
+		return true;
 	}
 
 	/**

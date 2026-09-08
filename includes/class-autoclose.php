@@ -134,6 +134,8 @@ class AutoClose {
 	 * @since 3.0.0
 	 */
 	private function define_feature_hooks() {
+		Util\Cron::register_schedules();
+
 		$comments      = new Features\Comments();
 		$revisions     = new Features\Revisions();
 		$block_pings   = new Features\Block_Pings();
