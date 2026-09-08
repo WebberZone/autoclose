@@ -192,7 +192,7 @@ class Revisions_Command extends Base_Command {
 			$this->report(
 				$format,
 				'dry-run',
-				'success',
+				$preview_data['status'] ?? 'failed',
 				$preview_data,
 				$post_ids,
 				(int) ( $preview_data['affected'] ?? 0 ),
@@ -250,7 +250,7 @@ class Revisions_Command extends Base_Command {
 			'mode'          => 'all',
 			'age'           => 0,
 			'affected'      => (int) $result['deleted'],
-			'scanned'       => (int) $result['deleted'],
+			'scanned'       => (int) $result['scanned'],
 			'limit_reached' => false,
 			'errors'        => $result['errors'],
 		);
@@ -329,7 +329,7 @@ class Revisions_Command extends Base_Command {
 	 * @param array  $sample    Sample rows.
 	 */
 	private function report( string $format, string $run_mode, string $outcome, array $operation, array $post_ids, int $affected, array $sample ): void {
-		$outcome               = 'failed' === $outcome ? 'failed' : 'success';
+		$outcome               = in_array( $outcome, array( 'success', 'partial', 'failed', 'skipped' ), true ) ? $outcome : 'failed';
 		$operation['post_ids'] = $post_ids;
 		$operation['sample']   = $sample;
 		$operation['errors']   = array_values( (array) ( $operation['errors'] ?? array() ) );

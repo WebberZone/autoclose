@@ -181,6 +181,7 @@ class Runner {
 		$errors     = array();
 		$successful = 0;
 		$failed     = 0;
+		$partial    = 0;
 		$attempted  = 0;
 
 		foreach ( $components as $component ) {
@@ -192,6 +193,9 @@ class Runner {
 			if ( 'failed' === $status ) {
 				++$failed;
 			}
+			if ( 'partial' === $status ) {
+				++$partial;
+			}
 			if ( 'success' === $status ) {
 				++$successful;
 			}
@@ -200,9 +204,11 @@ class Runner {
 
 		$outcome = 'success';
 		if ( $failed > 0 ) {
-			$outcome = $successful > 0 ? 'partial' : 'failed';
-		} elseif ( 0 === $attempted && ! empty( $errors ) ) {
-			$outcome = 'failed';
+			$outcome = ( $successful > 0 || $partial > 0 ) ? 'partial' : 'failed';
+		} elseif ( $partial > 0 ) {
+			$outcome = 'partial';
+		} elseif ( 0 === $attempted ) {
+			$outcome = empty( $errors ) ? 'skipped' : 'failed';
 		}
 
 		$summary = array(

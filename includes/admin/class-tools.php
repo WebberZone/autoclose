@@ -90,86 +90,83 @@ class Tools {
 
 		/* Close all */
 		if ( isset( $_POST['close_all'] ) && check_admin_referer( 'acc-tools-settings' ) ) {
-			// Execute the main function.
-			$this->process_all();
-
-			$date_time_format = get_option( 'date_format' ) . ', ' . get_option( 'time_format' );
-			$current_time     = time();
-
-			$message = '';
+			$summary = $this->process_all();
+			$outcome = $summary['outcome'] ?? 'failed';
+			$message = sprintf(
+				/* translators: 1: Posts with comments affected, 2: Posts with pings affected, 3: Revisions deleted. */
+				esc_html__( 'AutoClose processed %1$s posts with comments, %2$s posts with pingbacks/trackbacks, and %3$s revisions.', 'autoclose' ),
+				number_format_i18n( (int) ( $summary['comments_closed'] ?? 0 ) ),
+				number_format_i18n( (int) ( $summary['pings_closed'] ?? 0 ) ),
+				number_format_i18n( (int) ( $summary['revisions_deleted'] ?? 0 ) )
+			);
+			$cutoffs = array();
+			$format  = get_option( 'date_format' ) . ', ' . get_option( 'time_format' );
 
 			if ( Options_API::get_option( 'close_comment' ) ) {
-				/* translators: 1: Date. */
-				$message .= sprintf(
-				/* translators: 1. Date */
-					esc_html__( 'Comments closed up to %1$s', 'autoclose' ),
-					wp_date( $date_time_format, $current_time - max( 0, (int) Options_API::get_option( 'comment_age' ) ) * DAY_IN_SECONDS )
+				$cutoffs[] = sprintf(
+					/* translators: 1: Date. */
+					esc_html__( 'Comments cutoff: %1$s.', 'autoclose' ),
+					wp_date( $format, time() - max( 0, (int) Options_API::get_option( 'comment_age' ) ) * DAY_IN_SECONDS )
 				);
-				$message .= '<br />';
 			}
 
 			if ( Options_API::get_option( 'close_pbtb' ) ) {
-				/* translators: 1: Date. */
-				$message .= sprintf(
-				/* translators: 1. Date */
-					esc_html__( 'Pingbacks/Trackbacks closed up to %1$s', 'autoclose' ),
-					wp_date( $date_time_format, $current_time - max( 0, (int) Options_API::get_option( 'pbtb_age' ) ) * DAY_IN_SECONDS )
-				);
-				$message .= '<br />';
-			}
-
-			if ( Options_API::get_option( 'delete_revisions' ) ) {
-				$revision_age = max( 0, (int) Options_API::get_option( 'revision_age' ) );
-
-				if ( $revision_age > 0 ) {
-					$message .= sprintf(
+				$cutoffs[] = sprintf(
 					/* translators: 1: Date. */
-						esc_html__( 'Post revisions beyond the retention limit and older than %1$s deleted', 'autoclose' ),
-						// Pruning compares against UTC time(), so render that same instant in the site timezone.
-						wp_date( $date_time_format, time() - $revision_age * DAY_IN_SECONDS )
-					);
-				} else {
-					$message .= esc_html__( 'Post revisions beyond the retention limit deleted', 'autoclose' );
-				}
-
-				$message .= '<br />';
+					esc_html__( 'Pingbacks/Trackbacks cutoff: %1$s.', 'autoclose' ),
+					wp_date( $format, time() - max( 0, (int) Options_API::get_option( 'pbtb_age' ) ) * DAY_IN_SECONDS )
+				);
 			}
 
-			if ( ! empty( $message ) ) {
+			if ( Options_API::get_option( 'delete_revisions' ) && (int) Options_API::get_option( 'revision_age' ) > 0 ) {
+				$cutoffs[] = sprintf(
+					/* translators: 1: Date. */
+					esc_html__( 'Revision cutoff: %1$s.', 'autoclose' ),
+					wp_date( $format, time() - (int) Options_API::get_option( 'revision_age' ) * DAY_IN_SECONDS )
+				);
+			}
+
+			if ( ! empty( $cutoffs ) ) {
+				$message .= '<br />' . implode( ' ', $cutoffs );
+			}
+
+			if ( in_array( $outcome, array( 'success', 'skipped' ), true ) ) {
 				add_settings_error( 'acc-notices', '', $message, 'updated' );
 			} else {
-				add_settings_error( 'acc-notices', '', esc_html__( 'Nothing to process. Visit the Settings page to select what to close/delete.', 'autoclose' ) . '<br />', 'error' );
+				$errors = implode( ' ', array_values( (array) ( $summary['errors'] ?? array() ) ) );
+				add_settings_error( 'acc-notices', '', $message . '<br />' . esc_html( $errors ), 'error' );
 			}
 		}
 
 		/* Open comments */
 		if ( isset( $_POST['acc_opencomments'] ) && check_admin_referer( 'acc-tools-settings' ) ) {
-			$comments->open_comments();
-			add_settings_error( 'acc-notices', '', esc_html__( 'Comments opened on all post types', 'autoclose' ), 'updated' );
+			$result = $comments->edit_discussions_result( 'comment', 'open' );
+			$this->add_discussion_notice( $result, __( 'Comments opened', 'autoclose' ) );
 		}
 
 		/* Open pingbacks/trackbacks */
 		if ( isset( $_POST['acc_openpings'] ) && check_admin_referer( 'acc-tools-settings' ) ) {
-			$comments->open_pingbacks();
-			add_settings_error( 'acc-notices', '', esc_html__( 'Pingbacks/Trackbacks opened on all post types', 'autoclose' ), 'updated' );
+			$result = $comments->edit_discussions_result( 'ping', 'open' );
+			$this->add_discussion_notice( $result, __( 'Pingbacks/Trackbacks opened', 'autoclose' ) );
 		}
 
 		/* Close comments */
 		if ( isset( $_POST['acc_closecomments'] ) && check_admin_referer( 'acc-tools-settings' ) ) {
-			$comments->close_comments();
-			add_settings_error( 'acc-notices', '', esc_html__( 'Comments closed on all post types', 'autoclose' ), 'updated' );
+			$result = $comments->edit_discussions_result( 'comment', 'close' );
+			$this->add_discussion_notice( $result, __( 'Comments closed', 'autoclose' ) );
 		}
 
 		/* Close pingbacks/trackbacks */
 		if ( isset( $_POST['acc_closepings'] ) && check_admin_referer( 'acc-tools-settings' ) ) {
-			$comments->close_pingbacks();
-			add_settings_error( 'acc-notices', '', esc_html__( 'Pingbacks/Trackbacks closed on all post types', 'autoclose' ), 'updated' );
+			$result = $comments->edit_discussions_result( 'ping', 'close' );
+			$this->add_discussion_notice( $result, __( 'Pingbacks/Trackbacks closed', 'autoclose' ) );
 		}
 
 		/* Delete pingbacks/trackbacks */
 		if ( isset( $_POST['acc_delete_pingtracks'] ) && check_admin_referer( 'acc-tools-settings' ) ) {
-			$comments->delete_pingbacks();
-			add_settings_error( 'acc-notices', '', esc_html__( 'Pingbacks/Trackbacks deleted on all post types', 'autoclose' ), 'updated' );
+			$result             = $comments->delete_pingbacks_result();
+			$result['affected'] = (int) ( $result['deleted'] ?? 0 );
+			$this->add_discussion_notice( $result, __( 'Pingbacks/Trackbacks deleted', 'autoclose' ) );
 		}
 
 		/* Delete revisions */
@@ -205,6 +202,29 @@ class Tools {
 	 */
 	public function process_all() {
 		$runner = new Runner();
-		$runner->run();
+
+		return $runner->run();
+	}
+
+	/**
+	 * Display a truthful result for a discussion operation.
+	 *
+	 * @since 3.2.0
+	 *
+	 * @param array  $result  Operation result.
+	 * @param string $label   Success label.
+	 */
+	private function add_discussion_notice( array $result, string $label ): void {
+		$affected = number_format_i18n( (int) ( $result['affected'] ?? 0 ) );
+		$message  = sprintf( '%s: %s.', $label, $affected );
+		$status   = $result['status'] ?? 'failed';
+
+		if ( 'success' === $status ) {
+			add_settings_error( 'acc-notices', '', esc_html( $message ), 'updated' );
+			return;
+		}
+
+		$errors = implode( ' ', array_values( (array) ( $result['errors'] ?? array() ) ) );
+		add_settings_error( 'acc-notices', '', esc_html( $message . ' ' . $errors ), 'error' );
 	}
 }

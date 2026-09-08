@@ -63,7 +63,7 @@ class Revisions {
 			$scanned   = (int) $result['scanned'];
 			$remaining = (bool) $result['limit_reached'];
 
-			if ( 'failed' === $result['status'] ) {
+			if ( ! empty( $result['errors'] ) ) {
 				$errors = array_merge( $errors, $result['errors'] );
 			}
 		}
@@ -77,8 +77,10 @@ class Revisions {
 		 */
 		do_action( 'acc_revisions_processed', $deleted );
 
+		$status = empty( $errors ) ? ( $operations > 0 ? 'success' : 'skipped' ) : ( $deleted > 0 ? 'partial' : 'failed' );
+
 		return array(
-			'status'                  => empty( $errors ) ? ( $operations > 0 ? 'success' : 'skipped' ) : 'failed',
+			'status'                  => $status,
 			'operations'              => $operations,
 			'revisions_deleted'       => $deleted,
 			'revisions_scanned'       => $scanned,
@@ -327,8 +329,10 @@ class Revisions {
 			);
 		}
 
+		$status = empty( $errors ) ? 'success' : ( $deleted > 0 ? 'partial' : 'failed' );
+
 		return array(
-			'status'        => empty( $errors ) ? 'success' : 'failed',
+			'status'        => $status,
 			'deleted'       => $deleted,
 			'scanned'       => $scan['scanned'],
 			'limit_reached' => $scan['limit_reached'],
@@ -632,6 +636,7 @@ class Revisions {
 		$ids     = wp_parse_id_list( $post_ids );
 		$where   = "WHERE post_type = 'revision'";
 		$deleted = 0;
+		$scanned = 0;
 		$errors  = array();
 
 		if ( ! empty( $ids ) ) {
@@ -656,6 +661,7 @@ class Revisions {
 				break;
 			}
 
+			$scanned      += count( $revision_ids );
 			$batch_deleted = 0;
 			$deleted_ids   = array();
 
@@ -685,9 +691,12 @@ class Revisions {
 			}
 		}
 
+		$status = empty( $errors ) ? 'success' : ( $deleted > 0 ? 'partial' : 'failed' );
+
 		return array(
-			'status'  => empty( $errors ) ? 'success' : 'failed',
+			'status'  => $status,
 			'deleted' => $deleted,
+			'scanned' => $scanned,
 			'errors'  => $errors,
 		);
 	}

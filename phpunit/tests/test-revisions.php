@@ -512,7 +512,7 @@ class RevisionsTest extends WP_UnitTestCase
 
         remove_filter('pre_delete_post', $blocker, 10);
 
-        $this->assertSame('failed', $result['status']);
+        $this->assertSame('partial', $result['status']);
         $this->assertSame(1, $result['revisions_deleted']);
         $this->assertSame(2, $result['revisions_scanned']);
         $this->assertNotEmpty($result['errors']);
@@ -539,7 +539,7 @@ class RevisionsTest extends WP_UnitTestCase
 
         remove_filter('pre_delete_post', $blocker, 10);
 
-        $this->assertSame('failed', $result['status']);
+        $this->assertSame('partial', $result['status']);
         $this->assertSame(1, $result['deleted']);
         $this->assertNotEmpty($result['errors']);
         $this->assertFalse($legacy);

@@ -30,25 +30,25 @@ class Notifications {
 	 * Number of posts whose comments were closed during this run.
 	 *
 	 * @since 3.1.0
-	 * @var int
+	 * @var array<int, int>
 	 */
-	private int $comments_closed = 0;
+	private array $comments_closed = array();
 
 	/**
 	 * Number of posts whose pings were closed during this run.
 	 *
 	 * @since 3.1.0
-	 * @var int
+	 * @var array<int, int>
 	 */
-	private int $pings_closed = 0;
+	private array $pings_closed = array();
 
 	/**
 	 * Number of revisions deleted during this run.
 	 *
 	 * @since 3.1.0
-	 * @var int
+	 * @var array<int, int>
 	 */
-	private int $revisions_deleted = 0;
+	private array $revisions_deleted = array();
 
 	/**
 	 * Constructor.
@@ -71,8 +71,9 @@ class Notifications {
 	 * @param int $pings    Number of posts whose pings were closed.
 	 */
 	public function collect_comments( int $comments, int $pings ): void {
-		$this->comments_closed += $comments;
-		$this->pings_closed    += $pings;
+		$blog_id                           = (int) get_current_blog_id();
+		$this->comments_closed[ $blog_id ] = ( $this->comments_closed[ $blog_id ] ?? 0 ) + $comments;
+		$this->pings_closed[ $blog_id ]    = ( $this->pings_closed[ $blog_id ] ?? 0 ) + $pings;
 	}
 
 	/**
@@ -83,7 +84,8 @@ class Notifications {
 	 * @param int $deleted Number of revisions deleted.
 	 */
 	public function collect_revisions( int $deleted ): void {
-		$this->revisions_deleted += $deleted;
+		$blog_id                             = (int) get_current_blog_id();
+		$this->revisions_deleted[ $blog_id ] = ( $this->revisions_deleted[ $blog_id ] ?? 0 ) + $deleted;
 	}
 
 	/**
@@ -92,9 +94,8 @@ class Notifications {
 	 * @since 3.2.0
 	 */
 	public function reset_counts(): void {
-		$this->comments_closed   = 0;
-		$this->pings_closed      = 0;
-		$this->revisions_deleted = 0;
+		$blog_id = (int) get_current_blog_id();
+		unset( $this->comments_closed[ $blog_id ], $this->pings_closed[ $blog_id ], $this->revisions_deleted[ $blog_id ] );
 	}
 
 	/**
@@ -121,10 +122,11 @@ class Notifications {
 		/* translators: %s: site name */
 		$subject = sprintf( __( '[%s] AutoClose Cron Summary', 'autoclose' ), $site_name );
 
-		$rows = array(
-			__( 'Comments closed', 'autoclose' )   => $this->comments_closed,
-			__( 'Pings closed', 'autoclose' )      => $this->pings_closed,
-			__( 'Revisions deleted', 'autoclose' ) => $this->revisions_deleted,
+		$blog_id = (int) get_current_blog_id();
+		$rows    = array(
+			__( 'Comments closed', 'autoclose' )   => (int) ( $this->comments_closed[ $blog_id ] ?? 0 ),
+			__( 'Pings closed', 'autoclose' )      => (int) ( $this->pings_closed[ $blog_id ] ?? 0 ),
+			__( 'Revisions deleted', 'autoclose' ) => (int) ( $this->revisions_deleted[ $blog_id ] ?? 0 ),
 		);
 
 		ob_start();

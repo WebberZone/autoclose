@@ -154,4 +154,73 @@ class CommentsTest extends WP_UnitTestCase {
 		$this->assertNull( $method->invoke( $this->comments, 0 ) );
 		$this->assertNull( $method->invoke( $this->comments, -1 ) );
 	}
+
+	/**
+	 * A failed configured operation is not reported as successful no-change work.
+	 */
+	public function test_failed_operation_is_reported_by_the_processor() {
+		$this->set_settings(
+			array(
+				'close_comment'      => 1,
+				'close_pbtb'         => 0,
+				'comment_post_types' => 'post',
+			)
+		);
+
+		$comments = new CommentsResultTestDouble(
+			array(
+				'status'   => 'failed',
+				'affected' => 0,
+				'errors'   => array( 'The discussion update failed.' ),
+			)
+		);
+		$result = $comments->process_comments();
+
+		$this->assertSame( 'failed', $result['status'] );
+		$this->assertSame( 0, $result['comments_closed'] );
+		$this->assertNotEmpty( $result['errors'] );
+	}
+
+	/**
+	 * A run with no configured discussion work is reported as skipped.
+	 */
+	public function test_no_configured_operations_are_skipped() {
+		$result = $this->comments->process_comments();
+
+		$this->assertSame( 'skipped', $result['status'] );
+		$this->assertSame( 0, $result['comments_closed'] );
+		$this->assertSame( 0, $result['pings_closed'] );
+	}
+}
+
+/**
+ * Comments processor double for failure-result tests.
+ */
+class CommentsResultTestDouble extends Comments {
+
+	/**
+	 * Discussion operation result.
+	 *
+	 * @var array
+	 */
+	private $result;
+
+	/**
+	 * @param array $result Discussion operation result.
+	 */
+	public function __construct( array $result ) {
+		$this->result = $result;
+	}
+
+	/**
+	 * Return the configured operation result.
+	 *
+	 * @param string $type   Discussion type.
+	 * @param string $action Operation action.
+	 * @param array  $args   Operation arguments.
+	 * @return array Discussion operation result.
+	 */
+	public function edit_discussions_result( $type = 'comment', $action = 'open', $args = array() ): array {
+		return $this->result;
+	}
 }

@@ -173,24 +173,20 @@ class Discussions_Command extends Base_Command {
 
 		if ( $dry_run ) {
 			$operation = $this->comments->preview_discussions( $this->type, $action, $query_args, $sample_limit );
-			$outcome   = 'failed' === ( $operation['status'] ?? 'failed' ) ? 'failed' : 'success';
+			$outcome   = $this->normalize_outcome( $operation['status'] ?? 'failed' );
 			$affected  = (int) ( $operation['affected'] ?? 0 );
 			$sample    = (array) ( $operation['sample'] ?? array() );
 		} else {
 			$result = 'comment' === $this->type
-				? ( 'close' === $action ? $this->comments->close_comments( $query_args ) : $this->comments->open_comments( $query_args ) )
-				: ( 'close' === $action ? $this->comments->close_pingbacks( $query_args ) : $this->comments->open_pingbacks( $query_args ) );
+				? $this->comments->edit_discussions_result( 'comment', $action, $query_args )
+				: $this->comments->edit_discussions_result( 'ping', $action, $query_args );
 
-			$operation = array(
-				'status'   => false === $result ? 'failed' : 'success',
-				'action'   => $action,
-				'type'     => $this->type,
-				'affected' => false === $result ? 0 : (int) $result,
-				'errors'   => false === $result ? array( $this->get_database_error() ) : array(),
-			);
-			$outcome   = 'failed' === $operation['status'] ? 'failed' : 'success';
-			$affected  = (int) $operation['affected'];
-			$sample    = array();
+			$operation           = $result;
+			$operation['action'] = $action;
+			$operation['type']   = $this->type;
+			$outcome             = $this->normalize_outcome( $operation['status'] ?? 'failed' );
+			$affected            = (int) $operation['affected'];
+			$sample              = array();
 		}
 
 		$operation['filters']    = array(
@@ -235,6 +231,18 @@ class Discussions_Command extends Base_Command {
 	}
 
 	/**
+	 * Normalize a processor result to a supported command outcome.
+	 *
+	 * @since 3.2.0
+	 *
+	 * @param string $status Processor status.
+	 * @return string Command outcome.
+	 */
+	private function normalize_outcome( string $status ): string {
+		return in_array( $status, array( 'success', 'partial', 'failed', 'skipped' ), true ) ? $status : 'failed';
+	}
+
+	/**
 	 * Validate the sample limit.
 	 *
 	 * @since 3.2.0
@@ -248,18 +256,5 @@ class Discussions_Command extends Base_Command {
 		}
 
 		return $sample_limit;
-	}
-
-	/**
-	 * Return the latest database error.
-	 *
-	 * @since 3.2.0
-	 *
-	 * @return string Database error message.
-	 */
-	private function get_database_error(): string {
-		global $wpdb;
-
-		return ! empty( $wpdb->last_error ) ? $wpdb->last_error : __( 'The discussion update failed.', 'autoclose' );
 	}
 }

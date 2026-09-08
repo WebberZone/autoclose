@@ -125,7 +125,7 @@ class Pingbacks_Command extends Base_Command {
 
 		if ( $dry_run ) {
 			$operation = $this->comments->preview_pingbacks( $post_ids, $sample_limit );
-			$outcome   = 'failed' === ( $operation['status'] ?? 'failed' ) ? 'failed' : 'success';
+			$outcome   = $this->normalize_outcome( $operation['status'] ?? 'failed' );
 			$affected  = (int) ( $operation['affected'] ?? 0 );
 			$sample    = (array) ( $operation['sample'] ?? array() );
 		} else {
@@ -146,15 +146,11 @@ class Pingbacks_Command extends Base_Command {
 					\WP_CLI::confirm( $message );
 				}
 
-				$result    = $this->comments->delete_pingbacks( $post_ids );
-				$operation = array(
-					'status'   => false === $result ? 'failed' : 'success',
-					'affected' => false === $result ? 0 : (int) $result,
-					'post_ids' => $post_ids,
-					'errors'   => false === $result ? array( $this->get_database_error() ) : array(),
-				);
-				$outcome   = 'failed' === $operation['status'] ? 'failed' : 'success';
-				$affected  = (int) $operation['affected'];
+				$operation             = $this->comments->delete_pingbacks_result( $post_ids );
+				$operation['post_ids'] = $post_ids;
+				$operation['affected'] = (int) $operation['deleted'];
+				$outcome               = $this->normalize_outcome( $operation['status'] ?? 'failed' );
+				$affected              = (int) $operation['affected'];
 			}
 		}
 
@@ -187,6 +183,18 @@ class Pingbacks_Command extends Base_Command {
 	}
 
 	/**
+	 * Normalize a processor result to a supported command outcome.
+	 *
+	 * @since 3.2.0
+	 *
+	 * @param string $status Processor status.
+	 * @return string Command outcome.
+	 */
+	private function normalize_outcome( string $status ): string {
+		return in_array( $status, array( 'success', 'partial', 'failed', 'skipped' ), true ) ? $status : 'failed';
+	}
+
+	/**
 	 * Validate the sample limit.
 	 *
 	 * @since 3.2.0
@@ -200,18 +208,5 @@ class Pingbacks_Command extends Base_Command {
 		}
 
 		return $sample_limit;
-	}
-
-	/**
-	 * Return the latest database error.
-	 *
-	 * @since 3.2.0
-	 *
-	 * @return string Database error message.
-	 */
-	private function get_database_error(): string {
-		global $wpdb;
-
-		return ! empty( $wpdb->last_error ) ? $wpdb->last_error : __( 'Pingback/trackback deletion failed.', 'autoclose' );
 	}
 }

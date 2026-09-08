@@ -56,14 +56,17 @@ class Comments {
 		$pings_opened    = 0;
 		$operations      = 0;
 		$errors          = array();
+		$progress        = false;
 		$migrated        = $this->migrate_legacy_statuses();
 
-		if ( 'failed' === $migrated['status'] ) {
+		if ( ! empty( $migrated['errors'] ) ) {
 			$errors = array_merge( $errors, $migrated['errors'] );
-		} elseif ( $migrated['updated'] > 0 ) {
+		}
+		if ( $migrated['updated'] > 0 ) {
 			++$operations;
-			$comments_closed = (int) $migrated['comments'];
-			$pings_closed    = (int) $migrated['pings'];
+			$comments_closed += (int) $migrated['comments'];
+			$pings_closed    += (int) $migrated['pings'];
+			$progress         = true;
 		}
 
 		// Get the post types.
@@ -86,11 +89,11 @@ class Comments {
 					'exclude_terms' => $comment_exclude_terms,
 				)
 			);
-			if ( 'failed' === $result['status'] ) {
+			if ( ! empty( $result['errors'] ) ) {
 				$errors = array_merge( $errors, $result['errors'] );
-			} else {
-				$comments_closed += (int) $result['affected'];
 			}
+			$comments_closed += (int) $result['affected'];
+			$progress         = $progress || ( (int) $result['affected'] > 0 );
 		}
 
 		// Close Pingbacks/Trackbacks on posts.
@@ -105,11 +108,11 @@ class Comments {
 					'exclude_terms' => $pbtb_exclude_terms,
 				)
 			);
-			if ( 'failed' === $result['status'] ) {
+			if ( ! empty( $result['errors'] ) ) {
 				$errors = array_merge( $errors, $result['errors'] );
-			} else {
-				$pings_closed += (int) $result['affected'];
 			}
+			$pings_closed += (int) $result['affected'];
+			$progress      = $progress || ( (int) $result['affected'] > 0 );
 		}
 
 		// Open Comments on these posts.
@@ -122,11 +125,11 @@ class Comments {
 					'post_ids' => $comment_pids,
 				)
 			);
-			if ( 'failed' === $result['status'] ) {
+			if ( ! empty( $result['errors'] ) ) {
 				$errors = array_merge( $errors, $result['errors'] );
-			} else {
-				$comments_opened = (int) $result['affected'];
 			}
+			$comments_opened = (int) $result['affected'];
+			$progress        = $progress || ( (int) $result['affected'] > 0 );
 		}
 
 		// Open Pingbacks / Trackbacks on these posts.
@@ -139,11 +142,11 @@ class Comments {
 					'post_ids' => $pbtb_pids,
 				)
 			);
-			if ( 'failed' === $result['status'] ) {
+			if ( ! empty( $result['errors'] ) ) {
 				$errors = array_merge( $errors, $result['errors'] );
-			} else {
-				$pings_opened = (int) $result['affected'];
 			}
+			$pings_opened = (int) $result['affected'];
+			$progress     = $progress || ( (int) $result['affected'] > 0 );
 		}
 
 		/**
@@ -156,8 +159,10 @@ class Comments {
 		 */
 		do_action( 'acc_comments_processed', $comments_closed, $pings_closed );
 
+		$status = empty( $errors ) ? ( $operations > 0 ? 'success' : 'skipped' ) : ( $progress ? 'partial' : 'failed' );
+
 		return array(
-			'status'          => empty( $errors ) ? ( $operations > 0 ? 'success' : 'skipped' ) : 'failed',
+			'status'          => $status,
 			'operations'      => $operations,
 			'comments_closed' => $comments_closed,
 			'pings_closed'    => $pings_closed,
@@ -228,8 +233,10 @@ class Comments {
 			} while ( self::STATUS_MIGRATION_BATCH_SIZE === $batch_count );
 		}
 
+		$status = empty( $errors ) ? 'success' : ( $updated > 0 ? 'partial' : 'failed' );
+
 		return array(
-			'status'   => empty( $errors ) ? 'success' : 'failed',
+			'status'   => $status,
 			'updated'  => $updated,
 			'comments' => $comments,
 			'pings'    => $pings,
@@ -346,7 +353,7 @@ class Comments {
 	 */
 	private function failed_discussion_result( int $affected, string $error ): array {
 		return array(
-			'status'   => 'failed',
+			'status'   => $affected > 0 ? 'partial' : 'failed',
 			'affected' => $affected,
 			'errors'   => array( $error ),
 		);
@@ -716,6 +723,20 @@ class Comments {
 	 * @return int|bool Number of rows affected/selected for all other queries. Boolean false on error.
 	 */
 	public function delete_pingbacks( $post_ids = array() ) {
+		$result = $this->delete_pingbacks_result( $post_ids );
+
+		return 'success' === $result['status'] ? $result['deleted'] : false;
+	}
+
+	/**
+	 * Delete pingbacks/trackbacks and preserve partial progress.
+	 *
+	 * @since 3.2.0
+	 *
+	 * @param array|string $post_ids Optional post IDs to limit the deletion.
+	 * @return array Deletion result.
+	 */
+	public function delete_pingbacks_result( $post_ids = array() ): array {
 		global $wpdb;
 
 		$ids   = wp_parse_id_list( $post_ids );
@@ -732,14 +753,25 @@ class Comments {
 		);
 
 		if ( null === $comments && ! empty( $wpdb->last_error ) ) {
-			return false;
+			return array(
+				'status'  => 'failed',
+				'deleted' => 0,
+				'scanned' => 0,
+				'errors'  => array( $this->get_database_error( __( 'Pingback/trackback deletion failed.', 'autoclose' ) ) ),
+			);
 		}
 
+		$deleted           = 0;
+		$failed            = 0;
+		$affected_post_ids = array();
 		if ( $comments ) {
-			$affected_post_ids = array();
 			foreach ( $comments as $comment ) {
-				wp_delete_comment( $comment['comment_ID'], true );
-				$affected_post_ids[] = $comment['comment_post_ID'];
+				if ( wp_delete_comment( $comment['comment_ID'], true ) ) {
+					++$deleted;
+					$affected_post_ids[] = $comment['comment_post_ID'];
+				} else {
+					++$failed;
+				}
 			}
 			$affected_post_ids = array_unique( $affected_post_ids );
 			foreach ( $affected_post_ids as $post_id ) {
@@ -747,7 +779,21 @@ class Comments {
 			}
 		}
 
-		return $comments ? count( $comments ) : 0;
+		$errors = array();
+		if ( $failed > 0 ) {
+			$errors[] = sprintf(
+			/* translators: 1: Number of pingbacks/trackbacks. */
+				_n( '%d pingback or trackback could not be deleted.', '%d pingbacks or trackbacks could not be deleted.', $failed, 'autoclose' ),
+				$failed
+			);
+		}
+
+		return array(
+			'status'  => empty( $errors ) ? 'success' : ( $deleted > 0 ? 'partial' : 'failed' ),
+			'deleted' => $deleted,
+			'scanned' => count( $comments ),
+			'errors'  => $errors,
+		);
 	}
 
 	/**
