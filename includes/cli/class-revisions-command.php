@@ -277,6 +277,7 @@ class Revisions_Command extends Base_Command {
 		return array(
 			'status'        => $result['status'],
 			'mode'          => 'prune',
+			'age'           => null === $age ? $this->revisions->get_revision_age() : max( 0, $age ),
 			'affected'      => (int) $result['deleted'],
 			'scanned'       => (int) $result['scanned'],
 			'limit_reached' => (bool) $result['limit_reached'],

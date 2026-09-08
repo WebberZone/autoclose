@@ -16,11 +16,12 @@ use WebberZone\AutoClose\Options_API;
  */
 class Revisions {
 
+
 	/**
 	 * Number of parent posts examined per scan batch.
 	 *
 	 * @since 3.2.0
-	 * @var int
+	 * @var   int
 	 */
 	const SCAN_BATCH_SIZE = 200;
 
@@ -28,7 +29,7 @@ class Revisions {
 	 * Number of revisions fetched per delete-all batch.
 	 *
 	 * @since 3.2.0
-	 * @var int
+	 * @var   int
 	 */
 	const DELETE_BATCH_SIZE = 200;
 
@@ -119,10 +120,10 @@ class Revisions {
 	 *
 	 * @since 3.2.0
 	 *
-	 * @param int          $sample_limit    Maximum sample rows.
-	 * @param array|string $post_ids        Optional parent post IDs to limit the preview.
-	 * @param bool         $respect_setting Whether to skip when deletion is disabled.
-	 * @param string       $mode            Either `prune` for the retention and age policy, or `all` for delete-all.
+	 * @param  int          $sample_limit    Maximum sample rows.
+	 * @param  array|string $post_ids        Optional parent post IDs to limit the preview.
+	 * @param  bool         $respect_setting Whether to skip when deletion is disabled.
+	 * @param  string       $mode            Either `prune` for the retention and age policy, or `all` for delete-all.
 	 * @return array Preview data.
 	 */
 	public function get_preview( int $sample_limit = 10, $post_ids = array(), bool $respect_setting = true, string $mode = 'prune' ): array {
@@ -145,8 +146,8 @@ class Revisions {
 		}
 
 		return 'all' === $mode
-			? $this->preview_all( $sample_limit, $ids )
-			: $this->get_prune_preview( $sample_limit, $ids );
+		? $this->preview_all( $sample_limit, $ids )
+		: $this->get_prune_preview( $sample_limit, $ids );
 	}
 
 	/**
@@ -154,10 +155,10 @@ class Revisions {
 	 *
 	 * @since 3.2.0
 	 *
-	 * @param int          $sample_limit Maximum sample rows.
-	 * @param array|string $post_ids     Parent post IDs.
-	 * @param int|null     $age_days     Age cutoff in days. Null uses the saved setting.
-	 * @param int|null     $limit        Maximum candidates to collect. Null uses the filtered default.
+	 * @param  int          $sample_limit Maximum sample rows.
+	 * @param  array|string $post_ids     Parent post IDs.
+	 * @param  int|null     $age_days     Age cutoff in days. Null uses the saved setting.
+	 * @param  int|null     $limit        Maximum candidates to collect. Null uses the filtered default.
 	 * @return array Preview data.
 	 */
 	public function get_prune_preview( int $sample_limit = 10, $post_ids = array(), ?int $age_days = null, ?int $limit = null ): array {
@@ -198,8 +199,8 @@ class Revisions {
 	 *
 	 * @since 3.2.0
 	 *
-	 * @param int             $sample_limit Maximum sample rows.
-	 * @param array<int, int> $ids          Parent post IDs.
+	 * @param  int             $sample_limit Maximum sample rows.
+	 * @param  array<int, int> $ids          Parent post IDs.
 	 * @return array Preview data.
 	 */
 	private function preview_all( int $sample_limit, array $ids ): array {
@@ -222,7 +223,7 @@ class Revisions {
 
 		$sample = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+       // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				"SELECT ID, post_parent, post_title, post_date FROM {$wpdb->posts} {$where} ORDER BY ID ASC LIMIT %d",
 				$sample_limit
 			),
@@ -260,11 +261,11 @@ class Revisions {
 	 * @since 3.2.0
 	 *
 	 * @param array $args {
-	 *     Optional. Pruning arguments.
+	 *                    Optional. Pruning arguments.
 	 *
-	 *     @type array|string $post_ids Parent post IDs to limit the run.
-	 *     @type int|null     $age_days Age cutoff in days. Null uses the saved setting.
-	 *     @type int|null     $limit    Maximum revisions to delete. Null uses the filtered default.
+	 * @type   array|string $post_ids Parent post IDs to limit the run.
+	 * @type   int|null     $age_days Age cutoff in days. Null uses the saved setting.
+	 * @type   int|null     $limit    Maximum revisions to delete. Null uses the filtered default.
 	 * }
 	 * @return array Pruning result.
 	 */
@@ -296,21 +297,27 @@ class Revisions {
 			);
 		}
 
-		$deleted = 0;
-		$failed  = 0;
+		$deleted     = 0;
+		$failed      = 0;
+		$deleted_ids = array();
 
 		foreach ( $scan['candidates'] as $candidate ) {
-			if ( wp_delete_post_revision( (int) $candidate['ID'] ) ) {
+			$revision_id = (int) $candidate['ID'];
+
+			if ( wp_delete_post_revision( $revision_id ) ) {
 				++$deleted;
+				$deleted_ids[] = $revision_id;
 			} else {
 				++$failed;
 			}
 		}
 
+		$this->remove_orphaned_term_relationships( $deleted_ids );
+
 		$errors = array();
 		if ( $failed > 0 ) {
 			$errors[] = sprintf(
-				/* translators: 1: Number of revisions. */
+			/* translators: 1: Number of revisions. */
 				_n( '%d revision could not be deleted.', '%d revisions could not be deleted.', $failed, 'autoclose' ),
 				$failed
 			);
@@ -331,11 +338,11 @@ class Revisions {
 	 * @since 3.2.0
 	 *
 	 * @param array $args {
-	 *     Optional. Selection arguments.
+	 *                    Optional. Selection arguments.
 	 *
-	 *     @type array|string $post_ids Parent post IDs to limit the scan.
-	 *     @type int|null     $age_days Age cutoff in days. Null uses the saved setting.
-	 *     @type int          $limit    Maximum candidates to collect. Zero removes the bound.
+	 * @type   array|string $post_ids Parent post IDs to limit the scan.
+	 * @type   int|null     $age_days Age cutoff in days. Null uses the saved setting.
+	 * @type   int          $limit    Maximum candidates to collect. Zero removes the bound.
 	 * }
 	 * @return array{candidates: array<int, array<string, mixed>>, scanned: int, limit_reached: bool, error: string|null} Selection result.
 	 */
@@ -365,7 +372,7 @@ class Revisions {
 		while ( true ) {
 			$parents = $wpdb->get_col( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				$wpdb->prepare(
-					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+           // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 					"SELECT DISTINCT post_parent FROM {$wpdb->posts} WHERE post_type = 'revision' AND post_parent > 0{$id_clause} ORDER BY post_parent ASC LIMIT %d OFFSET %d",
 					self::SCAN_BATCH_SIZE,
 					$offset
@@ -373,7 +380,7 @@ class Revisions {
 			);
 
 			if ( ! empty( $wpdb->last_error ) ) {
-				return $this->failed_scan( $scanned, $wpdb->last_error );
+					return $this->failed_scan( $scanned, $wpdb->last_error );
 			}
 
 			if ( empty( $parents ) ) {
@@ -447,7 +454,7 @@ class Revisions {
 	 *
 	 * @since 3.2.0
 	 *
-	 * @param array<int, int> $parents Parent post IDs.
+	 * @param  array<int, int> $parents Parent post IDs.
 	 * @return array<int, array<int, array<string, mixed>>>|null Revisions grouped by parent, or null on error.
 	 */
 	private function get_revisions_for_parents( array $parents ): ?array {
@@ -457,7 +464,7 @@ class Revisions {
 
 		$rows = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
 			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+       // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 				"SELECT ID, post_parent, post_name, post_title, post_date, post_date_gmt FROM {$wpdb->posts} WHERE post_type = 'revision' AND post_parent IN ({$placeholders}) ORDER BY post_parent ASC, post_date ASC, ID ASC",
 				$parents
 			),
@@ -482,7 +489,7 @@ class Revisions {
 	 *
 	 * @since 3.2.0
 	 *
-	 * @param array<string, mixed> $revision Revision row.
+	 * @param  array<string, mixed> $revision Revision row.
 	 * @return bool True when the row is an autosave.
 	 */
 	private function is_autosave( array $revision ): bool {
@@ -494,7 +501,7 @@ class Revisions {
 	 *
 	 * @since 3.2.0
 	 *
-	 * @param array<string, mixed> $revision Revision row.
+	 * @param  array<string, mixed> $revision Revision row.
 	 * @return int UTC timestamp.
 	 */
 	private function get_revision_timestamp( array $revision ): int {
@@ -512,8 +519,8 @@ class Revisions {
 	 *
 	 * @since 3.2.0
 	 *
-	 * @param int    $scanned Revisions examined before the failure.
-	 * @param string $error   Database error.
+	 * @param  int    $scanned Revisions examined before the failure.
+	 * @param  string $error   Database error.
 	 * @return array Failed selection result.
 	 */
 	private function failed_scan( int $scanned, string $error ): array {
@@ -526,6 +533,40 @@ class Revisions {
 	}
 
 	/**
+	 * Remove term relationships left behind by deleted revisions.
+	 *
+	 * WordPress only clears relationships for taxonomies registered against
+	 * the post's own type, and no taxonomy is registered for `revision`, so rows
+	 * attached to a revision survive the delete. Revisions are excluded from term
+	 * counts, so the rows can be dropped without recounting.
+	 *
+	 * @since 3.2.0
+	 *
+	 * @param array<int, int> $revision_ids Deleted revision IDs.
+	 */
+	private function remove_orphaned_term_relationships( array $revision_ids ): void {
+		global $wpdb;
+
+		$revision_ids = array_values( array_unique( array_map( 'intval', $revision_ids ) ) );
+
+		if ( empty( $revision_ids ) ) {
+			return;
+		}
+
+		$placeholders = implode( ', ', array_fill( 0, count( $revision_ids ), '%d' ) );
+
+		$wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+				"DELETE FROM {$wpdb->term_relationships} WHERE object_id IN ({$placeholders})",
+				$revision_ids
+			)
+		);
+
+		clean_object_term_cache( $revision_ids, 'revision' );
+	}
+
+	/**
 	 * Delete every post revision, ignoring retention limits and the age cutoff.
 	 *
 	 * This is the explicit delete-all action. Ordinary scheduled cleanup uses
@@ -533,7 +574,7 @@ class Revisions {
 	 *
 	 * @since 3.0.0
 	 *
-	 * @param array|string $post_ids Optional parent post IDs to limit the deletion.
+	 * @param  array|string $post_ids Optional parent post IDs to limit the deletion.
 	 * @return int|bool Number of revisions deleted. Boolean false on error.
 	 */
 	public function delete_revisions( $post_ids = array() ) {
@@ -550,7 +591,7 @@ class Revisions {
 		while ( true ) {
 			$revision_ids = $wpdb->get_col( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				$wpdb->prepare(
-					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+           // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 					"SELECT ID FROM {$wpdb->posts} {$where} ORDER BY ID ASC LIMIT %d",
 					self::DELETE_BATCH_SIZE
 				)
@@ -565,12 +606,18 @@ class Revisions {
 			}
 
 			$batch_deleted = 0;
+			$deleted_ids   = array();
 
 			foreach ( $revision_ids as $revision_id ) {
-				if ( wp_delete_post_revision( (int) $revision_id ) ) {
+				$revision_id = (int) $revision_id;
+
+				if ( wp_delete_post_revision( $revision_id ) ) {
 					++$batch_deleted;
+					$deleted_ids[] = $revision_id;
 				}
 			}
+
+			$this->remove_orphaned_term_relationships( $deleted_ids );
 
 			$deleted += $batch_deleted;
 
