@@ -20,7 +20,7 @@ The schedule is created from the **General** tab of the settings page:
 
 When you save the settings with **Activate scheduled closing** enabled, the plugin clears any existing `acc_cron_hook` event and reschedules a new one for the next occurrence of the configured hour:min. When you disable the master switch, the event is removed.
 
-The schedule uses `gmmktime()` (UTC), so the configured hour:min is evaluated against UTC time and is unaffected by your site's timezone setting.
+The schedule uses UTC, so the configured hour:min is evaluated against UTC time and is unaffected by your site's timezone setting. The AutoClose status command converts the next run to the site's timezone for readability.
 
 ## Time of first run
 

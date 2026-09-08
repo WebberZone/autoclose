@@ -2,7 +2,7 @@
 Tags: comments, pingback, revisions, spam, anti-spam
 Contributors: webberzone, Ajay
 Donate link: https://wzn.io/donate-wz
-Stable tag: 3.1.2
+Stable tag: 3.2.0
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 7.4
@@ -71,60 +71,32 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 == Upgrade Notice ==
 
-= 3.1.2 =
-Fixed an incorrect early translation loading notice in WordPress 6.7 and later.
+= 3.2.0 =
+Adds WP-CLI commands for status, maintenance, discussions, revisions, pingbacks, close dates, and cron.
 
 == Changelog ==
 
-= 3.1.3 =
+= 3.2.0 =
 
-* Bug fixes:
-    * Fixed settings falling back to 0 instead of their intended default when the saved settings did not yet contain that option, which affected every checkbox and every text, number and comma-separated field. This applied to newly introduced settings on existing installs; settings saved from the settings page were unaffected.
-    * Fixed the `acc_settings_defaults` filter being ignored when a default was read outside the admin area.
-    * Fixed settings on a multisite network reading another site's values in the same request after a `switch_to_blog()` call, such as during network activation.
+Release date: 8 September 2026
 
-* Improvements:
-    * Setting defaults are now resolved from a single lightweight list instead of building every settings field, so reading an option early in the page load no longer risks loading translations too early.
+**Added**
 
-= 3.1.2 =
+* Added WP-CLI commands for status, maintenance, discussions, revisions, pingbacks, close dates, and cron.
 
-* Bug fixes:
-    * Fixed an incorrect early translation loading notice in WordPress 6.7 and later by initializing admin components on the `init` action.
+**Changed**
 
-= 3.1.1 =
+* Improved bulk operations with batched updates and cache invalidation.
+* Limited default CLI scopes to supported public post types, excluding attachments and revisions.
 
-* Bug fixes:
-    * Plugin re-activation now correctly re-schedules the cron job if the scheduler was previously enabled. Previously, the cron remained unscheduled until settings were manually re-saved.
-    * Fixed per-post close date scheduling: when both a comments date and a pings date were set on the same post, only the first event was registered. Comments and pings events are now scheduled as distinct cron entries and both fire correctly.
-    * Fixed date comparison in the comment/ping closing query to use UTC time against `post_date_gmt`, preventing posts from being closed at the wrong time on servers where the PHP timezone differs from UTC.
+**Fixed**
 
-= 3.1.0 =
-Release post: [https://webberzone.com/announcements/auto-close-v3-1-0/](https://webberzone.com/announcements/auto-close-v3-1-0/)
+* Fixed close dates and revision restores reopening comments.
+* Fixed incorrect close-date results and missing date controls.
+* Removed orphaned revision metadata and term relationships.
+* Fixed stale caches and restored `clean_post_cache` notifications.
+* Improved daylight-saving date validation.
 
-* New features:
-    * Exclude posts in specific categories, tags, or any taxonomy term from having comments or pingbacks/trackbacks closed.
-    * Reopen comments automatically when a published post is saved or updated, with a configurable number of days before they are closed again by the cron.
-    * Email summary notification after each scheduled cron run, showing the number of comments closed, pings closed, and revisions deleted.
+= Earlier versions =
 
-* Bug fixes:
-    * Fixed undefined variable warnings when processing taxonomy term exclusions.
-    * Fixed Settings API repeater fields: form submission, hidden input names, and sanitization with row ID lookup.
-
-* Modifications:
-    * Update Settings API and other reusable classes in line with the latest WebberZone plugins.
-    * Email summary now uses an HTML template for improved readability.
-    * Term exclusion fields now use an autocomplete search (Tom Select) instead of manual ID entry.
-
-= 3.0.0 =
-Release post: [https://webberzone.com/announcements/auto-close-v3-0-0/](https://webberzone.com/announcements/auto-close-v3-0-0/)
-
-Completely rewritten the plugin to use autoloading, namespaces and classes.
-
-* Features:
-    * Added block ping URLs feature and self-pings feature.
-    * Introduced a new meta box allowing users to schedule the closure of comments, pingbacks, and trackbacks for the current post.
-
-* Bug fixes:
-    * Fixed PHP error/warnings about loading translations too early.
-
-For older changes, refer to changelog.txt
+For the changelog of earlier versions, please refer to the [releases page on GitHub](https://github.com/WebberZone/autoclose/releases).

@@ -7,6 +7,7 @@ parameters:
         - includes/
     scanFiles:
         - autoclose.php
+        - phpunit/phpstan-wp-cli-stubs.php
     scanDirectories:
         - includes
     bootstrapFiles:

@@ -42,24 +42,44 @@ class Close_Date {
 	 * @param int $post_id Post ID.
 	 */
 	public function maybe_schedule_or_close( $post_id ): void {
-		$comments_date = get_post_meta( $post_id, "_{$this->prefix}_comments_date", true );
-		$pings_date    = get_post_meta( $post_id, "_{$this->prefix}_pings_date", true );
-		$now           = current_time( 'Y-m-d\TH:i' );
+		$comments_date      = get_post_meta( $post_id, "_{$this->prefix}_comments_date", true );
+		$pings_date         = get_post_meta( $post_id, "_{$this->prefix}_pings_date", true );
+		$comments_timestamp = $this->get_date_timestamp( $comments_date );
+		$pings_timestamp    = $this->get_date_timestamp( $pings_date );
 
 		wp_clear_scheduled_hook( 'autoclose_close_comments_pings_event', array( $post_id, 'comments' ) );
 		wp_clear_scheduled_hook( 'autoclose_close_comments_pings_event', array( $post_id, 'pings' ) );
 
-		if ( $comments_date && $comments_date <= $now ) {
+		if ( false !== $comments_timestamp && $comments_timestamp <= time() ) {
 			$this->close_comments( $post_id );
-		} elseif ( $comments_date ) {
-			wp_schedule_single_event( strtotime( $comments_date ), 'autoclose_close_comments_pings_event', array( $post_id, 'comments' ) );
+		} elseif ( false !== $comments_timestamp ) {
+			wp_schedule_single_event( $comments_timestamp, 'autoclose_close_comments_pings_event', array( $post_id, 'comments' ) );
 		}
 
-		if ( $pings_date && $pings_date <= $now ) {
+		if ( false !== $pings_timestamp && $pings_timestamp <= time() ) {
 			$this->close_pings( $post_id );
-		} elseif ( $pings_date ) {
-			wp_schedule_single_event( strtotime( $pings_date ), 'autoclose_close_comments_pings_event', array( $post_id, 'pings' ) );
+		} elseif ( false !== $pings_timestamp ) {
+			wp_schedule_single_event( $pings_timestamp, 'autoclose_close_comments_pings_event', array( $post_id, 'pings' ) );
 		}
+	}
+
+	/**
+	 * Convert a stored site-local close date to a Unix timestamp.
+	 *
+	 * @param string $date Stored date in Y-m-d\\TH:i format.
+	 * @return int|false Timestamp, or false when no valid date is stored.
+	 */
+	private function get_date_timestamp( $date ) {
+		if ( empty( $date ) ) {
+			return false;
+		}
+
+		$parsed = \DateTimeImmutable::createFromFormat( '!Y-m-d\\TH:i', (string) $date, wp_timezone() );
+		if ( false === $parsed ) {
+			return false;
+		}
+
+		return $parsed->getTimestamp();
 	}
 
 	/**
@@ -79,11 +99,15 @@ class Close_Date {
 	 */
 	protected function close_comments( $post_id ): void {
 		if ( 'closed' !== get_post_field( 'comment_status', $post_id ) ) {
-			wp_update_post(
-				array(
-					'ID'             => $post_id,
-					'comment_status' => 'closed',
-				)
+			Reopen::without_reopening(
+				static function () use ( $post_id ) {
+					wp_update_post(
+						array(
+							'ID'             => $post_id,
+							'comment_status' => 'closed',
+						)
+					);
+				}
 			);
 		}
 	}
@@ -95,11 +119,15 @@ class Close_Date {
 	 */
 	protected function close_pings( $post_id ): void {
 		if ( 'closed' !== get_post_field( 'ping_status', $post_id ) ) {
-			wp_update_post(
-				array(
-					'ID'          => $post_id,
-					'ping_status' => 'closed',
-				)
+			Reopen::without_reopening(
+				static function () use ( $post_id ) {
+					wp_update_post(
+						array(
+							'ID'          => $post_id,
+							'ping_status' => 'closed',
+						)
+					);
+				}
 			);
 		}
 	}
