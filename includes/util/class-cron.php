@@ -73,8 +73,9 @@ class Cron {
 	 * @param int    $min        Minute.
 	 * @param string $recurrence Frequency.
 	 * @param bool   $future     Ensure the first occurrence is in the future.
+	 * @param bool   $force      Reschedule even when the existing event matches.
 	 */
-	public function enable_run( $hour, $min, $recurrence, $future = false ): bool {
+	public function enable_run( $hour, $min, $recurrence, $future = false, $force = false ): bool {
 		$hour       = max( 0, min( 23, (int) $hour ) );
 		$min        = max( 0, min( 59, (int) $min ) );
 		$recurrence = (string) $recurrence;
@@ -89,7 +90,7 @@ class Cron {
 		}
 
 		$existing = wp_get_scheduled_event( 'acc_cron_hook' );
-		if ( $existing && $existing->schedule === $recurrence ) {
+		if ( ! $force && $existing && $existing->schedule === $recurrence ) {
 			$existing_hour  = (int) gmdate( 'G', (int) $existing->timestamp );
 			$existing_min   = (int) gmdate( 'i', (int) $existing->timestamp );
 			$existing_valid = ! $future || (int) $existing->timestamp > time();
@@ -150,12 +151,18 @@ class Cron {
 			$outcome  = 'failed';
 			$errors[] = __( 'Scheduled maintenance is disabled for the current site.', 'autoclose' );
 		} elseif ( false === $before || $overdue || $force ) {
-			$this->enable_run(
+			$repaired = $this->enable_run(
 				(int) Options_API::get_option( 'cron_hour' ),
 				(int) Options_API::get_option( 'cron_min' ),
 				(string) Options_API::get_option( 'cron_recurrence' ),
-				true
+				true,
+				$force
 			);
+
+			if ( ! $repaired ) {
+				$outcome  = 'failed';
+				$errors[] = __( 'The AutoClose cron event could not be repaired.', 'autoclose' );
+			}
 		}
 
 		$after = wp_next_scheduled( 'acc_cron_hook' );

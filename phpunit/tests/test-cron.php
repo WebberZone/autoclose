@@ -193,4 +193,39 @@ class CronTest extends WP_UnitTestCase {
 		delete_option( Options_API::SETTINGS_OPTION );
 		Options_API::flush_cache();
 	}
+
+	/**
+	 * Repair reports a failure when an existing event cannot be rescheduled.
+	 */
+	public function test_repair_reports_reschedule_failure() {
+		update_option(
+			Options_API::SETTINGS_OPTION,
+			array(
+				'cron_on'         => 1,
+				'cron_hour'       => 0,
+				'cron_min'        => 0,
+				'cron_recurrence' => 'daily',
+			)
+		);
+		Options_API::flush_cache();
+
+		$cron = new Cron();
+		$this->assertTrue( $cron->enable_run( 0, 0, 'daily', true ) );
+
+		$filter = static function ( $pre, $hook ) {
+			return 'acc_cron_hook' === $hook ? false : $pre;
+		};
+		add_filter( 'pre_clear_scheduled_hook', $filter, 10, 2 );
+
+		$result = $cron->repair( true );
+
+		remove_filter( 'pre_clear_scheduled_hook', $filter, 10 );
+
+		$this->assertSame( 'failed', $result['outcome'] );
+		$this->assertNotEmpty( $result['errors'] );
+		$this->assertNotNull( $result['after'] );
+
+		delete_option( Options_API::SETTINGS_OPTION );
+		Options_API::flush_cache();
+	}
 }
