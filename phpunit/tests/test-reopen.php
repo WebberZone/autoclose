@@ -90,4 +90,34 @@ class ReopenTest extends WP_UnitTestCase {
 		$this->assertSame( 'open', get_post_field( 'comment_status', $post_id ) );
 		$this->assertGreaterThan( time(), (int) get_post_meta( $post_id, '_acc_reopen_until', true ) );
 	}
+
+	/**
+	 * Restoring a revision does not reopen a post that was closed before restore.
+	 */
+	public function test_revision_restore_preserves_closed_comments() {
+		$post_id = 0;
+		Reopen::without_reopening(
+			static function () use ( &$post_id ) {
+				$post_id = self::factory()->post->create( array( 'comment_status' => 'closed' ) );
+			}
+		);
+
+		$revision_id = wp_insert_post(
+			array(
+				'post_type'      => 'revision',
+				'post_parent'    => $post_id,
+				'post_status'    => 'inherit',
+				'post_title'     => 'Restored revision',
+				'post_content'   => 'Revision content',
+				'comment_status' => 'open',
+				'ping_status'    => 'open',
+			),
+			true
+		);
+
+		$this->assertNotWPError( $revision_id );
+		$this->assertSame( $post_id, wp_restore_post_revision( $revision_id ) );
+		$this->assertSame( 'closed', get_post_field( 'comment_status', $post_id ) );
+		$this->assertFalse( metadata_exists( 'post', $post_id, '_acc_reopen_until' ) );
+	}
 }
