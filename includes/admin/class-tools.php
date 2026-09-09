@@ -13,6 +13,10 @@ use WebberZone\AutoClose\Maintenance\Runner;
 use WebberZone\AutoClose\Options_API;
 use WebberZone\AutoClose\Util\Hook_Registry;
 
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 /**
  * Tools class.
  *
@@ -87,6 +91,30 @@ class Tools {
 	public function render_tools_page() {
 		$comments  = new Comments();
 		$revisions = new Revisions();
+		$preview   = null;
+
+		/* Preview configured maintenance */
+		if ( isset( $_POST['acc_preview'] ) && check_admin_referer( 'acc-tools-settings' ) ) {
+			$preview = ( new Runner( $comments, $revisions ) )->preview( 10 );
+		}
+
+		/* Preview pingback/trackback deletion */
+		if ( isset( $_POST['acc_preview_pingtracks'] ) && check_admin_referer( 'acc-tools-settings' ) ) {
+			$preview = array(
+				'mode'    => 'delete-pingtracks',
+				'outcome' => 'preview',
+				'result'  => $comments->preview_pingbacks( array(), 10 ),
+			);
+		}
+
+		/* Preview delete-all revisions */
+		if ( isset( $_POST['acc_preview_revisions'] ) && check_admin_referer( 'acc-tools-settings' ) ) {
+			$preview = array(
+				'mode'    => 'delete-revisions',
+				'outcome' => 'preview',
+				'result'  => $revisions->get_preview( 10, array(), false, 'all' ),
+			);
+		}
 
 		/* Close all */
 		if ( isset( $_POST['close_all'] ) && check_admin_referer( 'acc-tools-settings' ) ) {
@@ -198,6 +226,9 @@ class Tools {
 			}
 		}
 
+		$preview_mode = null !== $preview ? (string) ( $preview['mode'] ?? '' ) : '';
+		$preview_html = null !== $preview ? $this->render_preview( $preview ) : '';
+
 		// Include the view file.
 		include_once ACC_PLUGIN_DIR . 'includes/admin/views/tools-page.php';
 	}
@@ -211,6 +242,163 @@ class Tools {
 		$runner = new Runner();
 
 		return $runner->run();
+	}
+
+	/**
+	 * Render the read-only preview panel.
+	 *
+	 * The preview reflects the same eligibility queries execution uses, but it is
+	 * a snapshot: matching content or settings can change before Run is clicked,
+	 * and this panel never writes content, settings, run history, or emails.
+	 *
+	 * @since 3.2.0
+	 *
+	 * @param array $preview Preview data from Runner::preview() or a single-operation preview.
+	 * @return string Rendered HTML.
+	 */
+	public function render_preview( array $preview ): string {
+		ob_start();
+
+		$mode = $preview['mode'] ?? 'run';
+
+		echo '<div class="notice notice-info inline"><p>' . esc_html__( 'Preview only. Nothing has been changed. Matching content can change before you click Run — recheck eligibility happens at execution time.', 'autoclose' ) . '</p></div>';
+
+		if ( 'delete-pingtracks' === $mode || 'delete-revisions' === $mode ) {
+			$this->render_single_operation_preview( (array) ( $preview['result'] ?? array() ) );
+			return (string) ob_get_clean();
+		}
+
+		$components = (array) ( $preview['components'] ?? array() );
+		$comments   = (array) ( $components['comments']['operations'] ?? array() );
+		$revisions  = (array) ( $components['revisions'] ?? array() );
+
+		foreach ( $comments as $key => $operation ) {
+			$this->render_single_operation_preview( (array) $operation, $this->get_operation_label( (string) $key ) );
+		}
+
+		if ( ! empty( $revisions ) ) {
+			$this->render_single_operation_preview( $revisions, __( 'Revisions (scheduled cleanup)', 'autoclose' ) );
+		}
+
+		return (string) ob_get_clean();
+	}
+
+	/**
+	 * Human-readable label for a comments preview operation key.
+	 *
+	 * @since 3.2.0
+	 *
+	 * @param string $key Operation key.
+	 * @return string Label.
+	 */
+	private function get_operation_label( string $key ): string {
+		$labels = array(
+			'comments_close' => __( 'Close comments', 'autoclose' ),
+			'pings_close'    => __( 'Close pingbacks/trackbacks', 'autoclose' ),
+			'comments_open'  => __( 'Reopen comments (kept-open list)', 'autoclose' ),
+			'pings_open'     => __( 'Reopen pingbacks/trackbacks (kept-open list)', 'autoclose' ),
+		);
+
+		return $labels[ $key ] ?? $key;
+	}
+
+	/**
+	 * Render one operation's preview: counts, scope, and a sample of affected posts.
+	 *
+	 * @since 3.2.0
+	 *
+	 * @param array  $operation Operation preview data.
+	 * @param string $label     Optional heading.
+	 */
+	private function render_single_operation_preview( array $operation, string $label = '' ): void {
+		if ( 'skipped' === ( $operation['status'] ?? '' ) || false === ( $operation['enabled'] ?? true ) ) {
+			return;
+		}
+
+		$affected = (int) ( $operation['affected'] ?? 0 );
+
+		echo '<div class="acc-preview-operation" style="margin-bottom:16px;">';
+
+		if ( '' !== $label ) {
+			echo '<h4 style="margin-bottom:4px;">' . esc_html( $label ) . '</h4>';
+		}
+
+		echo '<p>' . sprintf(
+			/* translators: 1: Number of matching posts. */
+			esc_html__( 'Matching posts: %s', 'autoclose' ),
+			'<strong>' . esc_html( number_format_i18n( $affected ) ) . '</strong>'
+		) . '</p>';
+
+		$scope = array();
+
+		if ( isset( $operation['post_types'] ) && ! empty( $operation['post_types'] ) ) {
+			$scope[] = sprintf(
+				/* translators: 1: Comma-separated post types. */
+				esc_html__( 'Post types: %s', 'autoclose' ),
+				esc_html( implode( ', ', (array) $operation['post_types'] ) )
+			);
+		}
+
+		if ( array_key_exists( 'age', $operation ) && 'prune' === ( $operation['mode'] ?? 'prune' ) ) {
+			$scope[] = sprintf(
+				/* translators: 1: Age in days. */
+				esc_html__( 'Age cutoff: %s day(s)', 'autoclose' ),
+				esc_html( (string) (int) $operation['age'] )
+			);
+		} elseif ( ! empty( $operation['type_ages'] ) ) {
+			$per_type = array();
+			foreach ( (array) $operation['type_ages'] as $post_type => $age ) {
+				$per_type[] = $post_type . ': ' . ( null === $age ? __( 'never', 'autoclose' ) : sprintf( _n( '%d day', '%d days', (int) $age, 'autoclose' ), (int) $age ) );
+			}
+			$scope[] = esc_html__( 'Age cutoff by post type: ', 'autoclose' ) . esc_html( implode( ', ', $per_type ) );
+		} elseif ( isset( $operation['cutoff_gmt'] ) && $operation['cutoff_gmt'] ) {
+			$scope[] = sprintf(
+				/* translators: 1: Date. */
+				esc_html__( 'Age cutoff: %s', 'autoclose' ),
+				esc_html( (string) $operation['cutoff_gmt'] )
+			);
+		}
+
+		if ( ! empty( $operation['count_threshold'] ) ) {
+			$scope[] = sprintf(
+				/* translators: 1: Approved comment count. */
+				esc_html__( 'Or approved comments ≥ %d', 'autoclose' ),
+				(int) $operation['count_threshold']
+			);
+		}
+
+		if ( ! empty( $scope ) ) {
+			echo '<p class="description">' . wp_kses_post( implode( ' &middot; ', $scope ) ) . '</p>';
+		}
+
+		$sample = (array) ( $operation['sample'] ?? array() );
+
+		if ( ! empty( $sample ) ) {
+			echo '<ul style="list-style:disc; margin-left:20px;">';
+			foreach ( array_slice( $sample, 0, 10 ) as $row ) {
+				$row_id    = (int) ( $row['ID'] ?? $row['comment_ID'] ?? 0 );
+				$row_title = (string) ( $row['post_title'] ?? '' );
+				echo '<li>' . esc_html( '#' . $row_id . ( '' !== $row_title ? ' — ' . $row_title : '' ) ) . '</li>';
+			}
+			echo '</ul>';
+
+			if ( $affected > count( $sample ) ) {
+				echo '<p class="description">' . esc_html(
+					sprintf(
+						/* translators: 1: Number shown, 2: Total matching. */
+						__( 'Showing %1$s of %2$s matching posts.', 'autoclose' ),
+						number_format_i18n( count( $sample ) ),
+						number_format_i18n( $affected )
+					)
+				) . '</p>';
+			}
+		}
+
+		if ( ! empty( $operation['errors'] ) ) {
+			echo '<p class="description" style="color:#a00;">' . esc_html( implode( ' ', (array) $operation['errors'] ) ) . '</p>';
+		}
+
+		echo '</div>';
 	}
 
 	/**

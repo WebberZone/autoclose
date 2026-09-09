@@ -34,11 +34,15 @@ if ( ! defined( 'WPINC' ) ) {
 				</div>
 				<div class="inside">
 					<p>
+						<input type="submit" name="acc_preview" id="acc_preview" value="<?php esc_attr_e( 'Preview changes', 'autoclose' ); ?>" class="button button-secondary" />
 						<input type="submit" name="close_all" id="close_all"  value="<?php esc_attr_e( 'Run closing algorithm', 'autoclose' ); ?>" class="button button-primary" />
 					</p>
 					<p class="description">
 						<?php esc_html_e( 'Clicking this button will execute the closing algorithm respecting the various options in the Settings page.', 'autoclose' ); ?>
 					</p>
+					<?php if ( 'dry-run' === $preview_mode ) : ?>
+						<?php echo $preview_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Pre-escaped in Tools::render_preview(). ?>
+					<?php endif; ?>
 				</div>
 			</div>
 
@@ -66,11 +70,15 @@ if ( ! defined( 'WPINC' ) ) {
 				</div>
 				<div class="inside">
 					<p>
+						<input name="acc_preview_pingtracks" type="submit" id="acc_preview_pingtracks" value="<?php esc_attr_e( 'Preview changes', 'autoclose' ); ?>" class="button button-secondary" />
 						<input name="acc_delete_pingtracks" type="submit" id="acc_delete_pingtracks" value="<?php esc_attr_e( 'Delete pingbacks/trackbacks', 'autoclose' ); ?>" class="button button-secondary" onclick="if (!confirm('<?php esc_attr_e( 'This will delete all pingbacks/trackbacks permanently. Proceed?', 'autoclose' ); ?>')) return false;" />
 					</p>
 					<p class="description">
 						<?php esc_html_e( 'This is a permanent change. Once you go through with this, there is no way to restore your pingbacks/trackbacks. Please backup your database before proceeding.', 'autoclose' ); ?>
 					</p>
+					<?php if ( 'delete-pingtracks' === $preview_mode ) : ?>
+						<?php echo $preview_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Pre-escaped in Tools::render_preview(). ?>
+					<?php endif; ?>
 				</div>
 			</div>
 
@@ -80,6 +88,7 @@ if ( ! defined( 'WPINC' ) ) {
 				</div>
 				<div class="inside">
 					<p>
+						<input name="acc_preview_revisions" type="submit" id="acc_preview_revisions" value="<?php esc_attr_e( 'Preview changes', 'autoclose' ); ?>" class="button button-secondary" />
 						<input name="acc_delete_revisions" type="submit" id="acc_delete_revisions" value="<?php esc_attr_e( 'Delete all revisions', 'autoclose' ); ?>" class="button button-secondary" onclick="if (!confirm('<?php esc_attr_e( 'This deletes every revision permanently, ignoring retention limits and the age setting, and includes autosaves. Proceed?', 'autoclose' ); ?>')) return false;" />
 					</p>
 					<p class="description">
@@ -88,6 +97,9 @@ if ( ! defined( 'WPINC' ) ) {
 					<p class="description">
 						<?php esc_html_e( 'Unlike scheduled cleanup, this button ignores the number of revisions each post type keeps and the age setting, and it also removes autosaves. To delete only revisions beyond the retention limit and older than the configured age, use the Run closing algorithm button above.', 'autoclose' ); ?>
 					</p>
+					<?php if ( 'delete-revisions' === $preview_mode ) : ?>
+						<?php echo $preview_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Pre-escaped in Tools::render_preview(). ?>
+					<?php endif; ?>
 				</div>
 			</div>
 

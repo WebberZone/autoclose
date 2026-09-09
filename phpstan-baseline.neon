@@ -14,3 +14,13 @@ parameters:
 			message: "#^Variable \\$site_url might not be defined\\.$#"
 			count: 1
 			path: includes/features/views/email-cron-summary.php
+
+		-
+			message: "#^Variable \\$preview_mode might not be defined\\.$#"
+			count: 1
+			path: includes/admin/views/tools-page.php
+
+		-
+			message: "#^Variable \\$preview_html might not be defined\\.$#"
+			count: 3
+			path: includes/admin/views/tools-page.php
