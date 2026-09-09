@@ -84,18 +84,20 @@ Release date: 8 September 2026
 
 * Added WP-CLI commands for status, maintenance, discussions, revisions, pingbacks, close dates, and cron.
 * Added age- and retention-aware revision pruning with a 90-day default cutoff and the `acc_revisions_prune_limit` and `acc_revisions_prune_cutoff` filters.
+* Added `fortnightly` and `monthly` cron recurrences.
 
 **Changed**
 
 * Scheduled revision cleanup now respects each post's retention limit and age cutoff; autosaves remain protected and the Tools delete-all action remains explicit.
 * Added lifecycle reconciliation for scheduled close dates and labeled cron schedule times as UTC.
 * Improved bulk maintenance with supported public post-type scopes and truthful no-op and partial results.
+* Migrated legacy `close` discussion statuses to WordPress's canonical `closed` value once per site.
 * Preserved existing revision settings and added an admin notice explaining the new cleanup policy.
 
 **Fixed**
 
 * Close-date and revision-restore updates no longer reopen closed comments.
-* Fixed close-date results, date controls, DST validation, and cutoff display.
+* Fixed close-date results, date controls, DST validation, and discussion age cutoff calculations.
 * Revision deletion now removes orphaned metadata and term relationships.
 * Fixed stale caches, cache invalidation notifications, and per-site cron notification counts.
 

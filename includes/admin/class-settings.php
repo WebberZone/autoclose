@@ -794,7 +794,7 @@ class Settings {
 
 		$cron = new \WebberZone\AutoClose\Util\Cron();
 		if ( ! empty( $settings['cron_on'] ) ) {
-			if ( ! $cron->enable_run( $settings['cron_hour'], $settings['cron_min'], $settings['cron_recurrence'] ) ) {
+			if ( ! $cron->enable_run( $settings['cron_hour'], $settings['cron_min'], $settings['cron_recurrence'], true ) ) {
 				add_settings_error(
 					'acc_settings',
 					'acc_cron_schedule',

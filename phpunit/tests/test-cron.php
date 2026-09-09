@@ -50,6 +50,26 @@ class CronTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Re-saving an unchanged future schedule keeps the existing event.
+	 */
+	public function test_future_schedule_is_idempotent_by_time_and_recurrence() {
+		$cron      = new Cron();
+		$target    = time() + HOUR_IN_SECONDS;
+		$hour      = (int) gmdate( 'G', $target );
+		$minute    = (int) gmdate( 'i', $target );
+		$recurrence = 'daily';
+
+		$this->assertTrue( $cron->enable_run( $hour, $minute, $recurrence, true ) );
+		$before = wp_get_scheduled_event( 'acc_cron_hook' );
+
+		$this->assertTrue( $cron->enable_run( $hour, $minute, $recurrence, true ) );
+		$after = wp_get_scheduled_event( 'acc_cron_hook' );
+
+		$this->assertSame( $before->timestamp, $after->timestamp );
+		$this->assertSame( $before->schedule, $after->schedule );
+	}
+
+	/**
 	 * Local close dates are converted to the site's timezone before scheduling.
 	 */
 	public function test_close_date_uses_site_timezone_and_keeps_types_independent() {

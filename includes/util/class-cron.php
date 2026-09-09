@@ -73,6 +73,8 @@ class Cron {
 	 * @param bool   $future     Ensure the first occurrence is in the future.
 	 */
 	public function enable_run( $hour, $min, $recurrence, $future = false ): bool {
+		$hour       = max( 0, min( 23, (int) $hour ) );
+		$min        = max( 0, min( 59, (int) $min ) );
 		$recurrence = (string) $recurrence;
 		$schedules  = wp_get_schedules();
 		if ( ! isset( $schedules[ $recurrence ] ) ) {
@@ -85,8 +87,14 @@ class Cron {
 		}
 
 		$existing = wp_get_scheduled_event( 'acc_cron_hook' );
-		if ( $existing && ( (int) $existing->timestamp === $on && $existing->schedule === $recurrence ) ) {
-			return true;
+		if ( $existing && $existing->schedule === $recurrence ) {
+			$existing_hour  = (int) gmdate( 'G', (int) $existing->timestamp );
+			$existing_min   = (int) gmdate( 'i', (int) $existing->timestamp );
+			$existing_valid = ! $future || (int) $existing->timestamp > time();
+
+			if ( $existing_valid && $existing_hour === $hour && $existing_min === $min ) {
+				return true;
+			}
 		}
 
 		if ( $existing ) {

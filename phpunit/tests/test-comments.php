@@ -26,6 +26,8 @@ class CommentsTest extends WP_UnitTestCase {
 	public function set_up() {
 		parent::set_up();
 
+		delete_option( 'acc_legacy_status_migration_complete' );
+
 		$this->comments = new Comments();
 		$this->set_settings(
 			array(
@@ -43,6 +45,7 @@ class CommentsTest extends WP_UnitTestCase {
 	 * Tear down each test.
 	 */
 	public function tear_down() {
+		delete_option( 'acc_legacy_status_migration_complete' );
 		delete_option( Options_API::SETTINGS_OPTION );
 		Options_API::flush_cache();
 
@@ -85,16 +88,51 @@ class CommentsTest extends WP_UnitTestCase {
 
 		$this->assertSame( 'success', $result['status'] );
 		$this->assertSame( 2, $result['updated'] );
+		$this->assertSame( 1, $result['comments'] );
+		$this->assertSame( 1, $result['pings'] );
 		$this->assertSame( 'closed', get_post_field( 'comment_status', $post_id ) );
 		$this->assertSame( 'closed', get_post_field( 'ping_status', $post_id ) );
+
+		$wpdb->update(
+			$wpdb->posts,
+			array( 'comment_status' => 'close' ),
+			array( 'ID' => $post_id )
+		);
+		clean_post_cache( $post_id );
 
 		$second = $this->comments->migrate_legacy_statuses();
 		$this->assertSame( 'success', $second['status'] );
 		$this->assertSame( 0, $second['updated'] );
+		$this->assertSame( 'close', get_post_field( 'comment_status', $post_id ) );
 	}
 
 	/**
-	 * A failed batch preserves the successful updates already made.
+	 * Legacy status repairs have separate counts from newly closed posts.
+	 */
+	public function test_legacy_status_repairs_do_not_inflate_close_counts() {
+		global $wpdb;
+
+		$post_id = self::factory()->post->create();
+		$wpdb->update(
+			$wpdb->posts,
+			array(
+				'comment_status' => 'close',
+				'ping_status'    => 'close',
+			),
+			array( 'ID' => $post_id )
+		);
+		clean_post_cache( $post_id );
+
+		$result = $this->comments->process_comments();
+
+		$this->assertSame( 0, $result['comments_closed'] );
+		$this->assertSame( 0, $result['pings_closed'] );
+		$this->assertSame( 1, $result['comments_migrated'] );
+		$this->assertSame( 1, $result['pings_migrated'] );
+	}
+
+	/**
+	 * A successful batch reports the affected count.
 	 */
 	public function test_discussion_result_preserves_affected_count_on_failure() {
 		$post_id = self::factory()->post->create( array( 'comment_status' => 'open' ) );
@@ -107,6 +145,28 @@ class CommentsTest extends WP_UnitTestCase {
 		$this->assertSame( 'success', $result['status'] );
 		$this->assertSame( 1, $result['affected'] );
 		$this->assertSame( 'closed', get_post_field( 'comment_status', $post_id ) );
+	}
+
+	/**
+	 * A database selection failure is reported instead of as zero work.
+	 */
+	public function test_discussion_selection_failure_is_reported() {
+		global $wpdb;
+
+		$posts_table = $wpdb->posts;
+		$suppressed  = $wpdb->suppress_errors( true );
+		$wpdb->posts = $wpdb->prefix . 'missing_autoclose_posts';
+
+		try {
+			$result = $this->comments->edit_discussions_result( 'comment', 'close' );
+		} finally {
+			$wpdb->posts = $posts_table;
+			$wpdb->suppress_errors( $suppressed );
+		}
+
+		$this->assertSame( 'failed', $result['status'] );
+		$this->assertSame( 0, $result['affected'] );
+		$this->assertNotEmpty( $result['errors'] );
 	}
 
 	/**

@@ -32,6 +32,13 @@ class Comments {
 	private const STATUS_MIGRATION_BATCH_SIZE = 500;
 
 	/**
+	 * Option recording that legacy discussion statuses have been migrated.
+	 *
+	 * @since 3.2.0
+	 */
+	private const STATUS_MIGRATION_OPTION = 'acc_legacy_status_migration_complete';
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 3.0.0
@@ -46,27 +53,29 @@ class Comments {
 	 * @since 3.0.0
 	 */
 	public function process_comments(): array {
-		$comment_age     = Options_API::get_option( 'comment_age' );
-		$comment_pids    = Options_API::get_option( 'comment_pids' );
-		$pbtb_age        = Options_API::get_option( 'pbtb_age' );
-		$pbtb_pids       = Options_API::get_option( 'pbtb_pids' );
-		$comments_closed = 0;
-		$pings_closed    = 0;
-		$comments_opened = 0;
-		$pings_opened    = 0;
-		$operations      = 0;
-		$errors          = array();
-		$progress        = false;
-		$migrated        = $this->migrate_legacy_statuses();
+		$comment_age       = Options_API::get_option( 'comment_age' );
+		$comment_pids      = Options_API::get_option( 'comment_pids' );
+		$pbtb_age          = Options_API::get_option( 'pbtb_age' );
+		$pbtb_pids         = Options_API::get_option( 'pbtb_pids' );
+		$comments_closed   = 0;
+		$pings_closed      = 0;
+		$comments_opened   = 0;
+		$pings_opened      = 0;
+		$comments_migrated = 0;
+		$pings_migrated    = 0;
+		$operations        = 0;
+		$errors            = array();
+		$progress          = false;
+		$migrated          = $this->migrate_legacy_statuses();
 
 		if ( ! empty( $migrated['errors'] ) ) {
 			$errors = array_merge( $errors, $migrated['errors'] );
 		}
 		if ( $migrated['updated'] > 0 ) {
 			++$operations;
-			$comments_closed += (int) $migrated['comments'];
-			$pings_closed    += (int) $migrated['pings'];
-			$progress         = true;
+			$comments_migrated = (int) $migrated['comments'];
+			$pings_migrated    = (int) $migrated['pings'];
+			$progress          = true;
 		}
 
 		// Get the post types.
@@ -162,13 +171,15 @@ class Comments {
 		$status = empty( $errors ) ? ( $operations > 0 ? 'success' : 'skipped' ) : ( $progress ? 'partial' : 'failed' );
 
 		return array(
-			'status'          => $status,
-			'operations'      => $operations,
-			'comments_closed' => $comments_closed,
-			'pings_closed'    => $pings_closed,
-			'comments_opened' => $comments_opened,
-			'pings_opened'    => $pings_opened,
-			'errors'          => $errors,
+			'status'            => $status,
+			'operations'        => $operations,
+			'comments_closed'   => $comments_closed,
+			'pings_closed'      => $pings_closed,
+			'comments_opened'   => $comments_opened,
+			'pings_opened'      => $pings_opened,
+			'comments_migrated' => $comments_migrated,
+			'pings_migrated'    => $pings_migrated,
+			'errors'            => $errors,
 		);
 	}
 
@@ -181,6 +192,16 @@ class Comments {
 	 */
 	public function migrate_legacy_statuses(): array {
 		global $wpdb;
+
+		if ( get_option( self::STATUS_MIGRATION_OPTION, false ) ) {
+			return array(
+				'status'   => 'success',
+				'updated'  => 0,
+				'comments' => 0,
+				'pings'    => 0,
+				'errors'   => array(),
+			);
+		}
 
 		$updated  = 0;
 		$comments = 0;
@@ -200,7 +221,7 @@ class Comments {
 					)
 				);
 
-				if ( null === $ids ) {
+				if ( ! empty( $wpdb->last_error ) ) {
 					$errors[] = $this->get_database_error( __( 'Legacy discussion status migration failed.', 'autoclose' ) );
 					break 2;
 				}
@@ -231,6 +252,10 @@ class Comments {
 				$this->clean_discussion_caches( $ids );
 				$last_id = (int) end( $ids );
 			} while ( self::STATUS_MIGRATION_BATCH_SIZE === $batch_count );
+		}
+
+		if ( empty( $errors ) ) {
+			update_option( self::STATUS_MIGRATION_OPTION, true, false );
 		}
 
 		$status = empty( $errors ) ? 'success' : ( $updated > 0 ? 'partial' : 'failed' );
@@ -309,7 +334,7 @@ class Comments {
 				)
 			);
 
-			if ( null === $post_ids ) {
+			if ( ! empty( $wpdb->last_error ) ) {
 				return $this->failed_discussion_result( $affected, $this->get_database_error( __( 'The discussion selection failed.', 'autoclose' ) ) );
 			}
 

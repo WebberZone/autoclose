@@ -79,6 +79,10 @@ class Reopen {
 	 * @param \WP_Post $post_before Post object before the update.
 	 */
 	public function capture_before_update( $post_id, $post_after, $post_before ): void { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		if ( self::$suppressed > 0 ) {
+			return;
+		}
+
 		$this->before_update[ (int) $post_id ] = array(
 			'comment_status'     => $post_before->comment_status,
 			'reopen_meta_exists' => metadata_exists( 'post', $post_id, '_acc_reopen_until' ),

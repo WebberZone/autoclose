@@ -6,6 +6,7 @@
  */
 
 use WebberZone\AutoClose\Features\Close_Date;
+use WebberZone\AutoClose\Core\Activator;
 use WebberZone\AutoClose\Options_API;
 
 /**
@@ -17,7 +18,9 @@ class LifecycleTest extends WP_UnitTestCase {
 	 * Clear plugin events and settings after each test.
 	 */
 	public function tear_down() {
+		wp_clear_scheduled_hook( 'acc_cron_hook' );
 		wp_clear_scheduled_hook( 'autoclose_close_comments_pings_event' );
+		wp_clear_scheduled_hook( Close_Date::RESTORE_HOOK );
 		delete_option( Options_API::SETTINGS_OPTION );
 		Options_API::flush_cache();
 
@@ -74,5 +77,42 @@ class LifecycleTest extends WP_UnitTestCase {
 		$this->assertSame( 'closed', get_post_field( 'comment_status', $post_id ) );
 		$this->assertFalse( metadata_exists( 'post', $post_id, '_acc_reopen_until' ) );
 		$this->assertFalse( wp_get_scheduled_event( 'autoclose_close_comments_pings_event', array( $post_id, 'comments' ) ) );
+	}
+
+	/**
+	 * A database failure during close-date restoration is reported.
+	 */
+	public function test_restore_scheduled_events_reports_selection_failure() {
+		global $wpdb;
+
+		$posts_table = $wpdb->posts;
+		$suppressed  = $wpdb->suppress_errors( true );
+		$wpdb->posts = $wpdb->prefix . 'missing_autoclose_posts';
+
+		try {
+			$result = ( new Close_Date() )->restore_scheduled_events();
+		} finally {
+			$wpdb->posts = $posts_table;
+			$wpdb->suppress_errors( $suppressed );
+		}
+
+		$this->assertSame( 'failed', $result['status'] );
+		$this->assertNotEmpty( $result['errors'] );
+	}
+
+	/**
+	 * Activation defers close-date reconciliation to a scheduled request.
+	 */
+	public function test_activation_defers_close_date_restoration() {
+		$post_id = self::factory()->post->create( array( 'comment_status' => 'open' ) );
+		update_post_meta( $post_id, '_acc_comments_date', wp_date( 'Y-m-d\\TH:i', time() - DAY_IN_SECONDS ) );
+
+		Activator::activate( false );
+
+		$event = wp_get_scheduled_event( Close_Date::RESTORE_HOOK );
+
+		$this->assertNotFalse( $event );
+		$this->assertGreaterThan( time(), (int) $event->timestamp );
+		$this->assertSame( 'open', get_post_field( 'comment_status', $post_id ) );
 	}
 }

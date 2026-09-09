@@ -130,7 +130,14 @@ class Tools {
 				$message .= '<br />' . implode( ' ', $cutoffs );
 			}
 
-			if ( in_array( $outcome, array( 'success', 'skipped' ), true ) ) {
+			if ( 'skipped' === $outcome ) {
+				add_settings_error(
+					'acc-notices',
+					'',
+					$message . '<br />' . esc_html__( 'Nothing to process. Enable a maintenance feature in AutoClose settings.', 'autoclose' ),
+					'warning'
+				);
+			} elseif ( 'success' === $outcome ) {
 				add_settings_error( 'acc-notices', '', $message, 'updated' );
 			} else {
 				$errors = implode( ' ', array_values( (array) ( $summary['errors'] ?? array() ) ) );

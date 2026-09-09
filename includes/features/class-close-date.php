@@ -23,6 +23,13 @@ if ( ! defined( 'WPINC' ) ) {
 class Close_Date {
 
 	/**
+	 * Hook used to reconcile persisted close dates after activation.
+	 *
+	 * @since 3.2.0
+	 */
+	public const RESTORE_HOOK = 'autoclose_restore_close_dates_event';
+
+	/**
 	 * Number of posts inspected per activation batch.
 	 *
 	 * @var int
@@ -103,7 +110,7 @@ class Close_Date {
 				)
 			);
 
-			if ( null === $post_ids ) {
+			if ( ! empty( $wpdb->last_error ) ) {
 				$result['errors'][] = ! empty( $wpdb->last_error ) ? $wpdb->last_error : __( 'The close-date restoration query failed.', 'autoclose' );
 				break;
 			}
@@ -177,23 +184,24 @@ class Close_Date {
 	 * @return array Result data.
 	 */
 	private function schedule_or_close_type( $post_id, string $type ): array {
-		$date      = get_post_meta( $post_id, "_{$this->prefix}_{$type}_date", true );
-		$timestamp = $this->get_date_timestamp( $date );
-		$result    = array(
+		$date       = get_post_meta( $post_id, "_{$this->prefix}_{$type}_date", true );
+		$timestamp  = $this->get_date_timestamp( $date );
+		$result     = array(
 			'scheduled' => 0,
 			'closed'    => 0,
 			'errors'    => array(),
 		);
+		$type_label = $this->get_type_label( $type );
 
 		$cleared = wp_clear_scheduled_hook( 'autoclose_close_comments_pings_event', array( $post_id, $type ) );
 		if ( false === $cleared ) {
-			$result['errors'][] = sprintf( __( 'The %s close event could not be cleared.', 'autoclose' ), $type );
+			$result['errors'][] = sprintf( __( 'The %s close event could not be cleared.', 'autoclose' ), $type_label );
 			return $result;
 		}
 
 		if ( false === $timestamp ) {
 			if ( ! empty( $date ) ) {
-				$result['errors'][] = sprintf( __( 'The %s close date is invalid.', 'autoclose' ), $type );
+				$result['errors'][] = sprintf( __( 'The %s close date is invalid.', 'autoclose' ), $type_label );
 			}
 			return $result;
 		}
@@ -201,7 +209,7 @@ class Close_Date {
 		if ( $timestamp <= time() ) {
 			$closed = 'comments' === $type ? $this->close_comments( $post_id ) : $this->close_pings( $post_id );
 			if ( ! $closed ) {
-				$result['errors'][] = sprintf( __( 'The %s status could not be closed.', 'autoclose' ), $type );
+				$result['errors'][] = sprintf( __( 'The %s status could not be closed.', 'autoclose' ), $type_label );
 			} else {
 				$result['closed'] = 1;
 			}
@@ -210,12 +218,24 @@ class Close_Date {
 
 		$scheduled = wp_schedule_single_event( $timestamp, 'autoclose_close_comments_pings_event', array( $post_id, $type ), true );
 		if ( is_wp_error( $scheduled ) ) {
-			$result['errors'][] = sprintf( __( 'The %s close event could not be scheduled.', 'autoclose' ), $type );
+			$result['errors'][] = sprintf( __( 'The %s close event could not be scheduled.', 'autoclose' ), $type_label );
 		} else {
 			$result['scheduled'] = 1;
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Get a translated label for a discussion type.
+	 *
+	 * @since 3.2.0
+	 *
+	 * @param string $type Discussion type.
+	 * @return string Translated discussion type label.
+	 */
+	private function get_type_label( string $type ): string {
+		return 'comments' === $type ? __( 'comments', 'autoclose' ) : __( 'pingbacks/trackbacks', 'autoclose' );
 	}
 
 	/**

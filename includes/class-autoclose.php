@@ -145,6 +145,7 @@ class AutoClose {
 
 		// Register close date hooks.
 		Hook_Registry::add_action( 'autoclose_close_comments_pings_event', array( $close_date, 'maybe_close_due_comments_pings' ), 10, 2 );
+		Hook_Registry::add_action( Features\Close_Date::RESTORE_HOOK, array( $close_date, 'restore_scheduled_events' ) );
 
 		// Register the shared maintenance runner for cron and CLI execution.
 		$runner = new Maintenance\Runner( $comments, $revisions );

@@ -52,6 +52,7 @@ function acc_delete_data() {
 	delete_option( 'acc_settings' );
 	delete_option( 'ald_acc_settings' );
 	delete_option( 'acc_maintenance_status' );
+	delete_option( 'acc_legacy_status_migration_complete' );
 	delete_option( 'acc_revision_policy_ack' );
 
 	// Wizard options.
@@ -63,6 +64,7 @@ function acc_delete_data() {
 	delete_transient( 'acc_show_wizard_activation_redirect' );
 
 	wp_clear_scheduled_hook( 'acc_cron_hook' );
+	wp_clear_scheduled_hook( 'autoclose_restore_close_dates_event' );
 	wp_clear_scheduled_hook( 'ald_acc_hook' );
 	wp_unschedule_hook( 'autoclose_close_comments_pings_event' );
 }
