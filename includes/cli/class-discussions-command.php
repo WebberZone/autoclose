@@ -79,7 +79,7 @@ class Discussions_Command extends Base_Command {
 	 * : Report matching posts without changing content.
 	 *
 	 * [--sample=<number>]
-	 * : Maximum sample rows in dry-run output. Default: 10. Maximum: 100.
+	 * : Maximum sample rows in dry-run output. Default: 10. Maximum: 100. Requires --dry-run; errors otherwise.
 	 *
 	 * [--format=<format>]
 	 * : Output format. Options: table, json, csv. Default: table.
@@ -123,7 +123,7 @@ class Discussions_Command extends Base_Command {
 	 * : Report matching posts without changing content.
 	 *
 	 * [--sample=<number>]
-	 * : Maximum sample rows in dry-run output. Default: 10. Maximum: 100.
+	 * : Maximum sample rows in dry-run output. Default: 10. Maximum: 100. Requires --dry-run; errors otherwise.
 	 *
 	 * [--format=<format>]
 	 * : Output format. Options: table, json, csv. Default: table.
@@ -152,8 +152,13 @@ class Discussions_Command extends Base_Command {
 	 * @param array  $assoc_args Associative arguments.
 	 */
 	private function execute( string $action, array $args, array $assoc_args ): void {
-		$format             = $this->get_format( $assoc_args );
-		$dry_run            = isset( $assoc_args['dry-run'] );
+		$format  = $this->get_format( $assoc_args );
+		$dry_run = isset( $assoc_args['dry-run'] );
+
+		if ( ! $dry_run && isset( $assoc_args['sample'] ) ) {
+			\WP_CLI::error( __( 'The sample option is only available with --dry-run.', 'autoclose' ), CLI::EXIT_INVALID );
+		}
+
 		$sample_limit       = $this->get_non_negative_int( $assoc_args, 'sample', 10 );
 		$age                = $this->get_non_negative_int( $assoc_args, 'age' );
 		$sample_limit       = $this->validate_sample_limit( $sample_limit );

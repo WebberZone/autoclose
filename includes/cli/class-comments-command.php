@@ -55,7 +55,7 @@ class Comments_Command extends Discussions_Command {
 	 * : Report matching posts without changing content.
 	 *
 	 * [--sample=<number>]
-	 * : Maximum sample rows in dry-run output. Default: 10. Maximum: 100.
+	 * : Maximum sample rows in dry-run output. Default: 10. Maximum: 100. Requires --dry-run; errors otherwise.
 	 *
 	 * [--format=<format>]
 	 * : Output format. Options: table, json, csv. Default: table.
@@ -99,7 +99,7 @@ class Comments_Command extends Discussions_Command {
 	 * : Report matching posts without changing content.
 	 *
 	 * [--sample=<number>]
-	 * : Maximum sample rows in dry-run output. Default: 10. Maximum: 100.
+	 * : Maximum sample rows in dry-run output. Default: 10. Maximum: 100. Requires --dry-run; errors otherwise.
 	 *
 	 * [--format=<format>]
 	 * : Output format. Options: table, json, csv. Default: table.
