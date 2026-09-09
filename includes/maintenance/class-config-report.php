@@ -105,7 +105,6 @@ class Config_Report {
 			),
 			'notifications' => array(
 				'enabled' => (bool) Options_API::get_option( 'email_notify' ),
-				'address' => (string) Options_API::get_option( 'email_notify_address' ),
 			),
 		);
 	}

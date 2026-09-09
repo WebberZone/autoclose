@@ -32,6 +32,7 @@ class ConfigReportTest extends WP_UnitTestCase {
 			array(
 				'comment_pids'             => '1,2,3',
 				'comment_exclude_term_ids' => '4,5',
+				'email_notify_address'     => 'private@example.com',
 			)
 		);
 		Options_API::flush_cache();
@@ -41,6 +42,8 @@ class ConfigReportTest extends WP_UnitTestCase {
 		$this->assertSame( 3, $report['comments']['keep_open_post_id_count'] );
 		$this->assertSame( 2, $report['comments']['exclude_term_id_count'] );
 		$this->assertArrayNotHasKey( 'keep_open_post_ids', $report['comments'] );
+		$this->assertArrayNotHasKey( 'address', $report['notifications'] );
+		$this->assertStringNotContainsString( 'private@example.com', wp_json_encode( $report ) );
 	}
 
 	/**
