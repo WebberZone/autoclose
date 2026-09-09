@@ -402,6 +402,16 @@ class Settings {
 				'size'        => 'regular',
 				'placeholder' => get_option( 'admin_email' ),
 			),
+			'deactivation_notice'  => array(
+				'id'   => 'deactivation_notice',
+				'name' => '<strong>' . esc_html__( 'If you deactivate this plugin', 'autoclose' ) . '</strong>',
+				/* translators: 1: Line break. */
+				'desc' => sprintf(
+					esc_html__( 'Comments, pingbacks, and trackbacks already closed by AutoClose stay closed. %1$sScheduled and per-post closing stop running, so nothing more will be closed automatically. %1$sA temporary reopen window that is still active when you deactivate may no longer close automatically once it ends. %1$sPost revision limits set here stop applying; WordPress\' own default or another plugin\'s limit takes over. %1$sRevisions already deleted are not restored.', 'autoclose' ),
+					'<br />'
+				),
+				'type' => 'descriptive_text',
+			),
 		);
 
 		/**

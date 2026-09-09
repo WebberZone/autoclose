@@ -9,6 +9,7 @@ namespace WebberZone\AutoClose\Admin;
 
 use WebberZone\AutoClose\Features\Comments;
 use WebberZone\AutoClose\Features\Revisions;
+use WebberZone\AutoClose\Maintenance\Config_Report;
 use WebberZone\AutoClose\Maintenance\Runner;
 use WebberZone\AutoClose\Maintenance\Status;
 use WebberZone\AutoClose\Options_API;
@@ -91,9 +92,15 @@ class Tools {
 	 * @since 3.0.0
 	 */
 	public function render_tools_page() {
-		$comments  = new Comments();
-		$revisions = new Revisions();
-		$preview   = null;
+		$comments      = new Comments();
+		$revisions     = new Revisions();
+		$preview       = null;
+		$config_report = null;
+
+		/* Generate configuration report */
+		if ( isset( $_POST['acc_config_report'] ) && check_admin_referer( 'acc-tools-settings' ) ) {
+			$config_report = Config_Report::build();
+		}
 
 		/* Repair scheduled maintenance event */
 		if ( isset( $_POST['acc_repair_schedule'] ) && check_admin_referer( 'acc-tools-settings' ) ) {
@@ -239,12 +246,116 @@ class Tools {
 			}
 		}
 
-		$preview_mode = null !== $preview ? (string) ( $preview['mode'] ?? '' ) : '';
-		$preview_html = null !== $preview ? $this->render_preview( $preview ) : '';
-		$status_html  = $this->render_status( Status::get() );
+		$preview_mode       = null !== $preview ? (string) ( $preview['mode'] ?? '' ) : '';
+		$preview_html       = null !== $preview ? $this->render_preview( $preview ) : '';
+		$status_html        = $this->render_status( Status::get() );
+		$config_report_html = null !== $config_report ? $this->render_config_report( $config_report ) : '';
 
 		// Include the view file.
 		include_once ACC_PLUGIN_DIR . 'includes/admin/views/tools-page.php';
+	}
+
+	/**
+	 * Render the on-demand configuration report.
+	 *
+	 * Covers effective settings, ID/term exception counts, explicit closing
+	 * date and reopen-window counts, and revision policies. Never includes
+	 * post content, comment text, credentials, or individual post IDs.
+	 *
+	 * @since 3.2.0
+	 *
+	 * @param array $report Report data from Config_Report::build().
+	 * @return string Rendered HTML.
+	 */
+	public function render_config_report( array $report ): string {
+		ob_start();
+
+		echo '<table class="widefat striped" style="max-width:640px;"><tbody>';
+
+		$this->render_status_row( __( 'Generated at (UTC)', 'autoclose' ), (string) ( $report['generated_at'] ?? '' ) );
+		$this->render_status_row( __( 'Site', 'autoclose' ), (string) ( $report['site']['url'] ?? '' ) );
+		$this->render_status_row( __( 'Multisite', 'autoclose' ), ! empty( $report['site']['multisite'] ) ? __( 'Yes', 'autoclose' ) : __( 'No', 'autoclose' ) );
+
+		$schedule = (array) ( $report['schedule'] ?? array() );
+		$this->render_status_row(
+			__( 'Scheduled maintenance', 'autoclose' ),
+			! empty( $schedule['enabled'] )
+				? sprintf(
+					/* translators: 1: Recurrence. */
+					__( 'Enabled (%s)', 'autoclose' ),
+					(string) ( $schedule['recurrence'] ?? '' )
+				)
+				: __( 'Disabled', 'autoclose' )
+		);
+
+		$comments = (array) ( $report['comments'] ?? array() );
+		$this->render_status_row(
+			__( 'Close comments', 'autoclose' ),
+			! empty( $comments['enabled'] )
+				? sprintf(
+					/* translators: 1: Comma-separated post types, 2: Age in days, 3: Count threshold. */
+					__( 'Enabled — %1$s, age %2$d day(s), count threshold %3$d', 'autoclose' ),
+					implode( ', ', (array) ( $comments['post_types'] ?? array() ) ),
+					(int) ( $comments['age_days'] ?? 0 ),
+					(int) ( $comments['count_threshold'] ?? 0 )
+				)
+				: __( 'Disabled', 'autoclose' )
+		);
+		$this->render_status_row( __( 'Comments kept open (ID exceptions)', 'autoclose' ), (string) (int) ( $comments['keep_open_post_id_count'] ?? 0 ) );
+		$this->render_status_row( __( 'Comments excluded terms', 'autoclose' ), (string) (int) ( $comments['exclude_term_id_count'] ?? 0 ) );
+		$this->render_status_row(
+			__( 'Reopen on post update', 'autoclose' ),
+			! empty( $comments['reopen_on_update'] ) ? sprintf(
+				/* translators: 1: Days. */
+				__( 'Enabled, %d day(s)', 'autoclose' ),
+				(int) ( $comments['reopen_days'] ?? 0 )
+			) : __( 'Disabled', 'autoclose' )
+		);
+
+		$pings = (array) ( $report['pings'] ?? array() );
+		$this->render_status_row(
+			__( 'Close pingbacks/trackbacks', 'autoclose' ),
+			! empty( $pings['enabled'] )
+				? sprintf(
+					/* translators: 1: Comma-separated post types, 2: Age in days. */
+					__( 'Enabled — %1$s, age %2$d day(s)', 'autoclose' ),
+					implode( ', ', (array) ( $pings['post_types'] ?? array() ) ),
+					(int) ( $pings['age_days'] ?? 0 )
+				)
+				: __( 'Disabled', 'autoclose' )
+		);
+		$this->render_status_row( __( 'Pings kept open (ID exceptions)', 'autoclose' ), (string) (int) ( $pings['keep_open_post_id_count'] ?? 0 ) );
+		$this->render_status_row( __( 'Block self-pings', 'autoclose' ), ! empty( $pings['block_self_pings'] ) ? __( 'Yes', 'autoclose' ) : __( 'No', 'autoclose' ) );
+
+		$revisions = (array) ( $report['revisions'] ?? array() );
+		$this->render_status_row(
+			__( 'Scheduled revision cleanup', 'autoclose' ),
+			! empty( $revisions['delete_all'] )
+				? sprintf(
+					/* translators: 1: Age in days. */
+					__( 'Enabled, age %d day(s)', 'autoclose' ),
+					(int) ( $revisions['age_days'] ?? 0 )
+				)
+				: __( 'Disabled', 'autoclose' )
+		);
+
+		$retention_summary = array();
+		foreach ( (array) ( $revisions['retention'] ?? array() ) as $post_type => $data ) {
+			$retention_summary[] = $post_type . ': ' . (int) ( $data['keep'] ?? 0 );
+		}
+		$this->render_status_row( __( 'Revisions kept per post type', 'autoclose' ), implode( ', ', $retention_summary ) );
+
+		$this->render_status_row( __( 'Posts with an explicit close date', 'autoclose' ), (string) (int) ( $report['close_dates']['posts_with_explicit_close_dates'] ?? 0 ) );
+		$this->render_status_row( __( 'Posts with an active reopen window', 'autoclose' ), (string) (int) ( $report['reopen']['posts_with_active_reopen_window'] ?? 0 ) );
+
+		$notifications = (array) ( $report['notifications'] ?? array() );
+		$this->render_status_row( __( 'Cron summary email', 'autoclose' ), ! empty( $notifications['enabled'] ) ? __( 'Enabled', 'autoclose' ) : __( 'Disabled', 'autoclose' ) );
+
+		echo '</tbody></table>';
+
+		echo '<p class="description">' . esc_html__( 'This report contains no post content, comment text, or credentials. It is shown here only and is not saved to a file.', 'autoclose' ) . '</p>';
+
+		return (string) ob_get_clean();
 	}
 
 	/**

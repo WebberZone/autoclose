@@ -89,6 +89,8 @@ Release date: 8 September 2026
 * Added an optional approved-comment count threshold: comments close once a post reaches the configured count, in addition to the age rule.
 * Added a read-only Preview changes option on the Tools page for the closing algorithm, pingback/trackback deletion, and revision deletion, showing matching counts, scope, and a sample of affected posts before you run them.
 * Added an AutoClose Status panel to the Tools page showing scheduling health, the next run, and the latest run's outcome, with a Repair schedule action.
+* Added an on-demand Configuration Report on the Tools page covering effective settings, exception counts, close-date and reopen-window counts, and revision policies, without post content, comment text, or credentials.
+* Added guidance on the Settings General tab explaining what stays and what stops if the plugin is deactivated.
 
 **Changed**
 

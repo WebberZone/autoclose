@@ -29,3 +29,8 @@ parameters:
 			message: "#^Variable \\$status_html might not be defined\\.$#"
 			count: 1
 			path: includes/admin/views/tools-page.php
+
+		-
+			message: "#^Variable \\$config_report_html might not be defined\\.$#"
+			count: 1
+			path: includes/admin/views/tools-page.php

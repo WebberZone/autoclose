@@ -45,6 +45,23 @@ if ( ! defined( 'WPINC' ) ) {
 
 			<div class="postbox">
 				<div class="postbox-header">
+					<h2 class="hndle ui-sortable-handle"><?php esc_html_e( 'Configuration Report', 'autoclose' ); ?></h2>
+				</div>
+				<div class="inside">
+					<p>
+						<input type="submit" name="acc_config_report" id="acc_config_report" value="<?php esc_attr_e( 'Generate configuration report', 'autoclose' ); ?>" class="button button-secondary" />
+					</p>
+					<p class="description">
+						<?php esc_html_e( 'Shows effective settings, exception counts, close-date and reopen-window counts, and revision policies for this site. Contains no post content, comment text, or credentials, and is not stored anywhere.', 'autoclose' ); ?>
+					</p>
+					<?php if ( '' !== $config_report_html ) : ?>
+						<?php echo $config_report_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Pre-escaped in Tools::render_config_report(). ?>
+					<?php endif; ?>
+				</div>
+			</div>
+
+			<div class="postbox">
+				<div class="postbox-header">
 					<h2 class="hndle ui-sortable-handle"><?php esc_html_e( 'Close Comments, Pingbacks and Trackbacks', 'autoclose' ); ?></h2>
 				</div>
 				<div class="inside">
