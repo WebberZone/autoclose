@@ -203,10 +203,13 @@ class RunnerRevisionsTestDouble extends Revisions {
 	/**
 	 * Return an empty preview result.
 	 *
-	 * @param int $sample_limit Sample limit.
+	 * @param int          $sample_limit    Sample limit.
+	 * @param array|string $post_ids        Parent post IDs.
+	 * @param bool         $respect_setting Whether to respect the deletion setting.
+	 * @param string       $mode            Preview mode.
 	 * @return array Preview result.
 	 */
-	public function get_preview( int $sample_limit = 10 ): array {
+	public function get_preview( int $sample_limit = 10, $post_ids = array(), bool $respect_setting = true, string $mode = 'prune' ): array {
 		return array( 'status' => 'skipped', 'errors' => array() );
 	}
 }
