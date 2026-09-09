@@ -154,28 +154,17 @@ class Close_Date_Command extends Base_Command {
 		$post_id = $post_ids[0];
 		$this->require_post( $post_id );
 		$dry_run = isset( $assoc_args['dry-run'] );
+		$errors  = array();
 
 		if ( ! $dry_run ) {
 			foreach ( $values as $type => $date ) {
 				update_post_meta( $post_id, "_acc_{$type}_date", $date );
 			}
-			$this->close_date->maybe_schedule_or_close( $post_id );
+			$result = $this->close_date->maybe_schedule_or_close( $post_id );
+			$errors = $result['errors'];
 		}
 
-		$item   = $this->get_item( $post_id );
-		$errors = array();
-		if ( ! $dry_run ) {
-			foreach ( $values as $type => $date ) {
-				if ( $this->is_due( $date ) ) {
-					$status = 'comments' === $type ? $item['comment_status'] : $item['ping_status'];
-					if ( 'closed' !== $status ) {
-						$errors[] = sprintf( __( 'The %s close date was due, but the status is still %s.', 'autoclose' ), $type, $status );
-					}
-				} elseif ( false === wp_next_scheduled( 'autoclose_close_comments_pings_event', array( $post_id, $type ) ) ) {
-					$errors[] = sprintf( __( 'The %s close event could not be scheduled.', 'autoclose' ), $type );
-				}
-			}
-		}
+		$item = $this->get_item( $post_id );
 
 		$data = array(
 			'mode'     => $dry_run ? 'dry-run' : 'run',
@@ -246,27 +235,31 @@ class Close_Date_Command extends Base_Command {
 
 		$dry_run = isset( $assoc_args['dry-run'] );
 		$items   = array();
+		$errors  = array();
 		foreach ( $post_ids as $post_id ) {
 			$this->require_post( $post_id );
 			if ( ! $dry_run ) {
 				foreach ( $types as $type ) {
 					delete_post_meta( $post_id, "_acc_{$type}_date" );
 				}
-				$this->close_date->maybe_schedule_or_close( $post_id );
+				$result = $this->close_date->maybe_schedule_or_close( $post_id );
+				$errors = array_merge( $errors, $result['errors'] );
 			}
 			$items[] = $this->get_item( $post_id );
 		}
 
 		$data = array(
 			'mode'     => $dry_run ? 'dry-run' : 'run',
-			'outcome'  => 'success',
+			'outcome'  => empty( $errors ) ? 'success' : 'failed',
 			'blog_id'  => (int) get_current_blog_id(),
 			'site_url' => home_url( '/' ),
 			'clear'    => $types,
 			'items'    => $items,
+			'errors'   => $errors,
 		);
 
 		$this->output( $data, $format, $this->get_action_rows( $data ) );
+		$this->exit_for_outcome( $data['outcome'] );
 	}
 
 	/**
@@ -356,20 +349,6 @@ class Close_Date_Command extends Base_Command {
 		}
 
 		return $parsed->format( 'Y-m-d\\TH:i' );
-	}
-
-	/**
-	 * Determine whether a validated date is due.
-	 *
-	 * @since 3.2.0
-	 *
-	 * @param string $date Site-local date.
-	 * @return bool Whether the date is due.
-	 */
-	private function is_due( string $date ): bool {
-		$parsed = \DateTimeImmutable::createFromFormat( '!Y-m-d\\TH:i', $date, wp_timezone() );
-
-		return false !== $parsed && $parsed->getTimestamp() <= time();
 	}
 
 	/**
