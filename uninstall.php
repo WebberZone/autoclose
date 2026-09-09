@@ -53,6 +53,7 @@ function acc_delete_data() {
 	delete_option( 'ald_acc_settings' );
 	delete_option( 'acc_maintenance_status' );
 	delete_option( 'acc_legacy_status_migration_complete' );
+	delete_option( 'acc_close_date_restore_cursor' );
 	delete_option( 'acc_revision_policy_ack' );
 
 	// Wizard options.

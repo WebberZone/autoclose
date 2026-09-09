@@ -37,6 +37,20 @@ class Close_Date {
 	private const RESTORE_BATCH_SIZE = 100;
 
 	/**
+	 * Maximum number of posts reconciled during one cron request.
+	 *
+	 * @since 3.2.0
+	 */
+	private const RESTORE_MAX_POSTS = 500;
+
+	/**
+	 * Option storing the last post ID reconciled by the deferred restore.
+	 *
+	 * @since 3.2.0
+	 */
+	private const RESTORE_CURSOR_OPTION = 'acc_close_date_restore_cursor';
+
+	/**
 	 * Prefix for meta keys and filters.
 	 *
 	 * @var string
@@ -88,12 +102,14 @@ class Close_Date {
 	public function restore_scheduled_events(): array {
 		global $wpdb;
 
-		$last_id = 0;
-		$result  = array(
+		$last_id   = (int) get_option( self::RESTORE_CURSOR_OPTION, 0 );
+		$processed = 0;
+		$result    = array(
 			'status'    => 'success',
 			'posts'     => 0,
 			'scheduled' => 0,
 			'closed'    => 0,
+			'pending'   => false,
 			'errors'    => array(),
 		);
 
@@ -129,14 +145,48 @@ class Close_Date {
 				$result['errors']     = array_merge( $result['errors'], $post_result['errors'] );
 			}
 
-			$last_id = (int) end( $post_ids );
+			$last_id    = (int) end( $post_ids );
+			$processed += $batch_count;
+			update_option( self::RESTORE_CURSOR_OPTION, $last_id, false );
+
+			if ( self::RESTORE_MAX_POSTS <= $processed && self::RESTORE_BATCH_SIZE === $batch_count ) {
+				$result['pending'] = true;
+				break;
+			}
 		} while ( self::RESTORE_BATCH_SIZE === $batch_count );
+
+		if ( $result['pending'] && $this->schedule_restore_continuation() ) {
+			$result['pending'] = true;
+		} elseif ( $result['pending'] ) {
+			$result['errors'][] = __( 'The close-date restoration continuation could not be scheduled.', 'autoclose' );
+		}
+
+		if ( ! $result['pending'] && empty( $result['errors'] ) ) {
+			delete_option( self::RESTORE_CURSOR_OPTION );
+		}
 
 		if ( ! empty( $result['errors'] ) ) {
 			$result['status'] = 'failed';
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Schedule another bounded restore request when close-date rows remain.
+	 *
+	 * @since 3.2.0
+	 *
+	 * @return bool Whether the continuation is registered.
+	 */
+	private function schedule_restore_continuation(): bool {
+		if ( false !== wp_next_scheduled( self::RESTORE_HOOK ) ) {
+			return true;
+		}
+
+		$scheduled = wp_schedule_single_event( time() + MINUTE_IN_SECONDS, self::RESTORE_HOOK, array(), true );
+
+		return ! is_wp_error( $scheduled );
 	}
 
 	/**
