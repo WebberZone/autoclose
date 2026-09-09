@@ -7,6 +7,7 @@
 
 namespace WebberZone\AutoClose\CLI;
 
+use WebberZone\AutoClose\Features\Comments;
 use WebberZone\AutoClose\Features\Revisions;
 use WebberZone\AutoClose\Options_API;
 use WebberZone\AutoClose\Maintenance\Status;
@@ -65,6 +66,20 @@ class Settings_Command extends Base_Command {
 			);
 		}
 
+		$comments           = new Comments();
+		$comment_post_types = Helpers::parse_post_types( Options_API::get_option( 'comment_post_types' ) );
+		$pbtb_post_types    = Helpers::parse_post_types( Options_API::get_option( 'pbtb_post_types' ) );
+		$comment_age_types  = array();
+		$pbtb_age_types     = array();
+
+		foreach ( $comment_post_types as $post_type ) {
+			$comment_age_types[ $post_type ] = $comments->get_effective_age( 'comment', $post_type );
+		}
+
+		foreach ( $pbtb_post_types as $post_type ) {
+			$pbtb_age_types[ $post_type ] = $comments->get_effective_age( 'ping', $post_type );
+		}
+
 		return array(
 			'site'          => $status['site'],
 			'schedule'      => array(
@@ -76,8 +91,9 @@ class Settings_Command extends Base_Command {
 			),
 			'comments'      => array(
 				'enabled'            => (bool) Options_API::get_option( 'close_comment' ),
-				'post_types'         => Helpers::parse_post_types( Options_API::get_option( 'comment_post_types' ) ),
+				'post_types'         => $comment_post_types,
 				'age_days'           => (int) Options_API::get_option( 'comment_age' ),
+				'age_days_by_type'   => $comment_age_types,
 				'keep_open_post_ids' => wp_parse_id_list( Options_API::get_option( 'comment_pids' ) ),
 				'exclude_term_ids'   => wp_parse_id_list( Options_API::get_option( 'comment_exclude_term_ids' ) ),
 				'reopen_on_update'   => (bool) Options_API::get_option( 'reopen_on_update' ),
@@ -85,8 +101,9 @@ class Settings_Command extends Base_Command {
 			),
 			'pings'         => array(
 				'enabled'            => (bool) Options_API::get_option( 'close_pbtb' ),
-				'post_types'         => Helpers::parse_post_types( Options_API::get_option( 'pbtb_post_types' ) ),
+				'post_types'         => $pbtb_post_types,
 				'age_days'           => (int) Options_API::get_option( 'pbtb_age' ),
+				'age_days_by_type'   => $pbtb_age_types,
 				'keep_open_post_ids' => wp_parse_id_list( Options_API::get_option( 'pbtb_pids' ) ),
 				'exclude_term_ids'   => wp_parse_id_list( Options_API::get_option( 'pbtb_exclude_term_ids' ) ),
 				'block_self_pings'   => (bool) Options_API::get_option( 'block_self_pings' ),

@@ -48,14 +48,76 @@ class Comments {
 	}
 
 	/**
+	 * Resolve the effective closing age for a post type.
+	 *
+	 * -2 (default) inherits the global comment_age/pbtb_age setting; -1 disables
+	 * closing for this post type; 0 or higher is an explicit age in days.
+	 *
+	 * @since 3.2.0
+	 *
+	 * @param string $type      Discussion type: comment or ping.
+	 * @param string $post_type Post type.
+	 * @return int|null Age in days, or null when closing is disabled for this post type.
+	 */
+	public function get_effective_age( string $type, string $post_type ): ?int {
+		$prefix   = 'ping' === $type ? 'pbtb' : 'comment';
+		$override = Options_API::get_option( "{$prefix}_age_{$post_type}" );
+		$override = ( null === $override || '' === $override ) ? -2 : (int) $override;
+
+		if ( -2 === $override ) {
+			return max( 0, (int) Options_API::get_option( "{$prefix}_age" ) );
+		}
+
+		return -1 === $override ? null : max( 0, $override );
+	}
+
+	/**
+	 * Resolve the effective closing age for each of the given post types.
+	 *
+	 * @since 3.2.0
+	 *
+	 * @param string $type       Discussion type: comment or ping.
+	 * @param array  $post_types Post types.
+	 * @return array<string, int|null> Post type to effective age, null meaning disabled.
+	 */
+	public function get_type_ages( string $type, array $post_types ): array {
+		$ages = array();
+
+		foreach ( $post_types as $post_type ) {
+			$ages[ $post_type ] = $this->get_effective_age( $type, $post_type );
+		}
+
+		return $ages;
+	}
+
+	/**
+	 * Retrieve public post types eligible for per-post-type age overrides.
+	 *
+	 * Matches the universe offered by the comment_post_types/pbtb_post_types selectors.
+	 *
+	 * @since 3.2.0
+	 *
+	 * @return array Array of post types in the format name => label.
+	 */
+	public function get_supported_post_types(): array {
+		$supported  = array();
+		$post_types = get_post_types( array( 'public' => true ), 'objects' );
+
+		foreach ( $post_types as $post_type ) {
+			$label                         = property_exists( $post_type->labels, 'name' ) ? $post_type->labels->name : $post_type->name;
+			$supported[ $post_type->name ] = $label;
+		}
+
+		return $supported;
+	}
+
+	/**
 	 * Process comments based on settings.
 	 *
 	 * @since 3.0.0
 	 */
 	public function process_comments(): array {
-		$comment_age       = Options_API::get_option( 'comment_age' );
 		$comment_pids      = Options_API::get_option( 'comment_pids' );
-		$pbtb_age          = Options_API::get_option( 'pbtb_age' );
 		$pbtb_pids         = Options_API::get_option( 'pbtb_pids' );
 		$comments_closed   = 0;
 		$pings_closed      = 0;
@@ -93,7 +155,7 @@ class Comments {
 				'comment',
 				'close',
 				array(
-					'age'           => $comment_age,
+					'type_ages'     => $this->get_type_ages( 'comment', $comment_post_types ),
 					'post_types'    => $comment_post_types,
 					'exclude_terms' => $comment_exclude_terms,
 				)
@@ -112,7 +174,7 @@ class Comments {
 				'ping',
 				'close',
 				array(
-					'age'           => $pbtb_age,
+					'type_ages'     => $this->get_type_ages( 'ping', $pbtb_post_types ),
 					'post_types'    => $pbtb_post_types,
 					'exclude_terms' => $pbtb_exclude_terms,
 				)
@@ -447,13 +509,16 @@ class Comments {
 			);
 		}
 
+		$type_ages = is_array( $args['type_ages'] ?? null ) ? $args['type_ages'] : null;
+
 		return array(
 			'status'        => 'success',
 			'action'        => $action,
 			'type'          => $type,
 			'affected'      => (int) $count,
-			'age_days'      => max( 0, (int) ( $args['age'] ?? 0 ) ),
-			'cutoff_gmt'    => $this->get_cutoff( (int) ( $args['age'] ?? 0 ) ),
+			'age_days'      => null === $type_ages ? max( 0, (int) ( $args['age'] ?? 0 ) ) : null,
+			'cutoff_gmt'    => null === $type_ages ? $this->get_cutoff( (int) ( $args['age'] ?? 0 ) ) : null,
+			'type_ages'     => $type_ages,
 			'post_types'    => array_values( (array) ( $args['post_types'] ?? array() ) ),
 			'post_ids'      => wp_parse_id_list( $args['post_ids'] ?? '' ),
 			'exclude_terms' => wp_parse_id_list( $args['exclude_terms'] ?? '' ),
@@ -485,7 +550,7 @@ class Comments {
 				'comment',
 				'close',
 				array(
-					'age'           => Options_API::get_option( 'comment_age' ),
+					'type_ages'     => $this->get_type_ages( 'comment', $settings['comment_post_types'] ),
 					'post_types'    => $settings['comment_post_types'],
 					'exclude_terms' => $settings['comment_exclude_terms'],
 				),
@@ -498,7 +563,7 @@ class Comments {
 				'ping',
 				'close',
 				array(
-					'age'           => Options_API::get_option( 'pbtb_age' ),
+					'type_ages'     => $this->get_type_ages( 'ping', $settings['pbtb_post_types'] ),
 					'post_types'    => $settings['pbtb_post_types'],
 					'exclude_terms' => $settings['pbtb_exclude_terms'],
 				),
@@ -545,6 +610,7 @@ class Comments {
 	private function get_discussion_defaults(): array {
 		return array(
 			'age'           => 0,
+			'type_ages'     => null,
 			'post_types'    => array(),
 			'post_ids'      => '',
 			'exclude_terms' => '',
@@ -576,24 +642,30 @@ class Comments {
 			$old_statuses
 		);
 		$where        = array( "{$type}_status IN (" . implode( ', ', $statuses ) . ')' );
-		$age          = max( 0, (int) ( $args['age'] ?? 0 ) );
+		$type_ages    = is_array( $args['type_ages'] ?? null ) ? $args['type_ages'] : null;
 
-		if ( $age > 0 ) {
-			$where[] = $wpdb->prepare( 'post_date_gmt < %s', $this->get_cutoff( $age ) );
-		}
+		if ( null !== $type_ages ) {
+			$where[] = $this->get_age_grouped_where( $type_ages );
+		} else {
+			$age = max( 0, (int) ( $args['age'] ?? 0 ) );
 
-		if ( ! empty( $args['post_types'] ) ) {
-			$post_types = array_map( 'sanitize_key', wp_parse_list( $args['post_types'] ) );
-			$post_types = array_filter( $post_types );
+			if ( $age > 0 ) {
+				$where[] = $wpdb->prepare( 'post_date_gmt < %s', $this->get_cutoff( $age ) );
+			}
 
-			if ( ! empty( $post_types ) ) {
-				$quoted_post_types = array_map(
-					static function ( $post_type ) {
-						return "'" . esc_sql( $post_type ) . "'";
-					},
-					$post_types
-				);
-				$where[]           = 'post_type IN (' . implode( ', ', $quoted_post_types ) . ')';
+			if ( ! empty( $args['post_types'] ) ) {
+				$post_types = array_map( 'sanitize_key', wp_parse_list( $args['post_types'] ) );
+				$post_types = array_filter( $post_types );
+
+				if ( ! empty( $post_types ) ) {
+					$quoted_post_types = array_map(
+						static function ( $post_type ) {
+							return "'" . esc_sql( $post_type ) . "'";
+						},
+						$post_types
+					);
+					$where[]           = 'post_type IN (' . implode( ', ', $quoted_post_types ) . ')';
+				}
 			}
 		}
 
@@ -612,6 +684,59 @@ class Comments {
 		}
 
 		return 'WHERE ' . implode( ' AND ', $where );
+	}
+
+	/**
+	 * Build a post-type/age clause from per-post-type effective ages.
+	 *
+	 * Post types that resolve to a disabled (null) age are excluded entirely.
+	 * Post types sharing a cutoff are grouped into a single IN() branch.
+	 *
+	 * @since 3.2.0
+	 *
+	 * @param array<string, int|null> $type_ages Post type to effective age, null meaning disabled.
+	 * @return string SQL clause. `1=0` when every post type is disabled.
+	 */
+	private function get_age_grouped_where( array $type_ages ): string {
+		global $wpdb;
+
+		$groups = array();
+
+		foreach ( $type_ages as $post_type => $age ) {
+			if ( null === $age ) {
+				continue;
+			}
+
+			$cutoff                         = $this->get_cutoff( $age );
+			$key                            = null === $cutoff ? '_immediate' : $cutoff;
+			$groups[ $key ]['cutoff']       = $cutoff;
+			$groups[ $key ]['post_types'][] = sanitize_key( (string) $post_type );
+		}
+
+		if ( empty( $groups ) ) {
+			return '1=0';
+		}
+
+		$clauses = array();
+
+		foreach ( $groups as $group ) {
+			$quoted_post_types = array_map(
+				static function ( $post_type ) {
+					return "'" . esc_sql( $post_type ) . "'";
+				},
+				$group['post_types']
+			);
+
+			$clause = 'post_type IN (' . implode( ', ', $quoted_post_types ) . ')';
+
+			if ( null !== $group['cutoff'] ) {
+				$clause .= $wpdb->prepare( ' AND post_date_gmt < %s', $group['cutoff'] );
+			}
+
+			$clauses[] = '(' . $clause . ')';
+		}
+
+		return '(' . implode( ' OR ', $clauses ) . ')';
 	}
 
 	/**

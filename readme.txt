@@ -85,6 +85,7 @@ Release date: 8 September 2026
 * Added WP-CLI commands for status, maintenance, discussions, revisions, pingbacks, close dates, and cron.
 * Added age- and retention-aware revision pruning with a 90-day default cutoff and the `acc_revisions_prune_limit` and `acc_revisions_prune_cutoff` filters.
 * Added `fortnightly` and `monthly` cron recurrences.
+* Added independent per-post-type age overrides for closing comments and pingbacks/trackbacks, alongside the existing global age.
 
 **Changed**
 

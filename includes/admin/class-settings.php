@@ -320,6 +320,13 @@ class Settings {
 			$defaults[ 'revision_' . $post_type ] = -2;
 		}
 
+		$comments = new \WebberZone\AutoClose\Features\Comments();
+
+		foreach ( array_keys( $comments->get_supported_post_types() ) as $post_type ) {
+			$defaults[ 'comment_age_' . $post_type ] = -2;
+			$defaults[ 'pbtb_age_' . $post_type ]    = -2;
+		}
+
 		return $defaults;
 	}
 
@@ -469,7 +476,28 @@ class Settings {
 				'min'     => 0,
 				'size'    => 'small',
 			),
+			'comment_age_per_type'  => array(
+				'id'   => 'comment_age_per_type',
+				'name' => '<strong>' . esc_html__( 'Age per post type', 'autoclose' ) . '</strong>',
+				/* translators: 1: Line break. */
+				'desc' => sprintf( esc_html__( 'Override the age above for individual post types. %1$s -2: use the age above (default). %1$s -1: never close comments for this post type. %1$s 0 or higher: age in days for this post type.', 'autoclose' ), '<br />' ),
+				'type' => 'descriptive_text',
+			),
 		);
+
+		$comments_instance = new \WebberZone\AutoClose\Features\Comments();
+
+		foreach ( $comments_instance->get_supported_post_types() as $post_type => $label ) {
+			$settings[ 'comment_age_' . $post_type ] = array(
+				'id'      => 'comment_age_' . $post_type,
+				'name'    => $label,
+				'desc'    => '',
+				'type'    => 'number',
+				'default' => $defaults[ 'comment_age_' . $post_type ] ?? -2,
+				'min'     => -2,
+				'size'    => 'small',
+			);
+		}
 
 		/**
 		 * Filters the comments settings array.
@@ -543,7 +571,28 @@ class Settings {
 				'default' => $defaults['block_ping_urls'],
 				'size'    => 'large',
 			),
+			'pbtb_age_per_type'  => array(
+				'id'   => 'pbtb_age_per_type',
+				'name' => '<strong>' . esc_html__( 'Age per post type', 'autoclose' ) . '</strong>',
+				/* translators: 1: Line break. */
+				'desc' => sprintf( esc_html__( 'Override the age above for individual post types. %1$s -2: use the age above (default). %1$s -1: never close pingbacks/trackbacks for this post type. %1$s 0 or higher: age in days for this post type.', 'autoclose' ), '<br />' ),
+				'type' => 'descriptive_text',
+			),
 		);
+
+		$comments_instance = new \WebberZone\AutoClose\Features\Comments();
+
+		foreach ( $comments_instance->get_supported_post_types() as $post_type => $label ) {
+			$settings[ 'pbtb_age_' . $post_type ] = array(
+				'id'      => 'pbtb_age_' . $post_type,
+				'name'    => $label,
+				'desc'    => '',
+				'type'    => 'number',
+				'default' => $defaults[ 'pbtb_age_' . $post_type ] ?? -2,
+				'min'     => -2,
+				'size'    => 'small',
+			);
+		}
 
 		/**
 		 * Filters the pingbacks/trackbacks settings array.

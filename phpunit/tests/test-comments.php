@@ -251,6 +251,75 @@ class CommentsTest extends WP_UnitTestCase {
 		$this->assertSame( 0, $result['comments_closed'] );
 		$this->assertSame( 0, $result['pings_closed'] );
 	}
+
+	/**
+	 * -2 inherits the global age setting.
+	 */
+	public function test_effective_age_inherits_global_by_default() {
+		$this->assertSame( 90, $this->comments->get_effective_age( 'comment', 'post' ) );
+		$this->assertSame( 90, $this->comments->get_effective_age( 'ping', 'post' ) );
+	}
+
+	/**
+	 * -1 disables closing for a single post type without affecting others.
+	 */
+	public function test_effective_age_minus_one_disables_post_type() {
+		$this->set_settings(
+			array(
+				'comment_age'      => 90,
+				'comment_age_post' => -1,
+				'comment_age_page' => -2,
+			)
+		);
+
+		$this->assertNull( $this->comments->get_effective_age( 'comment', 'post' ) );
+		$this->assertSame( 90, $this->comments->get_effective_age( 'comment', 'page' ) );
+	}
+
+	/**
+	 * A non-negative override is used verbatim, including zero (immediate).
+	 */
+	public function test_effective_age_explicit_override_including_zero() {
+		$this->set_settings(
+			array(
+				'comment_age'      => 90,
+				'comment_age_post' => 0,
+				'comment_age_page' => 5,
+			)
+		);
+
+		$this->assertSame( 0, $this->comments->get_effective_age( 'comment', 'post' ) );
+		$this->assertSame( 5, $this->comments->get_effective_age( 'comment', 'page' ) );
+	}
+
+	/**
+	 * A per-post-type override closes one type while leaving another, disabled, type untouched.
+	 */
+	public function test_process_comments_respects_per_post_type_age_override() {
+		$this->set_settings(
+			array(
+				'close_comment'      => 1,
+				'close_pbtb'         => 0,
+				'comment_post_types' => 'post,page',
+				'comment_age'        => 0,
+				'comment_age_page'   => -1,
+			)
+		);
+
+		$post_id = self::factory()->post->create( array( 'comment_status' => 'open' ) );
+		$page_id = self::factory()->post->create(
+			array(
+				'post_type'      => 'page',
+				'comment_status' => 'open',
+			)
+		);
+
+		$result = $this->comments->process_comments();
+
+		$this->assertSame( 1, $result['comments_closed'] );
+		$this->assertSame( 'closed', get_post_field( 'comment_status', $post_id ) );
+		$this->assertSame( 'open', get_post_field( 'comment_status', $page_id ) );
+	}
 }
 
 /**
