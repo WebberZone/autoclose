@@ -157,7 +157,6 @@ class Close_Date {
 		} while ( self::RESTORE_BATCH_SIZE === $batch_count );
 
 		if ( $result['pending'] && ! $this->schedule_restore_continuation() ) {
-			$result['pending']  = false;
 			$result['errors'][] = __( 'The close-date restoration continuation could not be scheduled.', 'autoclose' );
 		}
 

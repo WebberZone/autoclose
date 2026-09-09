@@ -120,6 +120,37 @@ class LifecycleTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A failed continuation schedule retains the cursor for the next activation.
+	 */
+	public function test_restore_scheduled_events_retains_cursor_when_continuation_fails() {
+		$post_ids = self::factory()->post->create_many( 501 );
+
+		foreach ( $post_ids as $post_id ) {
+			update_post_meta( $post_id, '_acc_comments_date', wp_date( 'Y-m-d\\TH:i', time() + DAY_IN_SECONDS ) );
+		}
+
+		$reject_schedule = static function ( $pre, $event ) {
+			if ( Close_Date::RESTORE_HOOK === $event->hook ) {
+				return new WP_Error( 'forced_schedule_failure', 'Forced test failure.' );
+			}
+
+			return $pre;
+		};
+		add_filter( 'pre_schedule_event', $reject_schedule, 10, 2 );
+
+		try {
+			$result = ( new Close_Date() )->restore_scheduled_events();
+		} finally {
+			remove_filter( 'pre_schedule_event', $reject_schedule, 10 );
+		}
+
+		$this->assertSame( 'failed', $result['status'] );
+		$this->assertTrue( $result['pending'] );
+		$this->assertNotEmpty( $result['errors'] );
+		$this->assertNotFalse( get_option( 'acc_close_date_restore_cursor', false ) );
+	}
+
+	/**
 	 * A database failure during close-date restoration is reported.
 	 */
 	public function test_restore_scheduled_events_reports_selection_failure() {
