@@ -138,6 +138,75 @@ class LifecycleTest extends WP_UnitTestCase {
 
 		$this->assertSame( 'failed', $result['status'] );
 		$this->assertNotEmpty( $result['errors'] );
+		$this->assertTrue( $result['pending'] );
+		$this->assertNotFalse( wp_get_scheduled_event( Close_Date::RESTORE_HOOK ) );
+	}
+
+	/**
+	 * A post error does not leave a cursor that can skip a later retry.
+	 */
+	public function test_restore_scheduled_events_retries_after_post_failure() {
+		$post_ids = self::factory()->post->create_many( 3 );
+
+		foreach ( $post_ids as $post_id ) {
+			update_post_meta( $post_id, '_acc_comments_date', wp_date( 'Y-m-d\\TH:i', time() + DAY_IN_SECONDS ) );
+		}
+
+		$close_date = new class() extends Close_Date {
+
+			/**
+			 * IDs passed to the reconciliation method.
+			 *
+			 * @var array<int>
+			 */
+			public $calls = array();
+
+			/**
+			 * Whether the next reconciliation should fail.
+			 *
+			 * @var bool
+			 */
+			public $fail_next = true;
+
+			/**
+			 * Record a reconciliation and fail once.
+			 *
+			 * @param int $post_id Post ID.
+			 * @return array Result data.
+			 */
+			public function maybe_schedule_or_close( $post_id ): array {
+				$this->calls[] = (int) $post_id;
+
+				if ( $this->fail_next ) {
+					$this->fail_next = false;
+
+					return array(
+						'scheduled' => 0,
+						'closed'    => 0,
+						'errors'    => array( 'Forced test failure.' ),
+					);
+				}
+
+				return array(
+					'scheduled' => 1,
+					'closed'    => 0,
+					'errors'    => array(),
+				);
+			}
+		};
+
+		$first = $close_date->restore_scheduled_events();
+
+		$this->assertSame( 'failed', $first['status'] );
+		$this->assertSame( 3, $first['posts'] );
+		$this->assertFalse( get_option( 'acc_close_date_restore_cursor', false ) );
+
+		$second = $close_date->restore_scheduled_events();
+
+		$this->assertSame( 'success', $second['status'] );
+		$this->assertSame( 3, $second['posts'] );
+		$this->assertCount( 6, $close_date->calls );
+		$this->assertSame( $close_date->calls[0], $close_date->calls[3] );
 	}
 
 	/**

@@ -127,7 +127,8 @@ class Close_Date {
 			);
 
 			if ( ! empty( $wpdb->last_error ) ) {
-				$result['errors'][] = ! empty( $wpdb->last_error ) ? $wpdb->last_error : __( 'The close-date restoration query failed.', 'autoclose' );
+				$result['errors'][] = $wpdb->last_error;
+				$result['pending']  = true;
 				break;
 			}
 
@@ -155,13 +156,12 @@ class Close_Date {
 			}
 		} while ( self::RESTORE_BATCH_SIZE === $batch_count );
 
-		if ( $result['pending'] && $this->schedule_restore_continuation() ) {
-			$result['pending'] = true;
-		} elseif ( $result['pending'] ) {
+		if ( $result['pending'] && ! $this->schedule_restore_continuation() ) {
+			$result['pending']  = false;
 			$result['errors'][] = __( 'The close-date restoration continuation could not be scheduled.', 'autoclose' );
 		}
 
-		if ( ! $result['pending'] && empty( $result['errors'] ) ) {
+		if ( ! $result['pending'] ) {
 			delete_option( self::RESTORE_CURSOR_OPTION );
 		}
 
