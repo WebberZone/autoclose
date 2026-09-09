@@ -145,6 +145,11 @@ class Status {
 			$timezone = 'UTC';
 		}
 
+		$last_state = $saved['last_state'] ?? null;
+		if ( in_array( $last_state, array( 'failed', 'partial' ), true ) ) {
+			$warnings[] = __( 'The last maintenance run did not complete successfully.', 'autoclose' );
+		}
+
 		return array(
 			'health'   => empty( $warnings ) ? ( empty( $saved ) ? 'unknown' : 'healthy' ) : 'warning',
 			'warnings' => $warnings,
