@@ -134,7 +134,7 @@ class CommentsTest extends WP_UnitTestCase {
 	/**
 	 * A successful batch reports the affected count.
 	 */
-	public function test_discussion_result_preserves_affected_count_on_failure() {
+	public function test_discussion_result_reports_successful_affected_count() {
 		$post_id = self::factory()->post->create( array( 'comment_status' => 'open' ) );
 		$result  = $this->comments->edit_discussions_result(
 			'comment',

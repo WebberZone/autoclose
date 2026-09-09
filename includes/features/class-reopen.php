@@ -99,13 +99,9 @@ class Reopen {
 	 * @param \WP_Post $post    Post object.
 	 * @param bool     $update  Whether this is an existing post being updated.
 	 */
-	public function reopen_on_update( $post_id, $post, $update = true ): void {
+	public function reopen_on_update( $post_id, $post, $update = true ): void { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		static $processing = false;
 		if ( $processing || self::$suppressed > 0 ) {
-			return;
-		}
-
-		if ( ! $update ) {
 			return;
 		}
 

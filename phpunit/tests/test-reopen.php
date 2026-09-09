@@ -53,7 +53,12 @@ class ReopenTest extends WP_UnitTestCase {
 	 * A due close date wins over the internal save that would otherwise reopen comments.
 	 */
 	public function test_due_close_does_not_reopen_comments() {
-		$post_id = self::factory()->post->create( array( 'comment_status' => 'closed' ) );
+		$post_id = 0;
+		Reopen::without_reopening(
+			static function () use ( &$post_id ) {
+				$post_id = self::factory()->post->create( array( 'comment_status' => 'closed' ) );
+			}
+		);
 		update_post_meta( $post_id, '_acc_comments_date', wp_date( 'Y-m-d\\TH:i', time() - MINUTE_IN_SECONDS ) );
 
 		$close_date = new Close_Date();
@@ -61,6 +66,16 @@ class ReopenTest extends WP_UnitTestCase {
 
 		$this->assertSame( 'closed', get_post_field( 'comment_status', $post_id ) );
 		$this->assertFalse( metadata_exists( 'post', $post_id, '_acc_reopen_until' ) );
+	}
+
+	/**
+	 * Publishing a new post starts the configured comments reopening window.
+	 */
+	public function test_new_published_post_reopens_comments() {
+		$post_id = self::factory()->post->create( array( 'comment_status' => 'closed' ) );
+
+		$this->assertSame( 'open', get_post_field( 'comment_status', $post_id ) );
+		$this->assertGreaterThan( time(), (int) get_post_meta( $post_id, '_acc_reopen_until', true ) );
 	}
 
 	/**
