@@ -94,6 +94,7 @@ class Settings_Command extends Base_Command {
 				'post_types'         => $comment_post_types,
 				'age_days'           => (int) Options_API::get_option( 'comment_age' ),
 				'age_days_by_type'   => $comment_age_types,
+				'count_threshold'    => $comments->get_count_threshold(),
 				'keep_open_post_ids' => wp_parse_id_list( Options_API::get_option( 'comment_pids' ) ),
 				'exclude_term_ids'   => wp_parse_id_list( Options_API::get_option( 'comment_exclude_term_ids' ) ),
 				'reopen_on_update'   => (bool) Options_API::get_option( 'reopen_on_update' ),

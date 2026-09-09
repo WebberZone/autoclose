@@ -86,6 +86,7 @@ Release date: 8 September 2026
 * Added age- and retention-aware revision pruning with a 90-day default cutoff and the `acc_revisions_prune_limit` and `acc_revisions_prune_cutoff` filters.
 * Added `fortnightly` and `monthly` cron recurrences.
 * Added independent per-post-type age overrides for closing comments and pingbacks/trackbacks, alongside the existing global age.
+* Added an optional approved-comment count threshold: comments close once a post reaches the configured count, in addition to the age rule.
 
 **Changed**
 

@@ -284,34 +284,35 @@ class Settings {
 	public static function get_defaults() {
 		$defaults = array(
 			// General.
-			'cron_on'               => 0,
-			'cron_hour'             => 0,
-			'cron_min'              => 0,
-			'cron_recurrence'       => 'daily',
-			'email_notify'          => 0,
-			'email_notify_address'  => '',
+			'cron_on'                 => 0,
+			'cron_hour'               => 0,
+			'cron_min'                => 0,
+			'cron_recurrence'         => 'daily',
+			'email_notify'            => 0,
+			'email_notify_address'    => '',
 
 			// Comments.
-			'close_comment'         => 0,
-			'comment_post_types'    => 'post',
-			'comment_age'           => 90,
-			'comment_pids'          => '',
-			'comment_exclude_terms' => '',
-			'reopen_on_update'      => 0,
-			'reopen_days'           => 30,
+			'close_comment'           => 0,
+			'comment_post_types'      => 'post',
+			'comment_age'             => 90,
+			'comment_pids'            => '',
+			'comment_exclude_terms'   => '',
+			'comment_count_threshold' => 0,
+			'reopen_on_update'        => 0,
+			'reopen_days'             => 30,
 
 			// Pings and trackbacks.
-			'close_pbtb'            => 0,
-			'pbtb_post_types'       => 'post',
-			'pbtb_age'              => 90,
-			'pbtb_pids'             => '',
-			'pbtb_exclude_terms'    => '',
-			'block_self_pings'      => 0,
-			'block_ping_urls'       => '',
+			'close_pbtb'              => 0,
+			'pbtb_post_types'         => 'post',
+			'pbtb_age'                => 90,
+			'pbtb_pids'               => '',
+			'pbtb_exclude_terms'      => '',
+			'block_self_pings'        => 0,
+			'block_ping_urls'         => '',
 
 			// Revisions.
-			'delete_revisions'      => 0,
-			'revision_age'          => 90,
+			'delete_revisions'        => 0,
+			'revision_age'            => 90,
 		);
 
 		$revisions = new \WebberZone\AutoClose\Features\Revisions();
@@ -421,28 +422,28 @@ class Settings {
 	public static function settings_comments() {
 		$defaults = self::get_defaults();
 		$settings = array(
-			'close_comment'         => array(
+			'close_comment'           => array(
 				'id'      => 'close_comment',
 				'name'    => esc_html__( 'Close comments', 'autoclose' ),
 				'desc'    => esc_html__( 'Enable to close comments - used for the automatic schedule as well as one time runs under the Tools tab.', 'autoclose' ),
 				'type'    => 'checkbox',
 				'default' => $defaults['close_comment'],
 			),
-			'comment_post_types'    => array(
+			'comment_post_types'      => array(
 				'id'      => 'comment_post_types',
 				'name'    => esc_html__( 'Post types to include', 'autoclose' ),
 				'desc'    => esc_html__( 'At least one option should be selected above. Select which post types on which you want comments closed.', 'autoclose' ),
 				'type'    => 'posttypes',
 				'default' => $defaults['comment_post_types'],
 			),
-			'comment_age'           => array(
+			'comment_age'             => array(
 				'id'      => 'comment_age',
 				'name'    => esc_html__( 'Close comments on posts/pages older than', 'autoclose' ),
 				'desc'    => esc_html__( 'Comments that are older than the above number, in days, will be closed automatically if the schedule is enabled', 'autoclose' ),
 				'type'    => 'number',
 				'default' => $defaults['comment_age'],
 			),
-			'comment_pids'          => array(
+			'comment_pids'            => array(
 				'id'      => 'comment_pids',
 				'name'    => esc_html__( 'Keep comments on these posts/pages open', 'autoclose' ),
 				'desc'    => esc_html__( 'Comma-separated list of post, page or custom post type IDs. e.g. 188,320,500', 'autoclose' ),
@@ -450,7 +451,7 @@ class Settings {
 				'default' => $defaults['comment_pids'],
 				'size'    => 'large',
 			),
-			'comment_exclude_terms' => array(
+			'comment_exclude_terms'   => array(
 				'id'               => 'comment_exclude_terms',
 				'name'             => esc_html__( 'Exclude posts in these categories/tags', 'autoclose' ),
 				'desc'             => esc_html__( 'Start typing to search for categories, tags, or other taxonomy terms. Posts in these terms will not have comments closed. This field has an autocomplete — start typing and select from the options.', 'autoclose' ),
@@ -460,14 +461,23 @@ class Settings {
 				'field_class'      => 'ts_autocomplete',
 				'field_attributes' => self::get_taxonomy_search_field_attributes( 'public_taxonomies' ),
 			),
-			'reopen_on_update'      => array(
+			'comment_count_threshold' => array(
+				'id'      => 'comment_count_threshold',
+				'name'    => esc_html__( 'Close comments with at least this many approved comments', 'autoclose' ),
+				'desc'    => esc_html__( 'Optional. Comments are closed once a post reaches this number of approved comments, in addition to the age rule above — whichever condition is met first. Only ordinary approved comments count; pingbacks, trackbacks, spam, unapproved comments, and internal editor notes are excluded. Set to 0 to disable. Scheduled checking is not an atomic cap: comments submitted between runs, or at the same time as a run, can push a post past this number before it is closed.', 'autoclose' ),
+				'type'    => 'number',
+				'default' => $defaults['comment_count_threshold'],
+				'min'     => 0,
+				'size'    => 'small',
+			),
+			'reopen_on_update'        => array(
 				'id'      => 'reopen_on_update',
 				'name'    => esc_html__( 'Reopen comments on post update', 'autoclose' ),
 				'desc'    => esc_html__( 'When a post is saved or updated, its comments will be reopened for the number of days set below.', 'autoclose' ),
 				'type'    => 'checkbox',
 				'default' => $defaults['reopen_on_update'],
 			),
-			'reopen_days'           => array(
+			'reopen_days'             => array(
 				'id'      => 'reopen_days',
 				'name'    => esc_html__( 'Keep comments open for (days)', 'autoclose' ),
 				'desc'    => esc_html__( 'Number of days to keep comments open after a post update. Set to 0 to keep open until the next scheduled close.', 'autoclose' ),
@@ -476,7 +486,7 @@ class Settings {
 				'min'     => 0,
 				'size'    => 'small',
 			),
-			'comment_age_per_type'  => array(
+			'comment_age_per_type'    => array(
 				'id'   => 'comment_age_per_type',
 				'name' => '<strong>' . esc_html__( 'Age per post type', 'autoclose' ) . '</strong>',
 				/* translators: 1: Line break. */

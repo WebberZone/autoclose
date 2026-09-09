@@ -91,6 +91,23 @@ class Comments {
 	}
 
 	/**
+	 * Approved-comment count threshold for closing comments.
+	 *
+	 * Opt-in; zero disables it. Only ordinary approved comments count: pingbacks,
+	 * trackbacks, spam, unapproved entries, and internal editor notes are excluded.
+	 * Scheduled checking evaluates this once per run, not atomically, so concurrent
+	 * or between-run submissions can push a post's count past the threshold before
+	 * the next run closes it.
+	 *
+	 * @since 3.2.0
+	 *
+	 * @return int Threshold. Zero disables it.
+	 */
+	public function get_count_threshold(): int {
+		return max( 0, (int) Options_API::get_option( 'comment_count_threshold' ) );
+	}
+
+	/**
 	 * Retrieve public post types eligible for per-post-type age overrides.
 	 *
 	 * Matches the universe offered by the comment_post_types/pbtb_post_types selectors.
@@ -155,9 +172,10 @@ class Comments {
 				'comment',
 				'close',
 				array(
-					'type_ages'     => $this->get_type_ages( 'comment', $comment_post_types ),
-					'post_types'    => $comment_post_types,
-					'exclude_terms' => $comment_exclude_terms,
+					'type_ages'       => $this->get_type_ages( 'comment', $comment_post_types ),
+					'count_threshold' => $this->get_count_threshold(),
+					'post_types'      => $comment_post_types,
+					'exclude_terms'   => $comment_exclude_terms,
 				)
 			);
 			if ( ! empty( $result['errors'] ) ) {
@@ -512,18 +530,19 @@ class Comments {
 		$type_ages = is_array( $args['type_ages'] ?? null ) ? $args['type_ages'] : null;
 
 		return array(
-			'status'        => 'success',
-			'action'        => $action,
-			'type'          => $type,
-			'affected'      => (int) $count,
-			'age_days'      => null === $type_ages ? max( 0, (int) ( $args['age'] ?? 0 ) ) : null,
-			'cutoff_gmt'    => null === $type_ages ? $this->get_cutoff( (int) ( $args['age'] ?? 0 ) ) : null,
-			'type_ages'     => $type_ages,
-			'post_types'    => array_values( (array) ( $args['post_types'] ?? array() ) ),
-			'post_ids'      => wp_parse_id_list( $args['post_ids'] ?? '' ),
-			'exclude_terms' => wp_parse_id_list( $args['exclude_terms'] ?? '' ),
-			'sample'        => is_array( $sample ) ? $sample : array(),
-			'errors'        => array(),
+			'status'          => 'success',
+			'action'          => $action,
+			'type'            => $type,
+			'affected'        => (int) $count,
+			'age_days'        => null === $type_ages ? max( 0, (int) ( $args['age'] ?? 0 ) ) : null,
+			'cutoff_gmt'      => null === $type_ages ? $this->get_cutoff( (int) ( $args['age'] ?? 0 ) ) : null,
+			'type_ages'       => $type_ages,
+			'count_threshold' => 'comment' === $type ? max( 0, (int) ( $args['count_threshold'] ?? 0 ) ) : 0,
+			'post_types'      => array_values( (array) ( $args['post_types'] ?? array() ) ),
+			'post_ids'        => wp_parse_id_list( $args['post_ids'] ?? '' ),
+			'exclude_terms'   => wp_parse_id_list( $args['exclude_terms'] ?? '' ),
+			'sample'          => is_array( $sample ) ? $sample : array(),
+			'errors'          => array(),
 		);
 	}
 
@@ -550,9 +569,10 @@ class Comments {
 				'comment',
 				'close',
 				array(
-					'type_ages'     => $this->get_type_ages( 'comment', $settings['comment_post_types'] ),
-					'post_types'    => $settings['comment_post_types'],
-					'exclude_terms' => $settings['comment_exclude_terms'],
+					'type_ages'       => $this->get_type_ages( 'comment', $settings['comment_post_types'] ),
+					'count_threshold' => $this->get_count_threshold(),
+					'post_types'      => $settings['comment_post_types'],
+					'exclude_terms'   => $settings['comment_exclude_terms'],
 				),
 				$sample_limit
 			);
@@ -609,11 +629,12 @@ class Comments {
 	 */
 	private function get_discussion_defaults(): array {
 		return array(
-			'age'           => 0,
-			'type_ages'     => null,
-			'post_types'    => array(),
-			'post_ids'      => '',
-			'exclude_terms' => '',
+			'age'             => 0,
+			'type_ages'       => null,
+			'count_threshold' => 0,
+			'post_types'      => array(),
+			'post_ids'        => '',
+			'exclude_terms'   => '',
 		);
 	}
 
@@ -645,7 +666,8 @@ class Comments {
 		$type_ages    = is_array( $args['type_ages'] ?? null ) ? $args['type_ages'] : null;
 
 		if ( null !== $type_ages ) {
-			$where[] = $this->get_age_grouped_where( $type_ages );
+			$count_threshold = 'comment' === $type ? max( 0, (int) ( $args['count_threshold'] ?? 0 ) ) : 0;
+			$where[]         = $this->get_eligibility_where( $type_ages, $count_threshold );
 		} else {
 			$age = max( 0, (int) ( $args['age'] ?? 0 ) );
 
@@ -687,17 +709,22 @@ class Comments {
 	}
 
 	/**
-	 * Build a post-type/age clause from per-post-type effective ages.
+	 * Build a post-type eligibility clause from per-post-type effective ages
+	 * and an optional approved-comment count threshold.
 	 *
-	 * Post types that resolve to a disabled (null) age are excluded entirely.
-	 * Post types sharing a cutoff are grouped into a single IN() branch.
+	 * A post type is eligible when its age condition is met OR, for comments,
+	 * when the approved-comment count threshold is met. A post type whose age
+	 * is disabled (null) and that the count threshold doesn't cover is excluded
+	 * entirely. A post matching both conditions is still selected once, since
+	 * this only builds a WHERE clause for a single UPDATE per post.
 	 *
 	 * @since 3.2.0
 	 *
-	 * @param array<string, int|null> $type_ages Post type to effective age, null meaning disabled.
-	 * @return string SQL clause. `1=0` when every post type is disabled.
+	 * @param array<string, int|null> $type_ages       Post type to effective age, null meaning disabled.
+	 * @param int                     $count_threshold  Approved-comment count threshold. Zero disables it.
+	 * @return string SQL clause. `1=0` when nothing is eligible.
 	 */
-	private function get_age_grouped_where( array $type_ages ): string {
+	private function get_eligibility_where( array $type_ages, int $count_threshold = 0 ): string {
 		global $wpdb;
 
 		$groups = array();
@@ -711,10 +738,6 @@ class Comments {
 			$key                            = null === $cutoff ? '_immediate' : $cutoff;
 			$groups[ $key ]['cutoff']       = $cutoff;
 			$groups[ $key ]['post_types'][] = sanitize_key( (string) $post_type );
-		}
-
-		if ( empty( $groups ) ) {
-			return '1=0';
 		}
 
 		$clauses = array();
@@ -734,6 +757,25 @@ class Comments {
 			}
 
 			$clauses[] = '(' . $clause . ')';
+		}
+
+		if ( $count_threshold > 0 && ! empty( $type_ages ) ) {
+			$quoted_post_types = array_map(
+				static function ( $post_type ) {
+					return "'" . esc_sql( sanitize_key( (string) $post_type ) ) . "'";
+				},
+				array_keys( $type_ages )
+			);
+
+			$clauses[] = $wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				'(post_type IN (' . implode( ', ', $quoted_post_types ) . ") AND ( SELECT COUNT(*) FROM {$wpdb->comments} WHERE comment_post_ID = {$wpdb->posts}.ID AND comment_approved = '1' AND comment_type IN ( '', 'comment' ) ) >= %d)",
+				$count_threshold
+			);
+		}
+
+		if ( empty( $clauses ) ) {
+			return '1=0';
 		}
 
 		return '(' . implode( ' OR ', $clauses ) . ')';

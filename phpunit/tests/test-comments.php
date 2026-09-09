@@ -320,6 +320,103 @@ class CommentsTest extends WP_UnitTestCase {
 		$this->assertSame( 'closed', get_post_field( 'comment_status', $post_id ) );
 		$this->assertSame( 'open', get_post_field( 'comment_status', $page_id ) );
 	}
+
+	/**
+	 * A post is closed by the count threshold even when its age is disabled.
+	 */
+	public function test_count_threshold_closes_regardless_of_disabled_age() {
+		$this->set_settings(
+			array(
+				'close_comment'           => 1,
+				'close_pbtb'              => 0,
+				'comment_post_types'      => 'post',
+				'comment_age_post'        => -1,
+				'comment_count_threshold' => 2,
+			)
+		);
+
+		$post_id = self::factory()->post->create( array( 'comment_status' => 'open' ) );
+		self::factory()->comment->create_many(
+			2,
+			array(
+				'comment_post_ID'  => $post_id,
+				'comment_approved' => '1',
+			)
+		);
+
+		$result = $this->comments->process_comments();
+
+		$this->assertSame( 1, $result['comments_closed'] );
+		$this->assertSame( 'closed', get_post_field( 'comment_status', $post_id ) );
+	}
+
+	/**
+	 * Pingbacks, spam, unapproved comments, and notes do not count toward the threshold.
+	 */
+	public function test_count_threshold_excludes_ineligible_comment_types() {
+		$this->set_settings(
+			array(
+				'close_comment'           => 1,
+				'close_pbtb'              => 0,
+				'comment_post_types'      => 'post',
+				'comment_age_post'        => -1,
+				'comment_count_threshold' => 2,
+			)
+		);
+
+		$post_id = self::factory()->post->create( array( 'comment_status' => 'open' ) );
+		self::factory()->comment->create( array( 'comment_post_ID' => $post_id, 'comment_approved' => '1' ) );
+		self::factory()->comment->create( array( 'comment_post_ID' => $post_id, 'comment_approved' => '0' ) );
+		self::factory()->comment->create( array( 'comment_post_ID' => $post_id, 'comment_approved' => 'spam' ) );
+		self::factory()->comment->create(
+			array(
+				'comment_post_ID'  => $post_id,
+				'comment_approved' => '1',
+				'comment_type'     => 'pingback',
+			)
+		);
+		self::factory()->comment->create(
+			array(
+				'comment_post_ID'  => $post_id,
+				'comment_approved' => '1',
+				'comment_type'     => 'note',
+			)
+		);
+
+		$result = $this->comments->process_comments();
+
+		$this->assertSame( 0, $result['comments_closed'] );
+		$this->assertSame( 'open', get_post_field( 'comment_status', $post_id ) );
+	}
+
+	/**
+	 * A post meeting both the age and count conditions is only counted once.
+	 */
+	public function test_post_matching_both_conditions_counted_once() {
+		$this->set_settings(
+			array(
+				'close_comment'           => 1,
+				'close_pbtb'              => 0,
+				'comment_post_types'      => 'post',
+				'comment_age'             => 0,
+				'comment_count_threshold' => 1,
+			)
+		);
+
+		$post_id = self::factory()->post->create( array( 'comment_status' => 'open' ) );
+		self::factory()->comment->create( array( 'comment_post_ID' => $post_id, 'comment_approved' => '1' ) );
+
+		$result = $this->comments->process_comments();
+
+		$this->assertSame( 1, $result['comments_closed'] );
+	}
+
+	/**
+	 * Zero disables the count threshold.
+	 */
+	public function test_zero_count_threshold_is_disabled() {
+		$this->assertSame( 0, $this->comments->get_count_threshold() );
+	}
 }
 
 /**
