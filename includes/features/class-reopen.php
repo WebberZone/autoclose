@@ -48,7 +48,7 @@ class Reopen {
 	 */
 	public function __construct() {
 		Hook_Registry::add_action( 'post_updated', array( $this, 'capture_before_update' ), 10, 3 );
-		Hook_Registry::add_action( 'save_post', array( $this, 'reopen_on_update' ), 10, 2 );
+		Hook_Registry::add_action( 'save_post', array( $this, 'reopen_on_update' ), 10, 3 );
 		Hook_Registry::add_action( 'wp_restore_post_revision', array( $this, 'restore_after_revision' ), 10, 2 );
 	}
 
@@ -93,10 +93,15 @@ class Reopen {
 	 *
 	 * @param int      $post_id Post ID.
 	 * @param \WP_Post $post    Post object.
+	 * @param bool     $update  Whether this is an existing post being updated.
 	 */
-	public function reopen_on_update( $post_id, $post ): void {
+	public function reopen_on_update( $post_id, $post, $update = true ): void {
 		static $processing = false;
 		if ( $processing || self::$suppressed > 0 ) {
+			return;
+		}
+
+		if ( ! $update ) {
 			return;
 		}
 
