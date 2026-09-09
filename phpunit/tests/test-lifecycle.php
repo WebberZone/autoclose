@@ -8,7 +8,9 @@
 use WebberZone\AutoClose\Features\Close_Date;
 use WebberZone\AutoClose\Features\Reopen;
 use WebberZone\AutoClose\Core\Activator;
+use WebberZone\AutoClose\Core\Deactivator;
 use WebberZone\AutoClose\Options_API;
+use WebberZone\AutoClose\Util\Cron;
 
 /**
  * Lifecycle tests.
@@ -24,6 +26,7 @@ class LifecycleTest extends WP_UnitTestCase {
 		wp_clear_scheduled_hook( Close_Date::RESTORE_HOOK );
 		delete_option( Options_API::SETTINGS_OPTION );
 		delete_option( 'acc_close_date_restore_cursor' );
+		delete_option( Close_Date::RESTORE_DONE_OPTION );
 		Options_API::flush_cache();
 
 		parent::tear_down();
@@ -254,5 +257,89 @@ class LifecycleTest extends WP_UnitTestCase {
 		$this->assertNotFalse( $event );
 		$this->assertGreaterThan( time(), (int) $event->timestamp );
 		$this->assertSame( 'open', get_post_field( 'comment_status', $post_id ) );
+	}
+
+	/**
+	 * A completed restore does not block a later retry after reactivation:
+	 * deactivation clears the completion marker, so if the reactivation-time
+	 * schedule attempt itself fails, cron repair can still re-queue it.
+	 */
+	public function test_repair_requeues_restore_after_failed_reactivation_schedule() {
+		$post_id = self::factory()->post->create();
+		update_post_meta( $post_id, '_acc_comments_date', wp_date( 'Y-m-d\\TH:i', time() + DAY_IN_SECONDS ) );
+
+		$result = ( new Close_Date() )->restore_scheduled_events();
+		$this->assertSame( 'success', $result['status'] );
+		$this->assertFalse( $result['pending'] );
+		$this->assertTrue( Close_Date::is_restore_done() );
+
+		Deactivator::deactivate( false );
+
+		$this->assertFalse( Close_Date::is_restore_done() );
+		$this->assertFalse( wp_next_scheduled( Close_Date::RESTORE_HOOK ) );
+
+		$reject_schedule = static function ( $pre, $event ) {
+			if ( Close_Date::RESTORE_HOOK === $event->hook ) {
+				return new WP_Error( 'forced_schedule_failure', 'Forced test failure.' );
+			}
+
+			return $pre;
+		};
+		add_filter( 'pre_schedule_event', $reject_schedule, 10, 2 );
+
+		try {
+			Activator::activate( false );
+		} finally {
+			remove_filter( 'pre_schedule_event', $reject_schedule, 10 );
+		}
+
+		$this->assertFalse( wp_next_scheduled( Close_Date::RESTORE_HOOK ) );
+
+		( new Cron() )->repair();
+
+		$this->assertNotFalse( wp_next_scheduled( Close_Date::RESTORE_HOOK ) );
+	}
+
+	/**
+	 * A per-post error during a full scan does not mark the restore done, so
+	 * a consumed one-shot restore event can be re-queued from the beginning
+	 * via cron repair rather than being permanently skipped.
+	 */
+	public function test_repair_requeues_restore_after_full_scan_post_error() {
+		$post_ids = self::factory()->post->create_many( 2 );
+
+		foreach ( $post_ids as $post_id ) {
+			update_post_meta( $post_id, '_acc_comments_date', wp_date( 'Y-m-d\\TH:i', time() + DAY_IN_SECONDS ) );
+		}
+
+		$close_date = new class() extends Close_Date {
+			/**
+			 * Fail every reconciliation to simulate a persistent per-post error.
+			 *
+			 * @param int $post_id Post ID.
+			 * @return array Result data.
+			 */
+			public function maybe_schedule_or_close( $post_id ): array {
+				return array(
+					'scheduled' => 0,
+					'closed'    => 0,
+					'errors'    => array( 'Forced test failure.' ),
+				);
+			}
+		};
+
+		$result = $close_date->restore_scheduled_events();
+
+		$this->assertSame( 'failed', $result['status'] );
+		$this->assertFalse( $result['pending'] );
+		$this->assertNotEmpty( $result['errors'] );
+		$this->assertFalse( Close_Date::is_restore_done() );
+		$this->assertFalse( get_option( 'acc_close_date_restore_cursor', false ) );
+
+		wp_clear_scheduled_hook( Close_Date::RESTORE_HOOK );
+
+		( new Cron() )->repair();
+
+		$this->assertNotFalse( wp_next_scheduled( Close_Date::RESTORE_HOOK ) );
 	}
 }

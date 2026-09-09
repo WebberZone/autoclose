@@ -109,6 +109,8 @@ class Close_Date {
 	public function restore_scheduled_events(): array {
 		global $wpdb;
 
+		delete_option( self::RESTORE_DONE_OPTION );
+
 		$last_id   = (int) get_option( self::RESTORE_CURSOR_OPTION, 0 );
 		$processed = 0;
 		$result    = array(
@@ -169,7 +171,10 @@ class Close_Date {
 
 		if ( ! $result['pending'] ) {
 			delete_option( self::RESTORE_CURSOR_OPTION );
-			update_option( self::RESTORE_DONE_OPTION, true, false );
+
+			if ( empty( $result['errors'] ) ) {
+				update_option( self::RESTORE_DONE_OPTION, true, false );
+			}
 		}
 
 		if ( ! empty( $result['errors'] ) ) {
