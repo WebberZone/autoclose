@@ -64,6 +64,30 @@ class StatusTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A run that started but never recorded completion (e.g. a fatal error
+	 * or timeout) is reported as unhealthy once it's stale.
+	 */
+	public function test_stale_running_state_is_reported_as_unhealthy() {
+		Status::record_attempt( time() - ( 2 * HOUR_IN_SECONDS ), 'stuck-run' );
+
+		$status = Status::get();
+
+		$this->assertSame( 'warning', $status['health'] );
+		$this->assertContains( 'The last maintenance run started but never reported completion.', $status['warnings'] );
+	}
+
+	/**
+	 * A run still recently in progress is not yet reported as unhealthy.
+	 */
+	public function test_recent_running_state_is_not_reported_as_unhealthy() {
+		Status::record_attempt( time(), 'in-progress-run' );
+
+		$status = Status::get();
+
+		$this->assertSame( 'healthy', $status['health'] );
+	}
+
+	/**
 	 * A successful last run stays healthy.
 	 */
 	public function test_successful_last_run_is_reported_as_healthy() {

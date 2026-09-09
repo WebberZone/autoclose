@@ -145,9 +145,13 @@ class Status {
 			$timezone = 'UTC';
 		}
 
-		$last_state = $saved['last_state'] ?? null;
+		$last_state   = $saved['last_state'] ?? null;
+		$last_attempt = isset( $saved['last_attempt'] ) ? (int) $saved['last_attempt'] : null;
+
 		if ( in_array( $last_state, array( 'failed', 'partial' ), true ) ) {
 			$warnings[] = __( 'The last maintenance run did not complete successfully.', 'autoclose' );
+		} elseif ( 'running' === $last_state && null !== $last_attempt && $last_attempt < time() - HOUR_IN_SECONDS ) {
+			$warnings[] = __( 'The last maintenance run started but never reported completion.', 'autoclose' );
 		}
 
 		return array(
