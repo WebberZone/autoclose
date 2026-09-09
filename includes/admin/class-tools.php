@@ -10,7 +10,9 @@ namespace WebberZone\AutoClose\Admin;
 use WebberZone\AutoClose\Features\Comments;
 use WebberZone\AutoClose\Features\Revisions;
 use WebberZone\AutoClose\Maintenance\Runner;
+use WebberZone\AutoClose\Maintenance\Status;
 use WebberZone\AutoClose\Options_API;
+use WebberZone\AutoClose\Util\Cron;
 use WebberZone\AutoClose\Util\Hook_Registry;
 
 if ( ! defined( 'WPINC' ) ) {
@@ -92,6 +94,17 @@ class Tools {
 		$comments  = new Comments();
 		$revisions = new Revisions();
 		$preview   = null;
+
+		/* Repair scheduled maintenance event */
+		if ( isset( $_POST['acc_repair_schedule'] ) && check_admin_referer( 'acc-tools-settings' ) ) {
+			$result = ( new Cron() )->repair();
+
+			if ( 'success' === $result['outcome'] ) {
+				add_settings_error( 'acc-notices', '', esc_html__( 'The scheduled maintenance event has been repaired.', 'autoclose' ), 'updated' );
+			} else {
+				add_settings_error( 'acc-notices', '', esc_html( implode( ' ', $result['errors'] ) ), 'error' );
+			}
+		}
 
 		/* Preview configured maintenance */
 		if ( isset( $_POST['acc_preview'] ) && check_admin_referer( 'acc-tools-settings' ) ) {
@@ -228,9 +241,97 @@ class Tools {
 
 		$preview_mode = null !== $preview ? (string) ( $preview['mode'] ?? '' ) : '';
 		$preview_html = null !== $preview ? $this->render_preview( $preview ) : '';
+		$status_html  = $this->render_status( Status::get() );
 
 		// Include the view file.
 		include_once ACC_PLUGIN_DIR . 'includes/admin/views/tools-page.php';
+	}
+
+	/**
+	 * Render the cron health status panel.
+	 *
+	 * @since 3.2.0
+	 *
+	 * @param array $status Status report from Status::get().
+	 * @return string Rendered HTML.
+	 */
+	public function render_status( array $status ): string {
+		ob_start();
+
+		$schedule = (array) ( $status['schedule'] ?? array() );
+		$last_run = (array) ( $status['last_run'] ?? array() );
+		$warnings = (array) ( $status['warnings'] ?? array() );
+		$health   = (string) ( $status['health'] ?? 'unknown' );
+
+		if ( ! empty( $warnings ) ) {
+			echo '<div class="notice notice-warning inline"><p>' . esc_html( implode( ' ', $warnings ) ) . '</p></div>';
+		} elseif ( 'healthy' === $health ) {
+			echo '<div class="notice notice-success inline"><p>' . esc_html__( 'Scheduling looks healthy.', 'autoclose' ) . '</p></div>';
+		}
+
+		echo '<table class="widefat striped" style="max-width:640px;"><tbody>';
+
+		$this->render_status_row( __( 'Scheduled maintenance', 'autoclose' ), ! empty( $schedule['enabled'] ) ? __( 'Enabled', 'autoclose' ) : __( 'Disabled', 'autoclose' ) );
+		$this->render_status_row( __( 'Cron event registered', 'autoclose' ), ! empty( $schedule['event_exists'] ) ? __( 'Yes', 'autoclose' ) : __( 'No', 'autoclose' ) );
+
+		if ( ! empty( $schedule['next_run_at'] ) ) {
+			$this->render_status_row(
+				__( 'Next run', 'autoclose' ),
+				sprintf(
+					/* translators: 1: Date/time, 2: Timezone. */
+					__( '%1$s (%2$s)', 'autoclose' ),
+					wp_date( get_option( 'date_format' ) . ', ' . get_option( 'time_format' ), (int) $schedule['next_run'] ),
+					(string) ( $status['site']['timezone'] ?? 'UTC' )
+				)
+			);
+		} else {
+			$this->render_status_row( __( 'Next run', 'autoclose' ), __( 'Not scheduled', 'autoclose' ) );
+		}
+
+		$this->render_status_row( __( 'Recurrence', 'autoclose' ), (string) ( $schedule['recurrence'] ?? '' ) );
+		$this->render_status_row( __( 'WP-Cron disabled (DISABLE_WP_CRON)', 'autoclose' ), ! empty( $schedule['wp_cron_disabled'] ) ? __( 'Yes', 'autoclose' ) : __( 'No', 'autoclose' ) );
+
+		$this->render_status_row(
+			__( 'Last attempt', 'autoclose' ),
+			! empty( $last_run['attempt'] ) ? wp_date( get_option( 'date_format' ) . ', ' . get_option( 'time_format' ), (int) $last_run['attempt'] ) : __( 'Never', 'autoclose' )
+		);
+		$this->render_status_row(
+			__( 'Last completed', 'autoclose' ),
+			! empty( $last_run['completed'] ) ? wp_date( get_option( 'date_format' ) . ', ' . get_option( 'time_format' ), (int) $last_run['completed'] ) : __( 'Never', 'autoclose' )
+		);
+		$this->render_status_row( __( 'Last outcome', 'autoclose' ), null !== ( $last_run['outcome'] ?? null ) ? (string) $last_run['outcome'] : __( 'None yet', 'autoclose' ) );
+
+		$counts = (array) ( $last_run['counts'] ?? array() );
+		if ( ! empty( $counts ) ) {
+			$summary = array();
+			foreach ( $counts as $key => $value ) {
+				if ( is_bool( $value ) ) {
+					continue;
+				}
+				$summary[] = $key . ': ' . number_format_i18n( (int) $value );
+			}
+			$this->render_status_row( __( 'Last run counts', 'autoclose' ), implode( ', ', $summary ) );
+		}
+
+		if ( ! empty( $last_run['errors'] ) ) {
+			$this->render_status_row( __( 'Last run errors', 'autoclose' ), implode( ' ', (array) $last_run['errors'] ) );
+		}
+
+		echo '</tbody></table>';
+
+		return (string) ob_get_clean();
+	}
+
+	/**
+	 * Render one status table row.
+	 *
+	 * @since 3.2.0
+	 *
+	 * @param string $label Row label.
+	 * @param string $value Row value.
+	 */
+	private function render_status_row( string $label, string $value ): void {
+		echo '<tr><th scope="row" style="width:220px;">' . esc_html( $label ) . '</th><td>' . esc_html( $value ) . '</td></tr>';
 	}
 
 	/**

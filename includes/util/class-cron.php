@@ -7,6 +7,8 @@
 
 namespace WebberZone\AutoClose\Util;
 
+use WebberZone\AutoClose\Options_API;
+
 /**
  * Cron class.
  *
@@ -123,5 +125,55 @@ class Cron {
 	public function disable_run(): bool {
 		$cleared = wp_clear_scheduled_hook( 'acc_cron_hook' );
 		return false !== $cleared;
+	}
+
+	/**
+	 * Repair the scheduled maintenance event for the current site.
+	 *
+	 * Only repairs the event when scheduled maintenance is enabled in the
+	 * current site's settings. It does not enable or disable the feature.
+	 * Shared by the WP-CLI repair command and the Tools page repair action.
+	 *
+	 * @since 3.2.0
+	 *
+	 * @param bool $force Reschedule the event even when it is already registered.
+	 * @return array Repair result.
+	 */
+	public function repair( bool $force = false ): array {
+		$before  = wp_next_scheduled( 'acc_cron_hook' );
+		$enabled = (bool) Options_API::get_option( 'cron_on' );
+		$overdue = false !== $before && (int) $before < time();
+		$errors  = array();
+		$outcome = 'success';
+
+		if ( ! $enabled ) {
+			$outcome  = 'failed';
+			$errors[] = __( 'Scheduled maintenance is disabled for the current site.', 'autoclose' );
+		} elseif ( false === $before || $overdue || $force ) {
+			$this->enable_run(
+				(int) Options_API::get_option( 'cron_hour' ),
+				(int) Options_API::get_option( 'cron_min' ),
+				(string) Options_API::get_option( 'cron_recurrence' ),
+				true
+			);
+		}
+
+		$after = wp_next_scheduled( 'acc_cron_hook' );
+
+		if ( $enabled && false === $after ) {
+			$outcome  = 'failed';
+			$errors[] = __( 'The AutoClose cron event could not be registered.', 'autoclose' );
+		}
+
+		return array(
+			'outcome'    => $outcome,
+			'forced'     => $force,
+			'overdue'    => $overdue,
+			'enabled'    => $enabled,
+			'before'     => false === $before ? null : (int) $before,
+			'after'      => false === $after ? null : (int) $after,
+			'recurrence' => (string) Options_API::get_option( 'cron_recurrence' ),
+			'errors'     => $errors,
+		);
 	}
 }

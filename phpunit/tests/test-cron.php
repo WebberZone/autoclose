@@ -6,6 +6,7 @@
  */
 
 use WebberZone\AutoClose\Features\Close_Date;
+use WebberZone\AutoClose\Options_API;
 use WebberZone\AutoClose\Util\Cron;
 
 /**
@@ -147,5 +148,49 @@ class CronTest extends WP_UnitTestCase {
 		remove_filter( 'pre_schedule_event', $filter, 10 );
 		$this->assertSame( 'failed', $result['status'] );
 		$this->assertNotEmpty( $result['errors'] );
+	}
+
+	/**
+	 * Repair does nothing and fails when scheduled maintenance is disabled.
+	 */
+	public function test_repair_fails_when_maintenance_disabled() {
+		update_option( Options_API::SETTINGS_OPTION, array( 'cron_on' => 0 ) );
+		Options_API::flush_cache();
+
+		$result = ( new Cron() )->repair();
+
+		$this->assertSame( 'failed', $result['outcome'] );
+		$this->assertFalse( $result['enabled'] );
+		$this->assertNotEmpty( $result['errors'] );
+
+		delete_option( Options_API::SETTINGS_OPTION );
+		Options_API::flush_cache();
+	}
+
+	/**
+	 * Repair registers a missing event when maintenance is enabled.
+	 */
+	public function test_repair_registers_missing_event() {
+		update_option(
+			Options_API::SETTINGS_OPTION,
+			array(
+				'cron_on'         => 1,
+				'cron_hour'       => 0,
+				'cron_min'        => 0,
+				'cron_recurrence' => 'daily',
+			)
+		);
+		Options_API::flush_cache();
+		wp_clear_scheduled_hook( 'acc_cron_hook' );
+
+		$result = ( new Cron() )->repair();
+
+		$this->assertSame( 'success', $result['outcome'] );
+		$this->assertTrue( $result['enabled'] );
+		$this->assertNull( $result['before'] );
+		$this->assertNotNull( $result['after'] );
+
+		delete_option( Options_API::SETTINGS_OPTION );
+		Options_API::flush_cache();
 	}
 }

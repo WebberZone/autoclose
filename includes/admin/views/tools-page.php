@@ -30,6 +30,21 @@ if ( ! defined( 'WPINC' ) ) {
 
 			<div class="postbox">
 				<div class="postbox-header">
+					<h2 class="hndle ui-sortable-handle"><?php esc_html_e( 'AutoClose Status', 'autoclose' ); ?></h2>
+				</div>
+				<div class="inside">
+					<?php echo $status_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Pre-escaped in Tools::render_status(). ?>
+					<p>
+						<input type="submit" name="acc_repair_schedule" id="acc_repair_schedule" value="<?php esc_attr_e( 'Repair schedule', 'autoclose' ); ?>" class="button button-secondary" />
+					</p>
+					<p class="description">
+						<?php esc_html_e( 'Reschedules the AutoClose cron event using the current time and recurrence settings. Only takes effect when scheduled maintenance is enabled.', 'autoclose' ); ?>
+					</p>
+				</div>
+			</div>
+
+			<div class="postbox">
+				<div class="postbox-header">
 					<h2 class="hndle ui-sortable-handle"><?php esc_html_e( 'Close Comments, Pingbacks and Trackbacks', 'autoclose' ); ?></h2>
 				</div>
 				<div class="inside">
