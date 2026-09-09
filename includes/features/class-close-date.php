@@ -51,6 +51,13 @@ class Close_Date {
 	private const RESTORE_CURSOR_OPTION = 'acc_close_date_restore_cursor';
 
 	/**
+	 * Option flagging that the deferred restore has completed at least once.
+	 *
+	 * @since 3.2.0
+	 */
+	public const RESTORE_DONE_OPTION = 'acc_close_date_restore_done';
+
+	/**
 	 * Prefix for meta keys and filters.
 	 *
 	 * @var string
@@ -162,6 +169,7 @@ class Close_Date {
 
 		if ( ! $result['pending'] ) {
 			delete_option( self::RESTORE_CURSOR_OPTION );
+			update_option( self::RESTORE_DONE_OPTION, true, false );
 		}
 
 		if ( ! empty( $result['errors'] ) ) {
@@ -169,6 +177,17 @@ class Close_Date {
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Whether the deferred restore has completed at least once on this site.
+	 *
+	 * @since 3.2.0
+	 *
+	 * @return bool Whether the restore is done.
+	 */
+	public static function is_restore_done(): bool {
+		return (bool) get_option( self::RESTORE_DONE_OPTION, false );
 	}
 
 	/**

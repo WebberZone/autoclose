@@ -20,6 +20,8 @@ class CronTest extends WP_UnitTestCase {
 	public function tear_down() {
 		wp_clear_scheduled_hook( 'acc_cron_hook' );
 		wp_clear_scheduled_hook( 'autoclose_close_comments_pings_event' );
+		wp_clear_scheduled_hook( Close_Date::RESTORE_HOOK );
+		delete_option( Close_Date::RESTORE_DONE_OPTION );
 
 		parent::tear_down();
 	}
@@ -227,5 +229,31 @@ class CronTest extends WP_UnitTestCase {
 
 		delete_option( Options_API::SETTINGS_OPTION );
 		Options_API::flush_cache();
+	}
+
+	/**
+	 * Repair reschedules a missing close-date restore event, e.g. after a
+	 * failed activation-time schedule.
+	 */
+	public function test_repair_reschedules_missing_restore_event() {
+		wp_clear_scheduled_hook( Close_Date::RESTORE_HOOK );
+		delete_option( Close_Date::RESTORE_DONE_OPTION );
+
+		( new Cron() )->repair();
+
+		$this->assertFalse( Close_Date::is_restore_done() );
+		$this->assertNotFalse( wp_next_scheduled( Close_Date::RESTORE_HOOK ) );
+	}
+
+	/**
+	 * Repair does not reschedule the restore event once it has completed.
+	 */
+	public function test_repair_does_not_reschedule_completed_restore_event() {
+		wp_clear_scheduled_hook( Close_Date::RESTORE_HOOK );
+		update_option( Close_Date::RESTORE_DONE_OPTION, true, false );
+
+		( new Cron() )->repair();
+
+		$this->assertFalse( wp_next_scheduled( Close_Date::RESTORE_HOOK ) );
 	}
 }
