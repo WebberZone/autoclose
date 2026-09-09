@@ -19,10 +19,9 @@ if ( ! defined( 'WPINC' ) ) {
 /**
  * Builds a bounded, non-personal snapshot of effective AutoClose configuration.
  *
- * Shared by the WP-CLI `settings` command and the Tools page configuration
- * report so both surfaces report identical data. The report never includes
- * comment content, post content, credentials, or other personal information:
- * post scoping is reported as bounded counts, not lists of IDs or titles.
+ * The report never includes comment content, post content, credentials, or
+ * other personal information: post scoping is reported as bounded counts, not
+ * lists of IDs or titles.
  *
  * @since 3.2.0
  */
@@ -147,7 +146,7 @@ class Config_Report {
 		return (int) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				"SELECT COUNT(*) FROM ( SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_acc_reopen_until' AND CAST(meta_value AS UNSIGNED) > UNIX_TIMESTAMP() LIMIT %d ) AS bounded",
+				"SELECT COUNT(*) FROM ( SELECT DISTINCT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_acc_reopen_until' AND CAST(meta_value AS UNSIGNED) > UNIX_TIMESTAMP() LIMIT %d ) AS bounded",
 				$bound
 			)
 		);

@@ -303,6 +303,7 @@ class Tools {
 		);
 		$this->render_status_row( __( 'Comments kept open (ID exceptions)', 'autoclose' ), (string) (int) ( $comments['keep_open_post_id_count'] ?? 0 ) );
 		$this->render_status_row( __( 'Comments excluded terms', 'autoclose' ), (string) (int) ( $comments['exclude_term_id_count'] ?? 0 ) );
+		$this->render_status_row( __( 'Comments age by post type', 'autoclose' ), $this->format_type_ages( (array) ( $comments['age_days_by_type'] ?? array() ) ) );
 		$this->render_status_row(
 			__( 'Reopen on post update', 'autoclose' ),
 			! empty( $comments['reopen_on_update'] ) ? sprintf(
@@ -325,6 +326,8 @@ class Tools {
 				: __( 'Disabled', 'autoclose' )
 		);
 		$this->render_status_row( __( 'Pings kept open (ID exceptions)', 'autoclose' ), (string) (int) ( $pings['keep_open_post_id_count'] ?? 0 ) );
+		$this->render_status_row( __( 'Pings excluded terms', 'autoclose' ), (string) (int) ( $pings['exclude_term_id_count'] ?? 0 ) );
+		$this->render_status_row( __( 'Pings age by post type', 'autoclose' ), $this->format_type_ages( (array) ( $pings['age_days_by_type'] ?? array() ) ) );
 		$this->render_status_row( __( 'Block self-pings', 'autoclose' ), ! empty( $pings['block_self_pings'] ) ? __( 'Yes', 'autoclose' ) : __( 'No', 'autoclose' ) );
 
 		$revisions = (array) ( $report['revisions'] ?? array() );
@@ -356,6 +359,29 @@ class Tools {
 		echo '<p class="description">' . esc_html__( 'This report contains no post content, comment text, or credentials. It is shown here only and is not saved to a file.', 'autoclose' ) . '</p>';
 
 		return (string) ob_get_clean();
+	}
+
+	/**
+	 * Format effective age overrides for the configuration report.
+	 *
+	 * @since 3.2.0
+	 *
+	 * @param array $ages Post type to age mapping.
+	 * @return string Formatted age mapping.
+	 */
+	private function format_type_ages( array $ages ): string {
+		$formatted = array();
+
+		foreach ( $ages as $post_type => $age ) {
+			$formatted[] = sprintf(
+				/* translators: 1: Post type, 2: Age in days or never. */
+				__( '%1$s: %2$s', 'autoclose' ),
+				(string) $post_type,
+				null === $age ? __( 'never', 'autoclose' ) : sprintf( _n( '%d day', '%d days', (int) $age, 'autoclose' ), (int) $age )
+			);
+		}
+
+		return empty( $formatted ) ? __( 'None configured', 'autoclose' ) : implode( ', ', $formatted );
 	}
 
 	/**
