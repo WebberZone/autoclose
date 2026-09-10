@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-10T05:41:15+00:00\n"
+"POT-Creation-Date: 2026-09-10T10:29:39+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: autoclose\n"
@@ -53,36 +53,41 @@ msgid "Contribute"
 msgstr ""
 
 #: includes/admin/class-admin.php:85
-#: includes/admin/class-admin.php:120
+#: includes/admin/class-admin.php:122
 msgid "Settings"
 msgstr ""
 
-#: includes/admin/class-admin.php:112
+#: includes/admin/class-admin.php:114
 msgid "AutoClose quick links"
 msgstr ""
 
-#: includes/admin/class-admin.php:113
+#: includes/admin/class-admin.php:115
 msgid "AutoClose admin shortcuts"
 msgstr ""
 
-#: includes/admin/class-admin.php:114
+#: includes/admin/class-admin.php:116
 msgid "WebberZone AutoClose"
 msgstr ""
 
-#: includes/admin/class-admin.php:115
+#: includes/admin/class-admin.php:117
 msgid "Automatically close comments, pingbacks and trackbacks."
 msgstr ""
 
-#: includes/admin/class-admin.php:116
-msgid "Manage your AutoClose settings and explore more WebberZone plugins."
+#: includes/admin/class-admin.php:118
+msgid "Jump to your most-used AutoClose tools, manage discussions faster, and explore more WebberZone plugins."
 msgstr ""
 
-#: includes/admin/class-admin.php:126
+#: includes/admin/class-admin.php:128
+#: includes/admin/class-tools.php:81
+msgid "Tools"
+msgstr ""
+
+#: includes/admin/class-admin.php:134
 msgid "WebberZone Plugins"
 msgstr ""
 
 #: includes/admin/class-metabox.php:74
-#: includes/admin/class-settings.php:145
+#: includes/admin/class-settings.php:144
 msgid "AutoClose Settings"
 msgstr ""
 
@@ -122,394 +127,390 @@ msgstr ""
 msgid "Dismiss"
 msgstr ""
 
+#: includes/admin/class-settings.php:109
 #: includes/admin/class-settings.php:110
-#: includes/admin/class-settings.php:111
-#: includes/admin/class-settings.php:146
+#: includes/admin/class-settings.php:145
 msgid "AutoClose"
 msgstr ""
 
-#: includes/admin/class-settings.php:112
+#: includes/admin/class-settings.php:111
 msgid "Automatically Close Comments, Pingbacks and Trackbacks Settings"
 msgstr ""
 
-#: includes/admin/class-settings.php:113
+#: includes/admin/class-settings.php:112
 msgid "Settings have been reset to their default values. Reload this page to view the updated settings."
 msgstr ""
 
-#: includes/admin/class-settings.php:114
+#: includes/admin/class-settings.php:113
 msgid "Settings updated."
 msgstr ""
 
-#: includes/admin/class-settings.php:115
+#: includes/admin/class-settings.php:114
 msgid "Save Changes"
 msgstr ""
 
-#: includes/admin/class-settings.php:116
+#: includes/admin/class-settings.php:115
 msgid "Reset all settings"
 msgstr ""
 
-#: includes/admin/class-settings.php:117
+#: includes/admin/class-settings.php:116
 msgid "Do you really want to reset all these settings to their default values?"
 msgstr ""
 
-#: includes/admin/class-settings.php:118
+#: includes/admin/class-settings.php:117
 msgid "Modified from default setting"
 msgstr ""
 
-#: includes/admin/class-settings.php:119
+#: includes/admin/class-settings.php:118
 msgid "Setting modified from its default value"
 msgstr ""
 
-#: includes/admin/class-settings.php:120
+#: includes/admin/class-settings.php:119
 msgid "Default"
 msgstr ""
 
-#: includes/admin/class-settings.php:121
+#: includes/admin/class-settings.php:120
 msgid "None"
 msgstr ""
 
-#: includes/admin/class-settings.php:162
-#: includes/admin/class-settings.php:741
+#: includes/admin/class-settings.php:161
+#: includes/admin/class-settings.php:740
 msgid "General"
 msgstr ""
 
-#: includes/admin/class-settings.php:163
-#: includes/admin/class-settings.php:747
+#: includes/admin/class-settings.php:162
+#: includes/admin/class-settings.php:746
 msgid "Comments"
 msgstr ""
 
-#: includes/admin/class-settings.php:164
-#: includes/admin/class-settings.php:754
+#: includes/admin/class-settings.php:163
+#: includes/admin/class-settings.php:753
 msgid "Pingbacks/Trackbacks"
 msgstr ""
 
-#: includes/admin/class-settings.php:165
-#: includes/admin/class-settings.php:762
+#: includes/admin/class-settings.php:164
+#: includes/admin/class-settings.php:761
 msgid "Revisions"
 msgstr ""
 
-#: includes/admin/class-settings.php:345
+#: includes/admin/class-settings.php:344
 msgid "Activate scheduled closing"
 msgstr ""
 
-#: includes/admin/class-settings.php:346
+#: includes/admin/class-settings.php:345
 msgid "This creates a WordPress cron job using the schedule settings below. This cron job will execute the tasks to close comments, pingbacks/trackbacks or delete post revisions based on the settings from the other tabs."
 msgstr ""
 
-#: includes/admin/class-settings.php:352
+#: includes/admin/class-settings.php:351
 msgid "Time to run closing"
 msgstr ""
 
-#: includes/admin/class-settings.php:353
+#: includes/admin/class-settings.php:352
 msgid "The next two options set the scheduled time in UTC. The cron job will run on the next occurrence of the configured hour and minute. The next run shown in AutoClose status is converted to the site timezone."
 msgstr ""
 
-#: includes/admin/class-settings.php:358
+#: includes/admin/class-settings.php:357
 msgid "Hour"
 msgstr ""
 
-#: includes/admin/class-settings.php:368
+#: includes/admin/class-settings.php:367
 msgid "Minute"
 msgstr ""
 
-#: includes/admin/class-settings.php:378
+#: includes/admin/class-settings.php:377
 msgid "Run maintenance"
 msgstr ""
 
-#: includes/admin/class-settings.php:383
+#: includes/admin/class-settings.php:382
 msgid "Daily"
 msgstr ""
 
-#: includes/admin/class-settings.php:384
+#: includes/admin/class-settings.php:383
 msgid "Weekly"
 msgstr ""
 
-#: includes/admin/class-settings.php:385
+#: includes/admin/class-settings.php:384
 msgid "Fortnightly"
 msgstr ""
 
-#: includes/admin/class-settings.php:386
+#: includes/admin/class-settings.php:385
 msgid "Monthly"
 msgstr ""
 
-#: includes/admin/class-settings.php:391
+#: includes/admin/class-settings.php:390
 msgid "Send summary email after cron run"
 msgstr ""
 
-#: includes/admin/class-settings.php:392
+#: includes/admin/class-settings.php:391
 msgid "Send an email summary after each scheduled run showing what was closed/deleted."
 msgstr ""
 
-#: includes/admin/class-settings.php:398
+#: includes/admin/class-settings.php:397
 msgid "Notification email address"
 msgstr ""
 
-#: includes/admin/class-settings.php:399
+#: includes/admin/class-settings.php:398
 msgid "Leave blank to use the site admin email address."
 msgstr ""
 
-#: includes/admin/class-settings.php:407
+#: includes/admin/class-settings.php:406
 msgid "If you deactivate this plugin"
 msgstr ""
 
-#: includes/admin/class-settings.php:410
+#: includes/admin/class-settings.php:409
 #, php-format
 msgid "Comments, pingbacks, and trackbacks already closed by AutoClose stay closed. %1$sScheduled and per-post closing stop running, so nothing more will be closed automatically. %1$sA temporary reopen window that is still active when you deactivate may no longer close automatically once it ends. %1$sPost revision limits set here stop applying; WordPress' own default or another plugin's limit takes over. %1$sRevisions already deleted are not restored."
 msgstr ""
 
-#: includes/admin/class-settings.php:437
+#: includes/admin/class-settings.php:436
 #: includes/admin/class-tools.php:293
 #: includes/admin/class-tools.php:534
 msgid "Close comments"
 msgstr ""
 
-#: includes/admin/class-settings.php:438
+#: includes/admin/class-settings.php:437
 msgid "Enable to close comments - used for the automatic schedule as well as one time runs under the Tools tab."
 msgstr ""
 
-#: includes/admin/class-settings.php:444
-#: includes/admin/class-settings.php:549
+#: includes/admin/class-settings.php:443
+#: includes/admin/class-settings.php:548
 msgid "Post types to include"
 msgstr ""
 
-#: includes/admin/class-settings.php:445
+#: includes/admin/class-settings.php:444
 msgid "At least one option should be selected above. Select which post types on which you want comments closed."
 msgstr ""
 
-#: includes/admin/class-settings.php:451
+#: includes/admin/class-settings.php:450
 msgid "Close comments on posts/pages older than"
 msgstr ""
 
-#: includes/admin/class-settings.php:452
+#: includes/admin/class-settings.php:451
 msgid "Comments that are older than the above number, in days, will be closed automatically if the schedule is enabled"
 msgstr ""
 
-#: includes/admin/class-settings.php:458
+#: includes/admin/class-settings.php:457
 msgid "Keep comments on these posts/pages open"
 msgstr ""
 
-#: includes/admin/class-settings.php:459
-#: includes/admin/class-settings.php:564
+#: includes/admin/class-settings.php:458
+#: includes/admin/class-settings.php:563
 msgid "Comma-separated list of post, page or custom post type IDs. e.g. 188,320,500"
 msgstr ""
 
-#: includes/admin/class-settings.php:466
-#: includes/admin/class-settings.php:571
+#: includes/admin/class-settings.php:465
+#: includes/admin/class-settings.php:570
 msgid "Exclude posts in these categories/tags"
 msgstr ""
 
-#: includes/admin/class-settings.php:467
+#: includes/admin/class-settings.php:466
 msgid "Start typing to search for categories, tags, or other taxonomy terms. Posts in these terms will not have comments closed. This field has an autocomplete — start typing and select from the options."
 msgstr ""
 
-#: includes/admin/class-settings.php:476
+#: includes/admin/class-settings.php:475
 msgid "Close comments with at least this many approved comments"
 msgstr ""
 
-#: includes/admin/class-settings.php:477
+#: includes/admin/class-settings.php:476
 msgid "Optional. Comments are closed once a post reaches this number of approved comments, in addition to the age rule above — whichever condition is met first. Only ordinary approved comments count; pingbacks, trackbacks, spam, unapproved comments, and internal editor notes are excluded. Set to 0 to disable. Scheduled checking is not an atomic cap: comments submitted between runs, or at the same time as a run, can push a post past this number before it is closed."
 msgstr ""
 
-#: includes/admin/class-settings.php:485
+#: includes/admin/class-settings.php:484
 msgid "Reopen comments on post update"
 msgstr ""
 
-#: includes/admin/class-settings.php:486
+#: includes/admin/class-settings.php:485
 msgid "When a post is saved or updated, its comments will be reopened for the number of days set below."
 msgstr ""
 
-#: includes/admin/class-settings.php:492
+#: includes/admin/class-settings.php:491
 msgid "Keep comments open for (days)"
 msgstr ""
 
-#: includes/admin/class-settings.php:493
+#: includes/admin/class-settings.php:492
 msgid "Number of days to keep comments open after a post update. Set to 0 to keep open until the next scheduled close."
 msgstr ""
 
-#: includes/admin/class-settings.php:501
-#: includes/admin/class-settings.php:596
+#: includes/admin/class-settings.php:500
+#: includes/admin/class-settings.php:595
 msgid "Age per post type"
 msgstr ""
 
 #. translators: 1: Line break.
-#: includes/admin/class-settings.php:503
+#: includes/admin/class-settings.php:502
 #, php-format
 msgid "Override the age above for individual post types. %1$s -2: use the age above (default). %1$s -1: never close comments for this post type. %1$s 0 or higher: age in days for this post type."
 msgstr ""
 
-#: includes/admin/class-settings.php:542
+#: includes/admin/class-settings.php:541
 msgid "Close Pingbacks/Trackbacks"
 msgstr ""
 
-#: includes/admin/class-settings.php:543
+#: includes/admin/class-settings.php:542
 msgid "Enable to close pingbacks and trackbacks - used for the automatic schedule as well as one time runs under the Tools tab."
 msgstr ""
 
-#: includes/admin/class-settings.php:550
+#: includes/admin/class-settings.php:549
 msgid "At least one option should be selected above. Select which post types on which you want pingbacks/trackbacks closed."
 msgstr ""
 
-#: includes/admin/class-settings.php:556
+#: includes/admin/class-settings.php:555
 msgid "Close pingbacks/trackbacks on posts/pages older than"
 msgstr ""
 
-#: includes/admin/class-settings.php:557
+#: includes/admin/class-settings.php:556
 msgid "Pingbacks/Trackbacks that are older than the above number, in days, will be closed automatically if the schedule is enabled"
 msgstr ""
 
-#: includes/admin/class-settings.php:563
+#: includes/admin/class-settings.php:562
 msgid "Keep pingbacks/trackbacks on these posts/pages open"
 msgstr ""
 
-#: includes/admin/class-settings.php:572
+#: includes/admin/class-settings.php:571
 msgid "Start typing to search for categories, tags, or other taxonomy terms. Posts in these terms will not have pingbacks/trackbacks closed. This field has an autocomplete — start typing and select from the options."
 msgstr ""
 
-#: includes/admin/class-settings.php:581
+#: includes/admin/class-settings.php:580
 msgid "Block Self-Pings"
 msgstr ""
 
-#: includes/admin/class-settings.php:582
+#: includes/admin/class-settings.php:581
 msgid "Enable to block self-pings (pings to your own site)."
 msgstr ""
 
-#: includes/admin/class-settings.php:588
+#: includes/admin/class-settings.php:587
 msgid "Block Ping URLs"
 msgstr ""
 
-#: includes/admin/class-settings.php:589
+#: includes/admin/class-settings.php:588
 msgid "Enter one URL per line. Pings to any of these URLs will be blocked in addition to self-pings."
 msgstr ""
 
 #. translators: 1: Line break.
-#: includes/admin/class-settings.php:598
+#: includes/admin/class-settings.php:597
 #, php-format
 msgid "Override the age above for individual post types. %1$s -2: use the age above (default). %1$s -1: never close pingbacks/trackbacks for this post type. %1$s 0 or higher: age in days for this post type."
 msgstr ""
 
-#: includes/admin/class-settings.php:637
+#: includes/admin/class-settings.php:636
 msgid "Cleanup policy"
 msgstr ""
 
-#: includes/admin/class-settings.php:638
+#: includes/admin/class-settings.php:637
 msgid "Scheduled cleanup deletes a revision only when it is beyond the number of revisions its post keeps and is older than the age below. Autosaves are never deleted by scheduled cleanup. Before v3.2.0 this setting deleted every revision on each run; it now follows the safer policy described here. To delete every revision regardless of these limits, use the one-time Delete revisions button on the AutoClose Tools page."
 msgstr ""
 
-#: includes/admin/class-settings.php:643
+#: includes/admin/class-settings.php:642
 msgid "Delete post revisions"
 msgstr ""
 
-#: includes/admin/class-settings.php:644
+#: includes/admin/class-settings.php:643
 msgid "The WordPress revisions system stores a record of each saved draft or published update. This can gather up a lot of overhead in the long run. Use this option to delete old post revisions when the scheduled maintenance runs."
 msgstr ""
 
-#: includes/admin/class-settings.php:650
+#: includes/admin/class-settings.php:649
 msgid "Delete revisions older than"
 msgstr ""
 
-#: includes/admin/class-settings.php:651
+#: includes/admin/class-settings.php:650
 msgid "Number of days. Only revisions older than this and beyond the retention limit below are deleted. Set to 0 to delete every revision beyond the retention limit regardless of age."
 msgstr ""
 
-#: includes/admin/class-settings.php:659
+#: includes/admin/class-settings.php:658
 msgid "Number of revisions"
 msgstr ""
 
 #. translators: 1: Code.
-#: includes/admin/class-settings.php:661
+#: includes/admin/class-settings.php:660
 #, php-format
 msgid "Limit the number of revisions that WordPress stores in the database for each of the post types below. %1$s -2: ignore setting from this plugin, %1$s -1: store every revision, %1$s 0: do not store any revisions, %1$s >0: store that many revisions per post. Old revisions are automatically deleted."
 msgstr ""
 
-#: includes/admin/class-settings.php:717
+#: includes/admin/class-settings.php:716
 msgid "For more information:"
 msgstr ""
 
-#: includes/admin/class-settings.php:718
+#: includes/admin/class-settings.php:717
 msgid "AutoClose Homepage"
 msgstr ""
 
-#: includes/admin/class-settings.php:719
+#: includes/admin/class-settings.php:718
 #: includes/admin/sidebar.php:25
 msgid "FAQ"
 msgstr ""
 
-#: includes/admin/class-settings.php:720
+#: includes/admin/class-settings.php:719
 msgid "Support Forum"
 msgstr ""
 
-#: includes/admin/class-settings.php:742
+#: includes/admin/class-settings.php:741
 msgid "This screen provides the basic settings for configuring AutoClose."
 msgstr ""
 
-#: includes/admin/class-settings.php:743
+#: includes/admin/class-settings.php:742
 msgid "Enable the scheduler option to autoclose comments and/or pingbacks/trackbacks as per the options set in the Comments and Pingbacks/Trackbacks tabs."
 msgstr ""
 
-#: includes/admin/class-settings.php:748
+#: includes/admin/class-settings.php:747
 msgid "This screen provides settings to automatically close comments."
 msgstr ""
 
-#: includes/admin/class-settings.php:749
+#: includes/admin/class-settings.php:748
 msgid "Enable the Close comments option to close comments on posts as per the schedule in the General tab. You can select the post types on which you want to close comments and the age of the post in days."
 msgstr ""
 
-#: includes/admin/class-settings.php:750
+#: includes/admin/class-settings.php:749
 msgid "If you want to keep comments on certain posts open, enter a comma-separated list of post IDs in the field provided."
 msgstr ""
 
-#: includes/admin/class-settings.php:755
+#: includes/admin/class-settings.php:754
 msgid "This screen provides settings to automatically close pingbacks and trackbacks."
 msgstr ""
 
-#: includes/admin/class-settings.php:756
+#: includes/admin/class-settings.php:755
 msgid "Enable the Close pingbacks/trackbacks option to close pingbacks and trackbacks on posts as per the schedule in the General tab. You can select the post types on which you want to close pingbacks/trackbacks and the age of the post in days."
 msgstr ""
 
-#: includes/admin/class-settings.php:757
+#: includes/admin/class-settings.php:756
 msgid "If you want to keep pingbacks/trackbacks on certain posts open, enter a comma-separated list of post IDs in the field provided."
 msgstr ""
 
-#: includes/admin/class-settings.php:758
+#: includes/admin/class-settings.php:757
 msgid "Additionally, you can choose to delete all pingbacks and trackbacks when the scheduled maintenance runs."
 msgstr ""
 
-#: includes/admin/class-settings.php:763
+#: includes/admin/class-settings.php:762
 msgid "This screen provides settings to automatically delete post revisions."
 msgstr ""
 
-#: includes/admin/class-settings.php:764
+#: includes/admin/class-settings.php:763
 msgid "Enable the Delete post revisions option to delete post revisions when the scheduled maintenance runs. A revision is deleted only when it is beyond the number of revisions its post keeps and is older than the age you set. Autosaves are never deleted by scheduled cleanup."
 msgstr ""
 
-#: includes/admin/class-settings.php:765
+#: includes/admin/class-settings.php:764
 msgid "Before v3.2.0 this option deleted every revision on each scheduled run. Existing settings are preserved, but scheduled runs now follow the retention and age policy above."
 msgstr ""
 
-#: includes/admin/class-settings.php:766
+#: includes/admin/class-settings.php:765
 msgid "You can also set the number of revisions to keep for each post type. Set to -1 to keep every revision and never prune that post type, 0 to keep none, or -2 to use whatever WordPress or another plugin decides."
 msgstr ""
 
-#: includes/admin/class-settings.php:767
+#: includes/admin/class-settings.php:766
 msgid "To delete every revision regardless of retention and age, use the Delete revisions button on the AutoClose Tools page."
 msgstr ""
 
 #. translators: 1: Opening anchor tag with Plugin page link, 2: Closing anchor tag, 3: Opening anchor tag with review link.
-#: includes/admin/class-settings.php:822
+#: includes/admin/class-settings.php:821
 #, php-format
 msgid "Thank you for using %1$sAutoClose%2$s! Please %3$srate us%2$s on %3$sWordPress.org%2$s"
 msgstr ""
 
-#: includes/admin/class-settings.php:838
-msgid "Visit the Tools page"
-msgstr ""
-
-#: includes/admin/class-settings.php:870
-#: includes/util/class-cron.php:173
+#: includes/admin/class-settings.php:853
+#: includes/util/class-cron.php:175
 msgid "The AutoClose cron event could not be registered."
 msgstr ""
 
-#: includes/admin/class-settings.php:878
+#: includes/admin/class-settings.php:861
 msgid "The AutoClose cron event could not be cleared."
 msgstr ""
 
@@ -534,10 +535,6 @@ msgstr ""
 #: includes/admin/class-tools.php:72
 #, php-format
 msgid "<a href=\"%1$s\">Post an issue</a> on <a href=\"%2$s\">GitHub</a> (bug reports only)."
-msgstr ""
-
-#: includes/admin/class-tools.php:81
-msgid "Tools"
 msgstr ""
 
 #: includes/admin/class-tools.php:83
@@ -954,105 +951,101 @@ msgstr ""
 msgid "Automatically Close Comments, Pingbacks and Trackbacks Tools"
 msgstr ""
 
-#: includes/admin/views/tools-page.php:19
-msgid "Visit the Settings page"
-msgstr ""
-
-#: includes/admin/views/tools-page.php:33
+#: includes/admin/views/tools-page.php:27
 msgid "AutoClose Status"
 msgstr ""
 
-#: includes/admin/views/tools-page.php:38
+#: includes/admin/views/tools-page.php:32
 msgid "Repair schedule"
 msgstr ""
 
-#: includes/admin/views/tools-page.php:41
+#: includes/admin/views/tools-page.php:35
 msgid "Reschedules the AutoClose cron event using the current time and recurrence settings. Only takes effect when scheduled maintenance is enabled."
 msgstr ""
 
-#: includes/admin/views/tools-page.php:48
+#: includes/admin/views/tools-page.php:42
 msgid "Configuration Report"
 msgstr ""
 
-#: includes/admin/views/tools-page.php:52
+#: includes/admin/views/tools-page.php:46
 msgid "Generate configuration report"
 msgstr ""
 
-#: includes/admin/views/tools-page.php:55
+#: includes/admin/views/tools-page.php:49
 msgid "Shows effective settings, exception counts, close-date and reopen-window counts, and revision policies for this site. Contains no post content, comment text, or credentials, and is not stored anywhere."
 msgstr ""
 
-#: includes/admin/views/tools-page.php:65
+#: includes/admin/views/tools-page.php:59
 msgid "Close Comments, Pingbacks and Trackbacks"
 msgstr ""
 
-#: includes/admin/views/tools-page.php:69
-#: includes/admin/views/tools-page.php:105
-#: includes/admin/views/tools-page.php:123
+#: includes/admin/views/tools-page.php:63
+#: includes/admin/views/tools-page.php:99
+#: includes/admin/views/tools-page.php:117
 msgid "Preview changes"
 msgstr ""
 
-#: includes/admin/views/tools-page.php:70
+#: includes/admin/views/tools-page.php:64
 msgid "Run closing algorithm"
 msgstr ""
 
-#: includes/admin/views/tools-page.php:73
+#: includes/admin/views/tools-page.php:67
 msgid "Clicking this button will execute the closing algorithm respecting the various options in the Settings page."
 msgstr ""
 
-#: includes/admin/views/tools-page.php:83
+#: includes/admin/views/tools-page.php:77
 msgid "Open or close Comments, Pingbacks and Trackbacks"
 msgstr ""
 
-#: includes/admin/views/tools-page.php:87
+#: includes/admin/views/tools-page.php:81
 msgid "Open Comments"
 msgstr ""
 
-#: includes/admin/views/tools-page.php:89
+#: includes/admin/views/tools-page.php:83
 msgid "Open Pings"
 msgstr ""
 
-#: includes/admin/views/tools-page.php:92
+#: includes/admin/views/tools-page.php:86
 msgid "Close Comments"
 msgstr ""
 
-#: includes/admin/views/tools-page.php:94
+#: includes/admin/views/tools-page.php:88
 msgid "Close Pings"
 msgstr ""
 
-#: includes/admin/views/tools-page.php:101
+#: includes/admin/views/tools-page.php:95
 msgid "Delete Pingbacks / Trackbacks"
 msgstr ""
 
-#: includes/admin/views/tools-page.php:106
+#: includes/admin/views/tools-page.php:100
 msgid "Delete pingbacks/trackbacks"
 msgstr ""
 
-#: includes/admin/views/tools-page.php:106
+#: includes/admin/views/tools-page.php:100
 msgid "This will delete all pingbacks/trackbacks permanently. Proceed?"
 msgstr ""
 
-#: includes/admin/views/tools-page.php:109
+#: includes/admin/views/tools-page.php:103
 msgid "This is a permanent change. Once you go through with this, there is no way to restore your pingbacks/trackbacks. Please backup your database before proceeding."
 msgstr ""
 
-#: includes/admin/views/tools-page.php:119
+#: includes/admin/views/tools-page.php:113
 msgid "Delete All Revisions"
 msgstr ""
 
-#: includes/admin/views/tools-page.php:124
+#: includes/admin/views/tools-page.php:118
 msgid "Delete all revisions"
 msgstr ""
 
-#: includes/admin/views/tools-page.php:124
+#: includes/admin/views/tools-page.php:118
 msgid "This deletes every revision permanently, ignoring retention limits and the age setting, and includes autosaves. Proceed?"
 msgstr ""
 
-#: includes/admin/views/tools-page.php:127
+#: includes/admin/views/tools-page.php:121
 msgid "This is a permanent change. Once you go through with this, there is no way to restore your revisions. Please backup your database before proceeding."
 msgstr ""
 
-#: includes/admin/views/tools-page.php:130
+#: includes/admin/views/tools-page.php:124
 msgid "Unlike scheduled cleanup, this button ignores the number of revisions each post type keeps and the age setting, and it also removes autosaves. To delete only revisions beyond the retention limit and older than the configured age, use the Run closing algorithm button above."
 msgstr ""
 
@@ -1127,12 +1120,12 @@ msgid "That local time does not exist in the site timezone because of a daylight
 msgstr ""
 
 #: includes/cli/class-discussions-command.php:54
-#: includes/features/class-close-date.php:311
+#: includes/features/class-close-date.php:386
 msgid "comments"
 msgstr ""
 
 #: includes/cli/class-discussions-command.php:54
-#: includes/features/class-close-date.php:311
+#: includes/features/class-close-date.php:386
 msgid "pingbacks/trackbacks"
 msgstr ""
 
@@ -1169,28 +1162,22 @@ msgstr ""
 msgid "This permanently deletes revisions beyond the retention limit and older than the age cutoff for %d selected post(s). Continue?"
 msgstr ""
 
-#: includes/features/class-close-date.php:169
-msgid "The close-date restoration continuation could not be scheduled."
-msgstr ""
-
-#: includes/features/class-close-date.php:271
-#, php-format
-msgid "The %s close event could not be cleared."
-msgstr ""
-
-#: includes/features/class-close-date.php:277
+#. translators: 1: Discussion type.
+#: includes/features/class-close-date.php:108
+#: includes/features/class-close-date.php:257
 #, php-format
 msgid "The %s close date is invalid."
 msgstr ""
 
-#: includes/features/class-close-date.php:285
-#, php-format
-msgid "The %s status could not be closed."
+#: includes/features/class-close-date.php:123
+#: includes/util/class-cron.php:180
+msgid "The close-date sweep could not be scheduled."
 msgstr ""
 
-#: includes/features/class-close-date.php:294
+#. translators: 1: Discussion type.
+#: includes/features/class-close-date.php:269
 #, php-format
-msgid "The %s close event could not be scheduled."
+msgid "The %s status could not be closed."
 msgstr ""
 
 #: includes/features/class-comments.php:305
@@ -1215,12 +1202,12 @@ msgstr ""
 msgid "Invalid discussion preview arguments."
 msgstr ""
 
-#: includes/features/class-comments.php:952
+#: includes/features/class-comments.php:993
 msgid "Pingback/trackback deletion failed."
 msgstr ""
 
 #. translators: 1: Number of pingbacks/trackbacks.
-#: includes/features/class-comments.php:978
+#: includes/features/class-comments.php:1019
 #, php-format
 msgid "%d pingback or trackback could not be deleted."
 msgid_plural "%d pingbacks or trackbacks could not be deleted."
@@ -1291,22 +1278,18 @@ msgstr ""
 msgid "The last maintenance run started but never reported completion."
 msgstr ""
 
-#: includes/util/class-cron.php:45
+#: includes/util/class-cron.php:46
 msgid "Every fortnight"
 msgstr ""
 
-#: includes/util/class-cron.php:52
+#: includes/util/class-cron.php:53
 msgid "Every 30 days"
 msgstr ""
 
-#: includes/util/class-cron.php:153
+#: includes/util/class-cron.php:155
 msgid "Scheduled maintenance is disabled for the current site."
 msgstr ""
 
-#: includes/util/class-cron.php:165
+#: includes/util/class-cron.php:167
 msgid "The AutoClose cron event could not be repaired."
-msgstr ""
-
-#: includes/util/class-cron.php:181
-msgid "The close-date restoration event could not be scheduled."
 msgstr ""
