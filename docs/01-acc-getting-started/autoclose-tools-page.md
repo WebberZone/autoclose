@@ -8,7 +8,7 @@ status: publish
 order: 2
 ---
 
-The [AutoClose](https://webberzone.com/plugins/autoclose/) Tools page provides one-click buttons to run the closing and opening actions immediately, without waiting for the scheduled cron. Access it via **Tools → AutoClose Tools** in your WordPress admin.
+The [AutoClose](https://webberzone.com/plugins/autoclose/) Tools page provides one-click buttons to run the closing and opening actions immediately, without waiting for the scheduled cron. Access it via **Tools → AutoClose Tools** in your WordPress admin, or via the **Tools** link in the admin banner shown on both the Tools and [Settings](autoclose-settings.md) pages.
 
 ## AutoClose Status
 
@@ -16,7 +16,7 @@ A panel at the top of the page reports scheduling health: whether scheduled main
 
 A warning banner appears when the last run failed or was only partially successful, or when a run started but never reported completion within an hour (a stuck run). Otherwise a success notice confirms scheduling looks healthy.
 
-Use **Repair schedule** to reschedule the `acc_cron_hook` event from the current time and your saved recurrence settings. It only takes effect when **Activate scheduled closing** is enabled — it does not turn scheduling on. Repairing also re-queues the deferred close-date restoration if it has not yet completed on this site. See [Scheduling the AutoClose Cron](../02-acc-advanced/scheduling-autoclose-cron.md) for what the restoration step does. This is the same action as `wp autoclose cron repair`, documented in [AutoClose WP-CLI](../02-acc-advanced/autoclose-wp-cli.md).
+Use **Repair schedule** to reschedule the `acc_cron_hook` event from the current time and your saved recurrence settings. It only takes effect when **Activate scheduled closing** is enabled — it does not turn scheduling on. This is the same action as `wp autoclose cron repair`, documented in [AutoClose WP-CLI](../02-acc-advanced/autoclose-wp-cli.md).
 
 ## Configuration Report
 
