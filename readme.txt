@@ -78,7 +78,7 @@ Adds per-post-type closing ages, an approved-comment threshold, Tools page previ
 
 = 3.2.0 =
 
-Release date: 8 September 2026
+Release date: 10 September 2026
 
 **Added**
 
