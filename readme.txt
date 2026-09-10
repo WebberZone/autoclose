@@ -65,6 +65,9 @@ Yes! Auto-Close works with posts, pages, attachments, and any registered custom 
 = Can I delete or limit revisions? =
 Yes, you can delete all revisions or set a limit per post type from the settings page.
 
+= Is Auto-Close still being actively developed? =
+Following 3.2.0, Auto-Close moves to maintenance-only support: no new features are planned, but it continues to receive security, compatibility, and regression fixes. Your settings, scheduled jobs, and existing behavior are unaffected by this change.
+
 = How can I report security bugs? =
 
 You can report security bugs through the Patchstack Vulnerability Disclosure Program. The Patchstack team help validate, triage and handle any security vulnerabilities. [Report a security vulnerability.](https://patchstack.com/database/wordpress/plugin/autoclose/vdp)
@@ -79,6 +82,7 @@ Adds per-post-type closing ages, an approved-comment threshold, Tools page previ
 = 3.2.0 =
 
 Release date: 10 September 2026
+Release post: https://webberzone.com/announcements/auto-close-v3-2/
 
 **Added**
 
