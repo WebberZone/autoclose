@@ -75,7 +75,7 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 == Upgrade Notice ==
 
 = 3.2.0 =
-Adds per-post-type closing ages, an approved-comment threshold, Tools page previews, a cron status panel, and a configuration report, plus fixes for close dates, revision restores, and caching. Review revision retention settings before enabling cleanup.
+Behavior change: scheduled revision cleanup now keeps revisions within each post's retention limit and newer than the age cutoff (90 days) instead of deleting all; check the Revisions tab if enabled. On fortnightly or monthly maintenance, confirm a next run on the Tools page.
 
 == Changelog ==
 
@@ -86,9 +86,8 @@ Release post: https://webberzone.com/announcements/auto-close-v3-2/
 
 **Added**
 
-* Added WP-CLI commands for status, maintenance, discussions, revisions, pingbacks, close dates, and cron.
+* Added WP-CLI commands for status, settings, maintenance runs, comments, pings, pingbacks, revisions, close dates, and cron.
 * Added age- and retention-aware revision pruning with a 90-day default cutoff and the `acc_revisions_prune_limit` and `acc_revisions_prune_cutoff` filters.
-* Added `fortnightly` and `monthly` cron recurrences.
 * Independent per-post-type age overrides for closing comments and pingbacks/trackbacks, alongside the existing global age.
 * An optional approved-comment count threshold: comments close once a post reaches the configured count, in addition to the age rule.
 * A read-only Preview changes option on the Tools page for the closing algorithm, pingback/trackback deletion, and revision deletion, showing matching counts, scope, and a sample of affected posts before you run them.
@@ -110,6 +109,7 @@ Release post: https://webberzone.com/announcements/auto-close-v3-2/
 * Fixed close-date results, date controls, DST validation, and discussion age cutoff calculations.
 * Revision deletion now removes orphaned metadata and term relationships.
 * Fixed stale caches, cache invalidation notifications, and per-site cron notification counts.
+* Fixed the `fortnightly` and `monthly` maintenance recurrences, which were selectable but never registered, so choosing either scheduled no maintenance event at all. Sites on either setting should confirm a next run on the Tools page.
 
 = Earlier versions =
 
