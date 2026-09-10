@@ -23,7 +23,7 @@ Guidance for Claude Code (claude.ai/code) working in this repository.
 
 ## Plugin Overview
 
-**Auto-Close Comments, Pingbacks and Trackbacks** (slug: `autoclose`) is a WordPress plugin (v3.1.2) that closes comments/pingbacks/trackbacks after a configurable age, manages revision limits, and can block self-pings, via WP-Cron (`acc_cron_hook`). Namespace: `WebberZone\AutoClose`. Requires WordPress 6.6+, PHP 7.4+. No Freemius.
+**Auto-Close Comments, Pingbacks and Trackbacks** (slug: `autoclose`) is a WordPress plugin (v3.2.0) that closes comments/pingbacks/trackbacks after a configurable age or approved-comment count, manages revision limits, and can block self-pings, via WP-Cron (`acc_cron_hook`). Namespace: `WebberZone\AutoClose`. Requires WordPress 6.6+, PHP 7.4+. No Freemius.
 
 Constants defined in `autoclose.php`: `ACC_PLUGIN_VERSION`, `ACC_PLUGIN_DIR`, `ACC_PLUGIN_URL`, `ACC_PLUGIN_FILE`.
 
@@ -64,8 +64,9 @@ Singleton (`AutoClose::get_instance()`). Unlike other WebberZone plugins, hooks 
 
 - `load_dependencies()` — instantiates `Admin\Settings`
 - `set_locale()` — hooks `Util\L10n::load_plugin_textdomain` on `init`
-- `define_admin_hooks()` — instantiates `Admin\Admin` and `Admin\Tools`; registers plugin row meta/action links and the tools admin menu page
-- `define_feature_hooks()` — instantiates all feature classes and registers their hooks
+- `define_admin_hooks()` — instantiates `Admin\Admin`, `Admin\Tools` and `Admin\Revision_Policy_Notice`; registers plugin row meta/action links, the tools admin menu page and the revision policy notice
+- `define_feature_hooks()` — instantiates all feature classes, wires `Maintenance\Runner` to `acc_cron_hook`, and registers their hooks
+- `define_cli_hooks()` — registers `CLI\CLI_Manager` when `WP_CLI` is defined and truthy
 
 `run()` is a no-op — hooks are already registered.
 
@@ -73,22 +74,35 @@ Singleton (`AutoClose::get_instance()`). Unlike other WebberZone plugins, hooks 
 
 Each feature class is instantiated once in `define_feature_hooks()`. `Comments`, `Revisions`, `Block_Pings`, and `Close_Date` register hooks there; `Reopen` and `Notifications` register hooks in their own constructors. All hook registration goes through `Util\Hook_Registry::add_action()`/`add_filter()`.
 
-- **`Comments`** — `process_comments()` runs on `acc_cron_hook`; closes comments on posts older than the configured age, per post type, with optional term exclusions.
-- **`Revisions`** — `process_revisions()` runs on `acc_cron_hook`; deletes revisions beyond the configured limit. `revisions_to_keep()` hooks `wp_revisions_to_keep` to enforce per-post-type limits on new saves.
+`acc_cron_hook` runs `Maintenance\Runner::run()`, not the feature classes directly — the Runner owns scheduled maintenance and the features expose the operations it calls.
+
+- **`Comments`** — closes comments and pings on eligible posts, per post type, with optional term exclusions. `get_effective_age()` resolves the per-post-type age override: `-2` inherits the global `comment_age`/`pbtb_age`, `-1` disables closing for that post type, `0` or higher is an explicit age in days. An optional approved-comment count threshold (`comment_count_threshold`) is OR'd with the age condition. Also migrates legacy `close` discussion statuses to `closed` once per site.
+- **`Revisions`** — scheduled cleanup deletes a revision only when it is both beyond its post's retention limit and older than the age cutoff (`revision_age`, default 90); autosaves are never touched. Bounded per run by `acc_revisions_prune_limit` (default 1000) and gated by `acc_revisions_prune_cutoff` (a UTC timestamp; `null` drops the age condition). `delete_all_revisions()` is the unconditional Tools-page path. `revisions_to_keep()` hooks `wp_revisions_to_keep` to enforce per-post-type limits on new saves.
 - **`Block_Pings`** — hooks `pre_ping` to prevent self-pings.
-- **`Close_Date`** — closes based on a specific date rather than age.
-- **`Reopen`** — auto-reopens comments/pings on post update when configured.
+- **`Close_Date`** — closes based on a specific date rather than age. `restore_scheduled_events()` reconciles stored close dates back into one-off cron events after activation, batched with a cursor and closing anything already overdue.
+- **`Reopen`** — auto-reopens comments/pings on post update when configured. `restore_after_revision()` guards `wp_restore_post_revision` so a revision restore does not silently reopen a closed post.
 - **`Notifications`** — sends an email summary after the cron job completes; template at `includes/features/views/email-cron-summary.php`.
+
+### Maintenance (`includes/maintenance/`)
+
+- **`Runner`** — the `acc_cron_hook` handler. `run($dry_run, $sample_limit)` executes configured maintenance; `preview()` returns the same shape without changing anything; `deletes_data()` reports whether the current configuration makes a run destructive.
+- **`Status`** — persists run state in the `acc_maintenance_status` option (`record_attempt()`/`record_run()`) and reports scheduling health via `get()`, backing the Tools page status panel and `wp autoclose status`.
+- **`Config_Report`** — builds the on-demand configuration report: effective settings and counts only, never post content, comment text or credentials.
 
 ### Cron (`includes/util/class-cron.php`)
 
-`Cron::enable_run($hour, $min, $recurrence)` schedules the `acc_cron_hook` WP-Cron event; called from `Core\Activator` on activation and from Settings on save when the scheduler option changes.
+`Cron::enable_run($hour, $min, $recurrence, $future = false, $force = false)` schedules the `acc_cron_hook` WP-Cron event; called from `Core\Activator` on activation and from Settings on save when the scheduler option changes. `repair($force)` re-registers a drifted or missing schedule, and also schedules the close-date restore when it has not completed. `register_schedules()` adds the `fortnightly` and `monthly` recurrences to `cron_schedules` — both were selectable before 3.2.0 but unregistered, so `wp_schedule_event()` silently failed.
+
+### WP-CLI (`includes/cli/`)
+
+Registered only under WP-CLI. `CLI_Manager::register()` maps `CLI` to `wp autoclose` (subcommands `status` and `run`) plus one class per namespace: `settings`, `comments`, `pings`, `pingbacks`, `revisions`, `close-date`, `cron`. `Discussions_Command` is the shared base for `Comments_Command` and `Pings_Command` and is not registered itself. `Base_Command` supplies `--format` handling. Everything that changes content accepts `--dry-run`; `cron repair` does not, as it touches no content. User-facing reference: `docs/02-acc-advanced/autoclose-wp-cli.md`.
 
 ### Admin (`includes/admin/`)
 
-- **`Settings`** — Settings page under Settings menu (`acc_options_page`). Tabs: General (cron schedule, email notifications), Comments, Pingbacks/Trackbacks, Revisions.
-- **`Tools`** — tools page for one-time manual runs.
+- **`Settings`** — Settings page under Settings menu (`acc_options_page`). Tabs: General (cron schedule, email notifications, deactivation guidance), Comments, Pingbacks/Trackbacks, Revisions. The Comments and Pingbacks/Trackbacks tabs carry the per-post-type age overrides alongside the global age.
+- **`Tools`** — tools page (`acc_tools_page`) for one-time manual runs, plus the AutoClose Status panel, the Repair schedule action and the Configuration Report. Each destructive action has a read-only **Preview changes** button; the two reopening actions do not.
 - **`Metabox`** — Per-post override meta for keeping comments/pings open regardless of global settings.
+- **`Revision_Policy_Notice`** — one-time dismissible notice explaining the 3.2.0 revision cleanup change. Hooked on `admin_notices` (all admin screens, not scoped to the Revisions tab) and shown only when `delete_revisions` is enabled; acknowledgement stored in `acc_revision_policy_ack`.
 
 ### Options access
 
