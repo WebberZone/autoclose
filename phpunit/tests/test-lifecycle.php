@@ -22,214 +22,310 @@ class LifecycleTest extends WP_UnitTestCase {
 	 */
 	public function tear_down() {
 		wp_clear_scheduled_hook( 'acc_cron_hook' );
-		wp_clear_scheduled_hook( 'autoclose_close_comments_pings_event' );
-		wp_clear_scheduled_hook( Close_Date::RESTORE_HOOK );
+		wp_unschedule_hook( Close_Date::LEGACY_EVENT_HOOK );
+		wp_unschedule_hook( Close_Date::SWEEP_HOOK );
 		delete_option( Options_API::SETTINGS_OPTION );
-		delete_option( 'acc_close_date_restore_cursor' );
-		delete_option( 'acc_close_date_restore_attempts' );
-		delete_option( Close_Date::RESTORE_DONE_OPTION );
+		delete_option( Close_Date::MIGRATED_OPTION );
 		Options_API::flush_cache();
 
 		parent::tear_down();
 	}
 
 	/**
-	 * Persisted future dates are restored without creating duplicate events.
+	 * Create posts without the reopen handler rewriting their discussion state.
+	 *
+	 * @param int $count Number of posts.
+	 * @return array<int> Post IDs.
 	 */
-	public function test_restore_scheduled_events_reconciles_future_dates() {
-		$post_id = self::factory()->post->create();
+	private function create_posts( int $count ): array {
+		$post_ids = array();
+		Reopen::without_reopening(
+			function () use ( &$post_ids, $count ) {
+				$post_ids = self::factory()->post->create_many( $count, array( 'comment_status' => 'open' ) );
+			}
+		);
+
+		return $post_ids;
+	}
+
+	/**
+	 * A future date waits for the sweep instead of creating a per-post event.
+	 */
+	public function test_future_dates_are_left_to_the_sweep() {
+		$post_id = $this->create_posts( 1 )[0];
 		update_post_meta( $post_id, '_acc_comments_date', wp_date( 'Y-m-d\\TH:i', time() + DAY_IN_SECONDS ) );
 		update_post_meta( $post_id, '_acc_pings_date', wp_date( 'Y-m-d\\TH:i', time() + ( 2 * DAY_IN_SECONDS ) ) );
 
-		$close_date = new Close_Date();
-		$first      = $close_date->restore_scheduled_events();
-		$comments   = wp_get_scheduled_event( 'autoclose_close_comments_pings_event', array( $post_id, 'comments' ) );
-		$pings      = wp_get_scheduled_event( 'autoclose_close_comments_pings_event', array( $post_id, 'pings' ) );
-		$second     = $close_date->restore_scheduled_events();
-
-		$this->assertSame( 'success', $first['status'] );
-		$this->assertSame( 1, $first['posts'] );
-		$this->assertSame( 2, $first['scheduled'] );
-		$this->assertSame( 2, $second['scheduled'] );
-		$this->assertNotFalse( $comments );
-		$this->assertNotFalse( $pings );
-	}
-
-	/**
-	 * Overdue persisted dates close content during reconciliation.
-	 */
-	public function test_restore_scheduled_events_closes_overdue_dates() {
-		update_option(
-			Options_API::SETTINGS_OPTION,
-			array(
-				'reopen_on_update' => 1,
-				'reopen_days'      => 30,
-			)
-		);
-		Options_API::flush_cache();
-
-		$post_id = 0;
-		Reopen::without_reopening(
-			static function () use ( &$post_id ) {
-				$post_id = self::factory()->post->create(
-					array(
-						'comment_status' => 'open',
-						'ping_status'    => 'open',
-					)
-				);
-			}
-		);
-		update_post_meta( $post_id, '_acc_comments_date', wp_date( 'Y-m-d\\TH:i', time() - DAY_IN_SECONDS ) );
-
-		$result = ( new Close_Date() )->restore_scheduled_events();
+		$result = ( new Close_Date() )->maybe_schedule_or_close( $post_id );
 
 		$this->assertSame( 'success', $result['status'] );
-		$this->assertSame( 1, $result['closed'] );
-		$this->assertSame( 'closed', get_post_field( 'comment_status', $post_id ) );
-		$this->assertFalse( metadata_exists( 'post', $post_id, '_acc_reopen_until' ) );
-		$this->assertFalse( wp_get_scheduled_event( 'autoclose_close_comments_pings_event', array( $post_id, 'comments' ) ) );
+		$this->assertSame( 2, $result['scheduled'] );
+		$this->assertSame( 0, $result['closed'] );
+		$this->assertSame( 'open', get_post_field( 'comment_status', $post_id ) );
+		$this->assertNotFalse( wp_next_scheduled( Close_Date::SWEEP_HOOK ) );
+		$this->assertFalse( wp_get_scheduled_event( Close_Date::LEGACY_EVENT_HOOK, array( $post_id, 'comments' ) ) );
 	}
 
 	/**
-	 * Large close-date restores resume through bounded continuation requests.
+	 * The number of scheduled events does not grow with the number of close dates.
 	 */
-	public function test_restore_scheduled_events_resumes_after_run_limit() {
-		$post_ids = array();
-		Reopen::without_reopening(
-			static function () use ( &$post_ids ) {
-				$post_ids = self::factory()->post->create_many( 501 );
-			}
-		);
+	public function test_close_dates_do_not_create_per_post_events() {
+		$post_ids = $this->create_posts( 25 );
+		$due      = wp_date( 'Y-m-d\\TH:i', time() + DAY_IN_SECONDS );
 
 		foreach ( $post_ids as $post_id ) {
-			update_post_meta( $post_id, '_acc_comments_date', wp_date( 'Y-m-d\\TH:i', time() + DAY_IN_SECONDS ) );
+			update_post_meta( $post_id, '_acc_comments_date', $due );
+			update_post_meta( $post_id, '_acc_pings_date', $due );
+			( new Close_Date() )->maybe_schedule_or_close( $post_id );
 		}
+
+		$events = 0;
+		foreach ( (array) _get_cron_array() as $hooks ) {
+			foreach ( $hooks as $hook => $registered ) {
+				if ( Close_Date::SWEEP_HOOK === $hook || Close_Date::LEGACY_EVENT_HOOK === $hook ) {
+					$events += count( $registered );
+				}
+			}
+		}
+
+		$this->assertSame( 1, $events );
+	}
+
+	/**
+	 * The sweep closes due dates and clears the meta it applied.
+	 */
+	public function test_sweep_closes_due_dates_and_clears_applied_meta() {
+		$post_ids = $this->create_posts( 2 );
+		update_post_meta( $post_ids[0], '_acc_comments_date', wp_date( 'Y-m-d\\TH:i', time() - HOUR_IN_SECONDS ) );
+		update_post_meta( $post_ids[0], '_acc_pings_date', wp_date( 'Y-m-d\\TH:i', time() - HOUR_IN_SECONDS ) );
+		update_post_meta( $post_ids[1], '_acc_comments_date', wp_date( 'Y-m-d\\TH:i', time() + DAY_IN_SECONDS ) );
+
+		$result = ( new Close_Date() )->process_due_dates();
+
+		$this->assertSame( 'success', $result['status'] );
+		$this->assertSame( 1, $result['posts'] );
+		$this->assertSame( 2, $result['closed'] );
+		$this->assertFalse( $result['pending'] );
+		$this->assertSame( 'closed', get_post_field( 'comment_status', $post_ids[0] ) );
+		$this->assertSame( 'closed', get_post_field( 'ping_status', $post_ids[0] ) );
+		$this->assertFalse( metadata_exists( 'post', $post_ids[0], '_acc_comments_date' ) );
+		$this->assertFalse( metadata_exists( 'post', $post_ids[0], '_acc_pings_date' ) );
+		$this->assertSame( 'open', get_post_field( 'comment_status', $post_ids[1] ) );
+		$this->assertTrue( metadata_exists( 'post', $post_ids[1], '_acc_comments_date' ) );
+	}
+
+	/**
+	 * A second sweep finds nothing left to do.
+	 */
+	public function test_sweep_is_idempotent() {
+		$post_id = $this->create_posts( 1 )[0];
+		update_post_meta( $post_id, '_acc_comments_date', wp_date( 'Y-m-d\\TH:i', time() - HOUR_IN_SECONDS ) );
 
 		$close_date = new Close_Date();
-		$first      = $close_date->restore_scheduled_events();
+		$first      = $close_date->process_due_dates();
+		$second     = $close_date->process_due_dates();
 
-		$this->assertSame( 'success', $first['status'] );
-		$this->assertTrue( $first['pending'] );
-		$this->assertSame( 500, $first['posts'] );
-		$this->assertNotFalse( get_option( 'acc_close_date_restore_cursor', false ) );
-		$this->assertNotFalse( wp_get_scheduled_event( Close_Date::RESTORE_HOOK ) );
-
-		wp_clear_scheduled_hook( Close_Date::RESTORE_HOOK );
-		$second = $close_date->restore_scheduled_events();
-
-		$this->assertSame( 'success', $second['status'] );
-		$this->assertFalse( $second['pending'] );
-		$this->assertSame( 1, $second['posts'] );
-		$this->assertFalse( get_option( 'acc_close_date_restore_cursor', false ) );
+		$this->assertSame( 1, $first['closed'] );
+		$this->assertSame( 0, $second['posts'] );
+		$this->assertSame( 0, $second['closed'] );
 	}
 
 	/**
-	 * A failed continuation schedule retains the cursor for the next activation.
+	 * A long backlog is applied over several bounded requests.
 	 */
-	public function test_restore_scheduled_events_retains_cursor_when_continuation_fails() {
-		$post_ids = self::factory()->post->create_many( 501 );
+	public function test_sweep_defers_the_remainder_of_a_large_backlog() {
+		$post_ids = $this->create_posts( 4 );
+		$due      = wp_date( 'Y-m-d\\TH:i', time() - HOUR_IN_SECONDS );
 
 		foreach ( $post_ids as $post_id ) {
-			update_post_meta( $post_id, '_acc_comments_date', wp_date( 'Y-m-d\\TH:i', time() + DAY_IN_SECONDS ) );
+			update_post_meta( $post_id, '_acc_comments_date', $due );
 		}
 
-		$reject_schedule = static function ( $pre, $event ) {
-			if ( Close_Date::RESTORE_HOOK === $event->hook ) {
-				return new WP_Error( 'forced_schedule_failure', 'Forced test failure.' );
-			}
-
-			return $pre;
+		$small_batches = static function () {
+			return 2;
 		};
-		add_filter( 'pre_schedule_event', $reject_schedule, 10, 2 );
+		add_filter( 'acc_close_dates_batch_size', $small_batches );
+		add_filter( 'acc_close_dates_sweep_limit', $small_batches );
 
 		try {
-			$result = ( new Close_Date() )->restore_scheduled_events();
+			$close_date = new Close_Date();
+			$first      = $close_date->process_due_dates();
+			$this->assertTrue( $first['pending'] );
+			$this->assertSame( 2, $first['closed'] );
+			$this->assertNotFalse( wp_next_scheduled( Close_Date::SWEEP_HOOK ) );
+
+			$second = $close_date->process_due_dates();
+			$this->assertSame( 2, $second['closed'] );
+
+			$third = $close_date->process_due_dates();
+			$this->assertFalse( $third['pending'] );
+			$this->assertSame( 0, $third['posts'] );
 		} finally {
-			remove_filter( 'pre_schedule_event', $reject_schedule, 10 );
+			remove_filter( 'acc_close_dates_batch_size', $small_batches );
+			remove_filter( 'acc_close_dates_sweep_limit', $small_batches );
+		}
+
+		foreach ( $post_ids as $post_id ) {
+			$this->assertSame( 'closed', get_post_field( 'comment_status', $post_id ) );
+		}
+	}
+
+	/**
+	 * A pending continuation is not mistaken for the recurring sweep.
+	 */
+	public function test_continuation_does_not_disturb_the_recurring_sweep() {
+		$post_ids = $this->create_posts( 4 );
+		$due      = wp_date( 'Y-m-d\\TH:i', time() - HOUR_IN_SECONDS );
+
+		foreach ( $post_ids as $post_id ) {
+			update_post_meta( $post_id, '_acc_comments_date', $due );
+		}
+
+		Close_Date::schedule_sweep();
+		$recurring = wp_get_scheduled_event( Close_Date::SWEEP_HOOK );
+
+		$small_batches = static function () {
+			return 2;
+		};
+		add_filter( 'acc_close_dates_batch_size', $small_batches );
+		add_filter( 'acc_close_dates_sweep_limit', $small_batches );
+
+		try {
+			$close_date = new Close_Date();
+			$result     = $close_date->process_due_dates();
+			$this->assertTrue( $result['pending'] );
+
+			// A metabox save while a continuation is pending must not clear it.
+			$pending_post = $this->create_posts( 1 )[0];
+			update_post_meta( $pending_post, '_acc_comments_date', wp_date( 'Y-m-d\\TH:i', time() + DAY_IN_SECONDS ) );
+			$close_date->maybe_schedule_or_close( $pending_post );
+
+			$after = wp_get_scheduled_event( Close_Date::SWEEP_HOOK );
+			$this->assertSame( $recurring->timestamp, $after->timestamp );
+			$this->assertSame( $recurring->schedule, $after->schedule );
+			$this->assertNotFalse( wp_next_scheduled( Close_Date::SWEEP_HOOK, array( 'continuation' ) ) );
+
+			$this->assertSame( 2, $close_date->process_due_dates()['closed'] );
+		} finally {
+			remove_filter( 'acc_close_dates_batch_size', $small_batches );
+			remove_filter( 'acc_close_dates_sweep_limit', $small_batches );
+		}
+	}
+
+	/**
+	 * An unparseable stored date is dropped so it cannot stall the sweep.
+	 */
+	public function test_sweep_drops_an_invalid_stored_date() {
+		$post_id = $this->create_posts( 1 )[0];
+		update_post_meta( $post_id, '_acc_comments_date', '0000-00-00T00:00' );
+
+		$result = ( new Close_Date() )->process_due_dates();
+
+		$this->assertSame( 'failed', $result['status'] );
+		$this->assertNotEmpty( $result['errors'] );
+		$this->assertFalse( metadata_exists( 'post', $post_id, '_acc_comments_date' ) );
+	}
+
+	/**
+	 * A database failure is reported instead of being treated as no work.
+	 */
+	public function test_sweep_reports_a_database_failure() {
+		global $wpdb;
+
+		$postmeta       = $wpdb->postmeta;
+		$suppressed     = $wpdb->suppress_errors( true );
+		$wpdb->postmeta = $wpdb->prefix . 'missing_autoclose_meta';
+
+		try {
+			$result = ( new Close_Date() )->process_due_dates();
+		} finally {
+			$wpdb->postmeta = $postmeta;
+			$wpdb->suppress_errors( $suppressed );
 		}
 
 		$this->assertSame( 'failed', $result['status'] );
-		$this->assertTrue( $result['pending'] );
 		$this->assertNotEmpty( $result['errors'] );
-		$this->assertNotFalse( get_option( 'acc_close_date_restore_cursor', false ) );
+		$this->assertFalse( $result['pending'] );
 	}
 
 	/**
-	 * A database failure during close-date restoration is reported.
+	 * Upgrading removes the per-post events scheduled by earlier versions.
 	 */
-	public function test_restore_scheduled_events_reports_selection_failure() {
-		global $wpdb;
+	public function test_migration_clears_legacy_per_post_events() {
+		$post_ids = $this->create_posts( 2 );
 
-		$posts_table = $wpdb->posts;
-		$suppressed  = $wpdb->suppress_errors( true );
-		$wpdb->posts = $wpdb->prefix . 'missing_autoclose_posts';
-
-		try {
-			$result = ( new Close_Date() )->restore_scheduled_events();
-		} finally {
-			$wpdb->posts = $posts_table;
-			$wpdb->suppress_errors( $suppressed );
+		foreach ( $post_ids as $post_id ) {
+			wp_schedule_single_event( time() + DAY_IN_SECONDS, Close_Date::LEGACY_EVENT_HOOK, array( $post_id, 'comments' ) );
 		}
 
-		$this->assertSame( 'failed', $result['status'] );
-		$this->assertNotEmpty( $result['errors'] );
-		$this->assertTrue( $result['pending'] );
-		$this->assertNotFalse( wp_get_scheduled_event( Close_Date::RESTORE_HOOK ) );
+		$this->assertNotFalse( wp_get_scheduled_event( Close_Date::LEGACY_EVENT_HOOK, array( $post_ids[0], 'comments' ) ) );
+
+		delete_option( Close_Date::MIGRATED_OPTION );
+		Close_Date::maybe_migrate();
+
+		foreach ( $post_ids as $post_id ) {
+			$this->assertFalse( wp_get_scheduled_event( Close_Date::LEGACY_EVENT_HOOK, array( $post_id, 'comments' ) ) );
+		}
+
+		$this->assertTrue( (bool) get_option( Close_Date::MIGRATED_OPTION ) );
+		$this->assertNotFalse( wp_next_scheduled( Close_Date::SWEEP_HOOK ) );
 	}
 
 	/**
-	 * Repeated selection failures stop re-arming the restore continuation.
+	 * A missing sweep is restored without repeating the migration.
 	 */
-	public function test_restore_scheduled_events_stops_retrying_after_repeated_failures() {
-		global $wpdb;
+	public function test_migration_restores_a_missing_sweep() {
+		Close_Date::maybe_migrate();
+		wp_clear_scheduled_hook( Close_Date::SWEEP_HOOK );
 
-		$posts_table = $wpdb->posts;
-		$suppressed  = $wpdb->suppress_errors( true );
-		$wpdb->posts = $wpdb->prefix . 'missing_autoclose_posts';
-		$close_date  = new Close_Date();
-		$results     = array();
+		Close_Date::maybe_migrate();
 
-		try {
-			for ( $attempt = 0; $attempt < 5; $attempt++ ) {
-				wp_clear_scheduled_hook( Close_Date::RESTORE_HOOK );
-				$results[] = $close_date->restore_scheduled_events();
-			}
-		} finally {
-			$wpdb->posts = $posts_table;
-			$wpdb->suppress_errors( $suppressed );
-		}
-
-		$this->assertTrue( $results[0]['pending'] );
-		$this->assertTrue( $results[3]['pending'] );
-		$this->assertFalse( $results[4]['pending'] );
-		$this->assertSame( 'failed', $results[4]['status'] );
-		$this->assertFalse( wp_get_scheduled_event( Close_Date::RESTORE_HOOK ) );
-		$this->assertFalse( get_option( 'acc_close_date_restore_attempts', false ) );
+		$this->assertNotFalse( wp_next_scheduled( Close_Date::SWEEP_HOOK ) );
 	}
 
 	/**
-	 * A successful selection clears the failure counter.
+	 * The sweep recurrence is filterable and falls back to a registered schedule.
 	 */
-	public function test_restore_scheduled_events_resets_failure_counter_on_success() {
-		global $wpdb;
+	public function test_sweep_recurrence_is_filterable() {
+		$this->assertSame( 'hourly', Close_Date::get_sweep_recurrence() );
 
-		$posts_table = $wpdb->posts;
-		$suppressed  = $wpdb->suppress_errors( true );
-		$wpdb->posts = $wpdb->prefix . 'missing_autoclose_posts';
+		$daily = static function () {
+			return 'daily';
+		};
+		add_filter( 'acc_close_dates_recurrence', $daily );
 
 		try {
-			( new Close_Date() )->restore_scheduled_events();
+			$this->assertSame( 'daily', Close_Date::get_sweep_recurrence() );
+			Close_Date::schedule_sweep();
+			$event = wp_get_scheduled_event( Close_Date::SWEEP_HOOK );
+			$this->assertSame( 'daily', $event->schedule );
 		} finally {
-			$wpdb->posts = $posts_table;
-			$wpdb->suppress_errors( $suppressed );
+			remove_filter( 'acc_close_dates_recurrence', $daily );
 		}
 
-		$this->assertSame( 1, (int) get_option( 'acc_close_date_restore_attempts', 0 ) );
+		$unknown = static function () {
+			return 'not_a_registered_schedule';
+		};
+		add_filter( 'acc_close_dates_recurrence', $unknown );
 
-		wp_clear_scheduled_hook( Close_Date::RESTORE_HOOK );
-		( new Close_Date() )->restore_scheduled_events();
+		try {
+			$this->assertSame( 'hourly', Close_Date::get_sweep_recurrence() );
+		} finally {
+			remove_filter( 'acc_close_dates_recurrence', $unknown );
+		}
+	}
 
-		$this->assertFalse( get_option( 'acc_close_date_restore_attempts', false ) );
+	/**
+	 * Activation registers the sweep and leaves existing content untouched.
+	 */
+	public function test_activation_registers_the_sweep() {
+		$post_id = $this->create_posts( 1 )[0];
+		update_post_meta( $post_id, '_acc_comments_date', wp_date( 'Y-m-d\\TH:i', time() - DAY_IN_SECONDS ) );
+
+		Activator::activate( false );
+
+		$this->assertNotFalse( wp_next_scheduled( Close_Date::SWEEP_HOOK ) );
+		$this->assertSame( 'open', get_post_field( 'comment_status', $post_id ) );
 	}
 
 	/**
@@ -257,169 +353,39 @@ class LifecycleTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * A post error does not leave a cursor that can skip a later retry.
+	 * Deactivation clears the sweep and any legacy events left behind.
 	 */
-	public function test_restore_scheduled_events_retries_after_post_failure() {
-		$post_ids = self::factory()->post->create_many( 3 );
-
-		foreach ( $post_ids as $post_id ) {
-			update_post_meta( $post_id, '_acc_comments_date', wp_date( 'Y-m-d\\TH:i', time() + DAY_IN_SECONDS ) );
-		}
-
-		$close_date = new class() extends Close_Date {
-
-			/**
-			 * IDs passed to the reconciliation method.
-			 *
-			 * @var array<int>
-			 */
-			public $calls = array();
-
-			/**
-			 * Whether the next reconciliation should fail.
-			 *
-			 * @var bool
-			 */
-			public $fail_next = true;
-
-			/**
-			 * Record a reconciliation and fail once.
-			 *
-			 * @param int $post_id Post ID.
-			 * @return array Result data.
-			 */
-			public function maybe_schedule_or_close( $post_id ): array {
-				$this->calls[] = (int) $post_id;
-
-				if ( $this->fail_next ) {
-					$this->fail_next = false;
-
-					return array(
-						'scheduled' => 0,
-						'closed'    => 0,
-						'errors'    => array( 'Forced test failure.' ),
-					);
-				}
-
-				return array(
-					'scheduled' => 1,
-					'closed'    => 0,
-					'errors'    => array(),
-				);
-			}
-		};
-
-		$first = $close_date->restore_scheduled_events();
-
-		$this->assertSame( 'failed', $first['status'] );
-		$this->assertSame( 3, $first['posts'] );
-		$this->assertFalse( get_option( 'acc_close_date_restore_cursor', false ) );
-
-		$second = $close_date->restore_scheduled_events();
-
-		$this->assertSame( 'success', $second['status'] );
-		$this->assertSame( 3, $second['posts'] );
-		$this->assertCount( 6, $close_date->calls );
-		$this->assertSame( $close_date->calls[0], $close_date->calls[3] );
-	}
-
-	/**
-	 * Activation defers close-date reconciliation to a scheduled request.
-	 */
-	public function test_activation_defers_close_date_restoration() {
-		$post_id = self::factory()->post->create( array( 'comment_status' => 'open' ) );
-		update_post_meta( $post_id, '_acc_comments_date', wp_date( 'Y-m-d\\TH:i', time() - DAY_IN_SECONDS ) );
-
-		Activator::activate( false );
-
-		$event = wp_get_scheduled_event( Close_Date::RESTORE_HOOK );
-
-		$this->assertNotFalse( $event );
-		$this->assertGreaterThan( time(), (int) $event->timestamp );
-		$this->assertSame( 'open', get_post_field( 'comment_status', $post_id ) );
-	}
-
-	/**
-	 * A completed restore does not block a later retry after reactivation:
-	 * deactivation clears the completion marker, so if the reactivation-time
-	 * schedule attempt itself fails, cron repair can still re-queue it.
-	 */
-	public function test_repair_requeues_restore_after_failed_reactivation_schedule() {
-		$post_id = self::factory()->post->create();
-		update_post_meta( $post_id, '_acc_comments_date', wp_date( 'Y-m-d\\TH:i', time() + DAY_IN_SECONDS ) );
-
-		$result = ( new Close_Date() )->restore_scheduled_events();
-		$this->assertSame( 'success', $result['status'] );
-		$this->assertFalse( $result['pending'] );
-		$this->assertTrue( Close_Date::is_restore_done() );
+	public function test_deactivation_clears_scheduled_work() {
+		$post_id = $this->create_posts( 1 )[0];
+		wp_schedule_single_event( time() + DAY_IN_SECONDS, Close_Date::LEGACY_EVENT_HOOK, array( $post_id, 'comments' ) );
+		Close_Date::maybe_migrate();
 
 		Deactivator::deactivate( false );
 
-		$this->assertFalse( Close_Date::is_restore_done() );
-		$this->assertFalse( wp_next_scheduled( Close_Date::RESTORE_HOOK ) );
-
-		$reject_schedule = static function ( $pre, $event ) {
-			if ( Close_Date::RESTORE_HOOK === $event->hook ) {
-				return new WP_Error( 'forced_schedule_failure', 'Forced test failure.' );
-			}
-
-			return $pre;
-		};
-		add_filter( 'pre_schedule_event', $reject_schedule, 10, 2 );
-
-		try {
-			Activator::activate( false );
-		} finally {
-			remove_filter( 'pre_schedule_event', $reject_schedule, 10 );
-		}
-
-		$this->assertFalse( wp_next_scheduled( Close_Date::RESTORE_HOOK ) );
-
-		( new Cron() )->repair();
-
-		$this->assertNotFalse( wp_next_scheduled( Close_Date::RESTORE_HOOK ) );
+		$this->assertFalse( wp_next_scheduled( Close_Date::SWEEP_HOOK ) );
+		$this->assertFalse( wp_get_scheduled_event( Close_Date::LEGACY_EVENT_HOOK, array( $post_id, 'comments' ) ) );
+		$this->assertFalse( get_option( Close_Date::MIGRATED_OPTION, false ) );
 	}
 
 	/**
-	 * A per-post error during a full scan does not mark the restore done, so
-	 * a consumed one-shot restore event can be re-queued from the beginning
-	 * via cron repair rather than being permanently skipped.
+	 * Cron repair re-registers a missing sweep.
 	 */
-	public function test_repair_requeues_restore_after_full_scan_post_error() {
-		$post_ids = self::factory()->post->create_many( 2 );
+	public function test_repair_registers_a_missing_sweep() {
+		update_option(
+			Options_API::SETTINGS_OPTION,
+			array(
+				'cron_on'         => 1,
+				'cron_hour'       => 0,
+				'cron_min'        => 0,
+				'cron_recurrence' => 'daily',
+			)
+		);
+		Options_API::flush_cache();
+		wp_clear_scheduled_hook( Close_Date::SWEEP_HOOK );
 
-		foreach ( $post_ids as $post_id ) {
-			update_post_meta( $post_id, '_acc_comments_date', wp_date( 'Y-m-d\\TH:i', time() + DAY_IN_SECONDS ) );
-		}
+		$result = ( new Cron() )->repair();
 
-		$close_date = new class() extends Close_Date {
-			/**
-			 * Fail every reconciliation to simulate a persistent per-post error.
-			 *
-			 * @param int $post_id Post ID.
-			 * @return array Result data.
-			 */
-			public function maybe_schedule_or_close( $post_id ): array {
-				return array(
-					'scheduled' => 0,
-					'closed'    => 0,
-					'errors'    => array( 'Forced test failure.' ),
-				);
-			}
-		};
-
-		$result = $close_date->restore_scheduled_events();
-
-		$this->assertSame( 'failed', $result['status'] );
-		$this->assertFalse( $result['pending'] );
-		$this->assertNotEmpty( $result['errors'] );
-		$this->assertFalse( Close_Date::is_restore_done() );
-		$this->assertFalse( get_option( 'acc_close_date_restore_cursor', false ) );
-
-		wp_clear_scheduled_hook( Close_Date::RESTORE_HOOK );
-
-		( new Cron() )->repair();
-
-		$this->assertNotFalse( wp_next_scheduled( Close_Date::RESTORE_HOOK ) );
+		$this->assertSame( 'success', $result['outcome'] );
+		$this->assertNotFalse( wp_next_scheduled( Close_Date::SWEEP_HOOK ) );
 	}
 }

@@ -69,8 +69,8 @@ class Deactivator {
 	 */
 	private static function single_deactivate() {
 		wp_clear_scheduled_hook( 'acc_cron_hook' );
-		wp_clear_scheduled_hook( \WebberZone\AutoClose\Features\Close_Date::RESTORE_HOOK );
+		wp_unschedule_hook( \WebberZone\AutoClose\Features\Close_Date::SWEEP_HOOK );
 		wp_unschedule_hook( 'autoclose_close_comments_pings_event' );
-		delete_option( \WebberZone\AutoClose\Features\Close_Date::RESTORE_DONE_OPTION );
+		delete_option( \WebberZone\AutoClose\Features\Close_Date::MIGRATED_OPTION );
 	}
 }

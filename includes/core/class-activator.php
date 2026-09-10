@@ -69,14 +69,7 @@ class Activator {
 	 * @return void
 	 */
 	private static function single_activate() {
-		if ( false === wp_next_scheduled( \WebberZone\AutoClose\Features\Close_Date::RESTORE_HOOK ) ) {
-			wp_schedule_single_event(
-				time() + MINUTE_IN_SECONDS,
-				\WebberZone\AutoClose\Features\Close_Date::RESTORE_HOOK,
-				array(),
-				true
-			);
-		}
+		\WebberZone\AutoClose\Features\Close_Date::maybe_migrate();
 
 		if ( ! Options_API::get_option( 'cron_on' ) ) {
 			return;

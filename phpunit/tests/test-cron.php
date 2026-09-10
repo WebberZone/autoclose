@@ -19,9 +19,9 @@ class CronTest extends WP_UnitTestCase {
 	 */
 	public function tear_down() {
 		wp_clear_scheduled_hook( 'acc_cron_hook' );
-		wp_clear_scheduled_hook( 'autoclose_close_comments_pings_event' );
-		wp_clear_scheduled_hook( Close_Date::RESTORE_HOOK );
-		delete_option( Close_Date::RESTORE_DONE_OPTION );
+		wp_unschedule_hook( Close_Date::LEGACY_EVENT_HOOK );
+		wp_unschedule_hook( Close_Date::SWEEP_HOOK );
+		delete_option( Close_Date::MIGRATED_OPTION );
 
 		parent::tear_down();
 	}
@@ -89,17 +89,14 @@ class CronTest extends WP_UnitTestCase {
 		update_post_meta( $post_id, '_acc_pings_date', '2027-01-15T10:00' );
 
 		$result = ( new Close_Date() )->maybe_schedule_or_close( $post_id );
-		$event  = wp_get_scheduled_event( 'autoclose_close_comments_pings_event', array( $post_id, 'comments' ) );
 
 		$this->assertSame( 'success', $result['status'] );
 		$this->assertSame( 2, $result['scheduled'] );
-		$this->assertSame(
-			( new DateTimeImmutable( '2027-01-15T09:00:00', new DateTimeZone( 'America/New_York' ) ) )->getTimestamp(),
-			$event->timestamp
-		);
+		$this->assertSame( 0, $result['closed'] );
+		$this->assertNotFalse( wp_next_scheduled( Close_Date::SWEEP_HOOK ) );
 
 		update_post_meta( $post_id, '_acc_pings_date', '2026-01-01T00:00' );
-		( new Close_Date() )->maybe_close_due_comments_pings( $post_id, 'pings' );
+		( new Close_Date() )->process_due_dates();
 
 		$this->assertSame( 'open', get_post_field( 'comment_status', $post_id ) );
 		$this->assertSame( 'closed', get_post_field( 'ping_status', $post_id ) );
@@ -125,7 +122,7 @@ class CronTest extends WP_UnitTestCase {
 
 		$this->assertSame( 'failed', $result['status'] );
 		$this->assertNotEmpty( $result['errors'] );
-		$this->assertFalse( wp_get_scheduled_event( 'autoclose_close_comments_pings_event', array( $post_id, 'comments' ) ) );
+		$this->assertTrue( metadata_exists( 'post', $post_id, '_acc_comments_date' ) );
 
 		if ( empty( $original_timezone ) ) {
 			delete_option( 'timezone_string' );
@@ -232,28 +229,25 @@ class CronTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Repair reschedules a missing close-date restore event, e.g. after a
-	 * failed activation-time schedule.
+	 * Repair re-registers the close-date sweep when it is missing.
 	 */
-	public function test_repair_reschedules_missing_restore_event() {
-		wp_clear_scheduled_hook( Close_Date::RESTORE_HOOK );
-		delete_option( Close_Date::RESTORE_DONE_OPTION );
+	public function test_repair_reschedules_missing_sweep_event() {
+		wp_clear_scheduled_hook( Close_Date::SWEEP_HOOK );
 
 		( new Cron() )->repair();
 
-		$this->assertFalse( Close_Date::is_restore_done() );
-		$this->assertNotFalse( wp_next_scheduled( Close_Date::RESTORE_HOOK ) );
+		$this->assertNotFalse( wp_next_scheduled( Close_Date::SWEEP_HOOK ) );
 	}
 
 	/**
-	 * Repair does not reschedule the restore event once it has completed.
+	 * Repair leaves an existing sweep in place.
 	 */
-	public function test_repair_does_not_reschedule_completed_restore_event() {
-		wp_clear_scheduled_hook( Close_Date::RESTORE_HOOK );
-		update_option( Close_Date::RESTORE_DONE_OPTION, true, false );
+	public function test_repair_keeps_an_existing_sweep_event() {
+		Close_Date::schedule_sweep();
+		$before = wp_next_scheduled( Close_Date::SWEEP_HOOK );
 
 		( new Cron() )->repair();
 
-		$this->assertFalse( wp_next_scheduled( Close_Date::RESTORE_HOOK ) );
+		$this->assertSame( $before, wp_next_scheduled( Close_Date::SWEEP_HOOK ) );
 	}
 }

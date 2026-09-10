@@ -28,18 +28,18 @@ The two fields are independent: you can close comments on a specific date and le
 
 ## How the scheduled close works
 
-When you save the post, the plugin reads both date fields and schedules two separate single events on the WordPress cron:
+When you save the post, the plugin stores both date fields as post meta:
 
-- A `autoclose_close_comments_pings_event` event with argument `comments` at the configured close-comments timestamp.
-- A `autoclose_close_comments_pings_event` event with argument `pings` at the configured close-pings timestamp.
+- `_acc_comments_date` for the close-comments date.
+- `_acc_pings_date` for the close-pings date.
 
-When the event fires, the plugin checks the post's current state and closes comments or pingbacks if they are not already `closed`. If the configured date is already in the past at the moment you save the post, the close runs immediately on the next cron pass.
+A single hourly `autoclose_close_dates_event` sweep applies every due date on the site, so the close happens at the first sweep after the time you set rather than to the exact minute. If the configured date is already in the past when you save the post, the close runs immediately on save.
 
-If you change either date and re-save the post, any previously scheduled event for that field is cleared and a new event is registered. This prevents stale events from firing after you have moved the date.
+Once a date has been applied the field is cleared, because the close has already happened. Change either date and re-save and the new date simply replaces the old one — there are no per-post events to go stale.
 
 ## Interaction with the global scheduled close
 
-The metabox schedules a one-shot cron event for a specific post. It runs alongside, not in place of, the global `acc_cron_hook` that closes comments by age. If the global cron closes comments on a post before the metabox-scheduled date arrives, the metabox event will not re-open them. The metabox schedules the close; it does not protect against an earlier bulk close.
+The metabox stores a date for a specific post, applied by the hourly close-date sweep. It runs alongside, not in place of, the global `acc_cron_hook` that closes comments by age. If the global cron closes comments on a post before the metabox date arrives, the sweep will not re-open them. The metabox schedules the close; it does not protect against an earlier bulk close.
 
 If you want a post to keep its comments open until a specific date, the cleanest approach is to:
 

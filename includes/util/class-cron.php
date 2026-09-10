@@ -175,13 +175,9 @@ class Cron {
 			$errors[] = __( 'The AutoClose cron event could not be registered.', 'autoclose' );
 		}
 
-		if ( ! Close_Date::is_restore_done() && false === wp_next_scheduled( Close_Date::RESTORE_HOOK ) ) {
-			$restore_scheduled = wp_schedule_single_event( time() + MINUTE_IN_SECONDS, Close_Date::RESTORE_HOOK, array(), true );
-
-			if ( is_wp_error( $restore_scheduled ) ) {
-				$outcome  = 'failed';
-				$errors[] = __( 'The close-date restoration event could not be scheduled.', 'autoclose' );
-			}
+		if ( false === wp_next_scheduled( Close_Date::SWEEP_HOOK ) && ! Close_Date::schedule_sweep() ) {
+			$outcome  = 'failed';
+			$errors[] = __( 'The close-date sweep could not be scheduled.', 'autoclose' );
 		}
 
 		return array(

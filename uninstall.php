@@ -56,6 +56,7 @@ function acc_delete_data() {
 	delete_option( 'acc_close_date_restore_cursor' );
 	delete_option( 'acc_close_date_restore_attempts' );
 	delete_option( 'acc_close_date_restore_done' );
+	delete_option( 'acc_close_dates_migrated' );
 	delete_option( 'acc_revision_policy_ack' );
 
 	// Wizard options.
@@ -68,6 +69,7 @@ function acc_delete_data() {
 
 	wp_clear_scheduled_hook( 'acc_cron_hook' );
 	wp_clear_scheduled_hook( 'autoclose_restore_close_dates_event' );
+	wp_unschedule_hook( 'autoclose_close_dates_event' );
 	wp_clear_scheduled_hook( 'ald_acc_hook' );
 	wp_unschedule_hook( 'autoclose_close_comments_pings_event' );
 }

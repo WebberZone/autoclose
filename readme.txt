@@ -75,7 +75,7 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 == Upgrade Notice ==
 
 = 3.2.0 =
-Behavior change: scheduled revision cleanup now keeps revisions within each post's retention limit and newer than the age cutoff (90 days) instead of deleting all; check the Revisions tab if enabled. On fortnightly or monthly maintenance, confirm a next run on the Tools page.
+Behavior change: scheduled revision cleanup now keeps revisions within each post's retention limit and newer than the age cutoff (90 days) instead of deleting all; check the Revisions tab if enabled. On fortnightly or monthly maintenance, confirm a next run on the Tools page. Per-post close dates are now applied by one hourly sweep instead of one cron event per post, so a close happens within the hour after the time you set rather than to the exact minute; the `acc_close_dates_recurrence` filter sweeps more often.
 
 == Changelog ==
 
@@ -101,6 +101,7 @@ Release post: https://webberzone.com/announcements/auto-close-v3-2/
 * Added lifecycle reconciliation for scheduled close dates and labeled cron schedule times as UTC.
 * Improved bulk maintenance with supported public post-type scopes and truthful no-op and partial results.
 * Migrated legacy `close` discussion statuses to WordPress's canonical `closed` value once per site.
+* Per-post close dates no longer schedule one cron event per post. A single hourly `autoclose_close_dates_event` sweep applies every due date, so the number of scheduled events no longer grows with the number of close dates — on a large site the old behaviour could push megabytes into the autoloaded `cron` option and slow every request. Existing per-post events are removed automatically on upgrade, close dates themselves are unaffected, and a date now closes at the first sweep after its time rather than to the exact minute. Use `acc_close_dates_recurrence` to sweep more often.
 * Preserved existing revision settings and added an admin notice explaining the new cleanup policy.
 
 **Fixed**

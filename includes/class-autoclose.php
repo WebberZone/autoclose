@@ -144,8 +144,9 @@ class AutoClose {
 		$notifications = new Features\Notifications(); // Feature: email summary after cron.
 
 		// Register close date hooks.
-		Hook_Registry::add_action( 'autoclose_close_comments_pings_event', array( $close_date, 'maybe_close_due_comments_pings' ), 10, 2 );
-		Hook_Registry::add_action( Features\Close_Date::RESTORE_HOOK, array( $close_date, 'restore_scheduled_events' ) );
+		Hook_Registry::add_action( Features\Close_Date::LEGACY_EVENT_HOOK, array( $close_date, 'maybe_close_due_comments_pings' ), 10, 2 );
+		Hook_Registry::add_action( Features\Close_Date::SWEEP_HOOK, array( $close_date, 'process_due_dates' ) );
+		Hook_Registry::add_action( 'init', array( Features\Close_Date::class, 'maybe_migrate' ), 20 );
 
 		// Register the shared maintenance runner for cron and CLI execution.
 		$runner = new Maintenance\Runner( $comments, $revisions );
