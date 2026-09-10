@@ -8,7 +8,7 @@ status: publish
 order: 1
 ---
 
-[AutoClose](https://webberzone.com/plugins/autoclose/) provides four layered mechanisms to keep specific content open: keep-open post IDs, taxonomy term exclusions, the per-post close-date metabox, and the per-post override. This article covers the bulk-exclusion mechanisms; the metabox is covered in [AutoClose Metabox and Close Dates](autoclose-metabox-and-close-dates.md).
+[AutoClose](https://webberzone.com/plugins/autoclose/) provides several layered mechanisms to keep specific content open: keep-open post IDs, taxonomy term exclusions, per-post-type age overrides, the per-post close-date metabox, and the per-post override. This article covers the bulk-exclusion and per-post-type mechanisms; the metabox is covered in [AutoClose Metabox and Close Dates](autoclose-metabox-and-close-dates.md).
 
 ## Keep comments open on these posts/pages
 
@@ -31,6 +31,16 @@ The **Comments → Exclude posts in these categories/tags** and **Pingbacks/Trac
 Posts that match any excluded term are skipped entirely; their comment and ping status is not touched. Term exclusions are checked first, before the age-based close, so a post can be old enough to qualify for closing but still be skipped if it is in an excluded term.
 
 The plugin saves the term IDs to a separate `*_term_ids` option when you save the settings, and uses that ID list when the cron runs. If you import settings from another site or migrate, you may need to re-select the terms in the autocomplete so the IDs match the new site's term IDs.
+
+## Age per post type
+
+The **Comments → Age per post type** and **Pingbacks/Trackbacks → Age per post type** settings override the global age cutoff for individual post types, rather than excluding them entirely:
+
+- `-2` — use the global age above (default).
+- `-1` — never close this post type.
+- `0` or higher — an explicit age in days for this post type, independent of the global setting.
+
+Setting a post type to `-1` is effectively a blanket exclusion for that post type, without needing a term or ID list. A post type left at `-2` still respects the term exclusions and keep-open ID list described above; those checks run before the age (global or per-type) is applied.
 
 ## Per-post override via the metabox
 

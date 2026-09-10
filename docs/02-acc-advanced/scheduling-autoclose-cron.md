@@ -18,6 +18,8 @@ The schedule is created from the **General** tab of the settings page:
 - **Hour** and **Minute** — the time of day the event fires, in `0`–`23` and `0`–`59` respectively.
 - **Run maintenance** — the recurrence: `daily`, `weekly`, `fortnightly`, or `monthly`.
 
+> **Fixed in v3.2.0.** The `fortnightly` and `monthly` recurrences were selectable in earlier versions but were never registered as WordPress cron schedules, so choosing either one scheduled no maintenance event at all. If your site was set to `fortnightly` or `monthly`, confirm a next run is now showing on the **Tools → AutoClose Tools** status panel after upgrading.
+
 When you save the settings with **Activate scheduled closing** enabled, the plugin clears any existing `acc_cron_hook` event and reschedules a new one for the next occurrence of the configured hour:min. When you disable the master switch, the event is removed.
 
 The schedule uses UTC, so the configured hour:min is evaluated against UTC time and is unaffected by your site's timezone setting. The AutoClose status command converts the next run to the site's timezone for readability.
@@ -39,6 +41,12 @@ You should see the event name and its next run time. If the event does not appea
 ## Re-activation after plugin deactivation
 
 If you deactivate the plugin, the deactivator clears `acc_cron_hook` and any `autoclose_close_comments_pings_event` events for scheduled close dates. Re-activating the plugin calls `Cron::enable_run()` from the activator if **Activate scheduled closing** was enabled at deactivation time, so the schedule resumes automatically with the saved hour, minute, and recurrence. The same applies on multisite network activation.
+
+### Restoring per-post close dates after reactivation
+
+Deactivation also clears the one-shot cron events scheduled by the [AutoClose metabox](autoclose-metabox-and-close-dates.md) for individual posts. Reactivation schedules a deferred reconciliation event that walks posts in batches and re-schedules or closes each one according to its saved close date, so per-post close dates are not lost across a deactivate/reactivate cycle.
+
+The reconciliation runs in bounded batches so it does not block a large site's activation request; if there is more work than one batch can cover, it re-queues itself roughly a minute later. It is marked complete only once every post has been reconciled with no errors — if a batch reports an error, the site is left eligible for a retry rather than silently marked done. If reconciliation stalls (for example, an early activation-time schedule attempt fails), **Repair schedule** on the [Tools page](../01-acc-getting-started/autoclose-tools-page.md) or `wp autoclose cron repair` re-queues it.
 
 ## Running on a real server cron
 

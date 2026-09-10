@@ -36,6 +36,14 @@ wp autoclose status --format=json
 
 Use `--format=json` or `--format=csv` for scripts and monitoring. On multisite, select the site with WP-CLI's global `--url` option; status and maintenance data are stored per site.
 
+Health is `warning` when any of these hold, and `healthy` otherwise (or `unknown` before any run has completed):
+
+- The last maintenance run failed or completed only partially.
+- A run started but never reported completion, and more than an hour has passed since it started (a stuck run).
+- Scheduled maintenance is enabled but its cron event is not registered, or the event is overdue.
+
+The specific reasons appear in the `Warnings` row (or the `warnings` array with `--format=json`). Use `wp autoclose cron repair` to resolve a missing or overdue schedule.
+
 ## `wp autoclose settings`
 
 Displays the effective site-local configuration, including the schedule (configured in UTC), comment and ping filters, reopen settings, self-ping blocking, revision retention, and notification settings.

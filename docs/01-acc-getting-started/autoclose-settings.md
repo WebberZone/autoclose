@@ -94,6 +94,14 @@ Taxonomy terms whose posts should not have comments closed. Start typing to sear
 
 **Default:** empty
 
+### Close comments with at least this many approved comments
+
+Optional. Comments close once a post reaches this number of approved comments, in addition to the age rule above — whichever condition is met first. Only ordinary approved comments count; pingbacks, trackbacks, spam, unapproved comments, and internal editor notes are excluded. Set to `0` to disable.
+
+Scheduled checking is not an atomic cap: comments submitted between runs, or at the same time as a run, can push a post past this number before it is closed.
+
+**Default:** `0` (disabled)
+
 ### Reopen comments on post update
 
 When a post is saved or updated, its comments reopen for the number of days set in **Keep comments open for (days)**.
@@ -105,6 +113,18 @@ When a post is saved or updated, its comments reopen for the number of days set 
 Number of days to keep comments open after a post update. Set to `0` to keep open until the next scheduled close.
 
 **Default:** `30`
+
+### Age per post type
+
+Overrides **Close comments on posts/pages older than** for individual post types. Each supported post type gets its own field.
+
+**Value semantics:**
+
+- `-2` — use the age above (default).
+- `-1` — never close comments for this post type.
+- `0` or higher — age in days for this post type.
+
+**Default:** `-2` for every post type.
 
 ## Pingbacks/Trackbacks
 
@@ -149,6 +169,22 @@ Enable to block self-pings — pings from a post to other pages on the same site
 One URL per line. Pings to any of these URLs are blocked in addition to self-pings.
 
 **Default:** empty
+
+### Age per post type
+
+Overrides **Close pingbacks/trackbacks on posts/pages older than** for individual post types, using the same value semantics as the comments **Age per post type** setting above (`-2` uses the global age, `-1` never closes, `0` or higher is an explicit age in days).
+
+**Default:** `-2` for every post type.
+
+### If you deactivate this plugin
+
+The settings page also explains what happens when you deactivate AutoClose:
+
+- Comments, pingbacks, and trackbacks already closed by AutoClose stay closed.
+- Scheduled and per-post closing stop running, so nothing more will be closed automatically.
+- A temporary reopen window that is still active when you deactivate may no longer close automatically once it ends.
+- Post revision limits set here stop applying; WordPress' own default or another plugin's limit takes over.
+- Revisions already deleted are not restored.
 
 ## Revisions
 
