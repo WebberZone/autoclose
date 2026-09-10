@@ -67,7 +67,6 @@ class Settings {
 
 		Hook_Registry::add_action( 'admin_menu', array( $this, 'initialise_settings' ) );
 		Hook_Registry::add_action( 'admin_head', array( $this, 'admin_head' ), 11 );
-		Hook_Registry::add_action( self::$prefix . '_settings_page_header', array( $this, 'settings_page_header' ) );
 		Hook_Registry::add_filter( self::$prefix . '_settings_sanitize', array( $this, 'change_settings_on_save' ), 99 );
 		Hook_Registry::add_action( 'wp_ajax_' . self::$prefix . '_taxonomy_search_tom_select', array( __CLASS__, 'taxonomy_search_tom_select' ) );
 		Hook_Registry::add_action( 'wp_ajax_nopriv_' . self::$prefix . '_taxonomy_search_tom_select', array( __CLASS__, 'taxonomy_search_tom_select' ) );
@@ -824,22 +823,6 @@ class Settings {
 			'</a>',
 			'<a href="https://wordpress.org/support/plugin/autoclose/reviews/#new-post" target="_blank">'
 		);
-	}
-
-	/**
-	 * Add a link to the Tools page from the settings page.
-	 *
-	 * @since 3.0.0
-	 */
-	public static function settings_page_header() {
-		?>
-		<p>
-			<a class="button button-primary" style="color: #0A0A0A; background: #FFBD59; border: 1px solid #FFA500;" href="<?php echo esc_url( admin_url( 'tools.php?page=acc_tools_page' ) ); ?>">
-				<?php esc_html_e( 'Visit the Tools page', 'autoclose' ); ?>
-			</a>
-		</p>
-
-		<?php
 	}
 
 	/**

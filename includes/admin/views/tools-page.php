@@ -14,12 +14,6 @@ if ( ! defined( 'WPINC' ) ) {
 <div class="wrap">
 	<h1><?php esc_html_e( 'Automatically Close Comments, Pingbacks and Trackbacks Tools', 'autoclose' ); ?></h1>
 
-	<p>
-		<a class="button button-primary" style="color: #0A0A0A; background: #FFBD59; border: 1px solid #FFA500;" href="<?php echo esc_url( admin_url( 'options-general.php?page=acc_options_page' ) ); ?>">
-			<?php esc_html_e( 'Visit the Settings page', 'autoclose' ); ?>
-		</a>
-	</p>
-
 	<?php settings_errors(); ?>
 
 	<div id="poststuff">

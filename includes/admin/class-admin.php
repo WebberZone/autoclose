@@ -104,16 +104,18 @@ class Admin {
 			),
 			'screen_ids' => array(
 				'settings_page_acc_options_page',
+				'tools_page_acc_tools_page',
 			),
 			'page_slugs' => array(
 				'acc_options_page',
+				'acc_tools_page',
 			),
 			'strings'    => array(
 				'region_label' => esc_html__( 'AutoClose quick links', 'autoclose' ),
 				'nav_label'    => esc_html__( 'AutoClose admin shortcuts', 'autoclose' ),
 				'eyebrow'      => esc_html__( 'WebberZone AutoClose', 'autoclose' ),
 				'title'        => esc_html__( 'Automatically close comments, pingbacks and trackbacks.', 'autoclose' ),
-				'text'         => esc_html__( 'Manage your AutoClose settings and explore more WebberZone plugins.', 'autoclose' ),
+				'text'         => esc_html__( 'Jump to your most-used AutoClose tools, manage discussions faster, and explore more WebberZone plugins.', 'autoclose' ),
 			),
 			'sections'   => array(
 				'settings' => array(
@@ -121,6 +123,12 @@ class Admin {
 					'url'        => admin_url( 'options-general.php?page=acc_options_page' ),
 					'screen_ids' => array( 'settings_page_acc_options_page' ),
 					'page_slugs' => array( 'acc_options_page' ),
+				),
+				'tools'    => array(
+					'label'      => esc_html__( 'Tools', 'autoclose' ),
+					'url'        => admin_url( 'tools.php?page=acc_tools_page' ),
+					'screen_ids' => array( 'tools_page_acc_tools_page' ),
+					'page_slugs' => array( 'acc_tools_page' ),
 				),
 				'plugins'  => array(
 					'label'  => esc_html__( 'WebberZone Plugins', 'autoclose' ),
