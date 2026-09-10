@@ -34,12 +34,6 @@ class Discussions_Command extends Base_Command {
 	 */
 	private $type;
 
-	/**
-	 * Human-readable discussion label.
-	 *
-	 * @var string
-	 */
-	private $label;
 
 	/**
 	 * Constructor.
@@ -51,8 +45,21 @@ class Discussions_Command extends Base_Command {
 	 */
 	public function __construct( string $type, $comments = null ) {
 		$this->type     = in_array( $type, array( 'comment', 'ping' ), true ) ? $type : 'comment';
-		$this->label    = 'comment' === $this->type ? __( 'comments', 'autoclose' ) : __( 'pingbacks/trackbacks', 'autoclose' );
 		$this->comments = $comments instanceof Comments ? $comments : new Comments();
+	}
+
+	/**
+	 * Human-readable discussion label.
+	 *
+	 * Resolved on use, not in the constructor: commands are registered on
+	 * plugins_loaded, before the textdomain is loaded on init.
+	 *
+	 * @since 3.2.0
+	 *
+	 * @return string Discussion label.
+	 */
+	private function get_label(): string {
+		return 'comment' === $this->type ? __( 'comments', 'autoclose' ) : __( 'pingbacks/trackbacks', 'autoclose' );
 	}
 
 	/**
@@ -219,7 +226,7 @@ class Discussions_Command extends Base_Command {
 			$this->row( 'Outcome', $data['outcome'] ),
 			$this->row( 'Site ID', $data['blog_id'] ),
 			$this->row( 'Site URL', $data['site_url'] ),
-			$this->row( 'Type', $this->label ),
+			$this->row( 'Type', $this->get_label() ),
 			$this->row( 'Action', $action ),
 			$this->row( 'Affected', $data['affected'] ),
 			$this->row( 'Age (days)', $age ),
