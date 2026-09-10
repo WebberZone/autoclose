@@ -26,6 +26,7 @@ class LifecycleTest extends WP_UnitTestCase {
 		wp_clear_scheduled_hook( Close_Date::RESTORE_HOOK );
 		delete_option( Options_API::SETTINGS_OPTION );
 		delete_option( 'acc_close_date_restore_cursor' );
+		delete_option( 'acc_close_date_restore_attempts' );
 		delete_option( Close_Date::RESTORE_DONE_OPTION );
 		Options_API::flush_cache();
 
@@ -174,6 +175,85 @@ class LifecycleTest extends WP_UnitTestCase {
 		$this->assertNotEmpty( $result['errors'] );
 		$this->assertTrue( $result['pending'] );
 		$this->assertNotFalse( wp_get_scheduled_event( Close_Date::RESTORE_HOOK ) );
+	}
+
+	/**
+	 * Repeated selection failures stop re-arming the restore continuation.
+	 */
+	public function test_restore_scheduled_events_stops_retrying_after_repeated_failures() {
+		global $wpdb;
+
+		$posts_table = $wpdb->posts;
+		$suppressed  = $wpdb->suppress_errors( true );
+		$wpdb->posts = $wpdb->prefix . 'missing_autoclose_posts';
+		$close_date  = new Close_Date();
+		$results     = array();
+
+		try {
+			for ( $attempt = 0; $attempt < 5; $attempt++ ) {
+				wp_clear_scheduled_hook( Close_Date::RESTORE_HOOK );
+				$results[] = $close_date->restore_scheduled_events();
+			}
+		} finally {
+			$wpdb->posts = $posts_table;
+			$wpdb->suppress_errors( $suppressed );
+		}
+
+		$this->assertTrue( $results[0]['pending'] );
+		$this->assertTrue( $results[3]['pending'] );
+		$this->assertFalse( $results[4]['pending'] );
+		$this->assertSame( 'failed', $results[4]['status'] );
+		$this->assertFalse( wp_get_scheduled_event( Close_Date::RESTORE_HOOK ) );
+		$this->assertFalse( get_option( 'acc_close_date_restore_attempts', false ) );
+	}
+
+	/**
+	 * A successful selection clears the failure counter.
+	 */
+	public function test_restore_scheduled_events_resets_failure_counter_on_success() {
+		global $wpdb;
+
+		$posts_table = $wpdb->posts;
+		$suppressed  = $wpdb->suppress_errors( true );
+		$wpdb->posts = $wpdb->prefix . 'missing_autoclose_posts';
+
+		try {
+			( new Close_Date() )->restore_scheduled_events();
+		} finally {
+			$wpdb->posts = $posts_table;
+			$wpdb->suppress_errors( $suppressed );
+		}
+
+		$this->assertSame( 1, (int) get_option( 'acc_close_date_restore_attempts', 0 ) );
+
+		wp_clear_scheduled_hook( Close_Date::RESTORE_HOOK );
+		( new Close_Date() )->restore_scheduled_events();
+
+		$this->assertFalse( get_option( 'acc_close_date_restore_attempts', false ) );
+	}
+
+	/**
+	 * Activation schedules the first maintenance run in the future.
+	 */
+	public function test_activation_schedules_first_run_in_the_future() {
+		update_option(
+			Options_API::SETTINGS_OPTION,
+			array(
+				'cron_on'         => 1,
+				'cron_hour'       => 0,
+				'cron_min'        => 0,
+				'cron_recurrence' => 'daily',
+			)
+		);
+		Options_API::flush_cache();
+		wp_clear_scheduled_hook( 'acc_cron_hook' );
+
+		Activator::activate( false );
+
+		$event = wp_get_scheduled_event( 'acc_cron_hook' );
+
+		$this->assertNotFalse( $event );
+		$this->assertGreaterThan( time(), (int) $event->timestamp );
 	}
 
 	/**

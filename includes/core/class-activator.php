@@ -86,7 +86,8 @@ class Activator {
 		$cron->enable_run(
 			(int) Options_API::get_option( 'cron_hour' ),
 			(int) Options_API::get_option( 'cron_min' ),
-			Options_API::get_option( 'cron_recurrence' )
+			Options_API::get_option( 'cron_recurrence' ),
+			true
 		);
 	}
 }

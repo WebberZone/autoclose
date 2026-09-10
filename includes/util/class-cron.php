@@ -39,22 +39,24 @@ class Cron {
 	 * @return array Schedules with AutoClose intervals.
 	 */
 	public static function add_schedules( array $schedules ): array {
+		// wp_get_schedules() can run before init; translating there triggers a just-in-time textdomain notice.
 		if ( ! isset( $schedules['fortnightly'] ) ) {
 			$schedules['fortnightly'] = array(
 				'interval' => 14 * DAY_IN_SECONDS,
-				'display'  => __( 'Every fortnight', 'autoclose' ),
+				'display'  => did_action( 'init' ) ? __( 'Every fortnight', 'autoclose' ) : 'Every fortnight',
 			);
 		}
 
 		if ( ! isset( $schedules['monthly'] ) ) {
 			$schedules['monthly'] = array(
 				'interval' => 30 * DAY_IN_SECONDS,
-				'display'  => __( 'Every 30 days', 'autoclose' ),
+				'display'  => did_action( 'init' ) ? __( 'Every 30 days', 'autoclose' ) : 'Every 30 days',
 			);
 		}
 
 		return $schedules;
 	}
+
 
 	/**
 	 * Constructor.

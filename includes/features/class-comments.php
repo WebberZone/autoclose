@@ -665,6 +665,10 @@ class Comments {
 		$where        = array( "{$type}_status IN (" . implode( ', ', $statuses ) . ')' );
 		$type_ages    = is_array( $args['type_ages'] ?? null ) ? $args['type_ages'] : null;
 
+		if ( 'close' === $action ) {
+			$where[] = $this->get_post_status_where( $type );
+		}
+
 		if ( null !== $type_ages ) {
 			$count_threshold = 'comment' === $type ? max( 0, (int) ( $args['count_threshold'] ?? 0 ) ) : 0;
 			$where[]         = $this->get_eligibility_where( $type_ages, $count_threshold );
@@ -672,7 +676,7 @@ class Comments {
 			$age = max( 0, (int) ( $args['age'] ?? 0 ) );
 
 			if ( $age > 0 ) {
-				$where[] = $wpdb->prepare( 'post_date_gmt < %s', $this->get_cutoff( $age ) );
+				$where[] = $wpdb->prepare( "post_date_gmt < %s AND post_date_gmt <> '0000-00-00 00:00:00'", $this->get_cutoff( $age ) );
 			}
 
 			if ( ! empty( $args['post_types'] ) ) {
@@ -706,6 +710,43 @@ class Comments {
 		}
 
 		return 'WHERE ' . implode( ' AND ', $where );
+	}
+
+	/**
+	 * Restrict closing to statuses that can actually accept discussion.
+	 *
+	 * @since 3.2.0
+	 *
+	 * @param string $type Discussion type.
+	 * @return string WHERE fragment limiting the post statuses.
+	 */
+	private function get_post_status_where( string $type ): string {
+		/**
+		 * Filters the post statuses eligible for closing.
+		 *
+		 * Drafts, auto-drafts and trashed posts are excluded by default so a post
+		 * is not published with its discussion already closed.
+		 *
+		 * @since 3.2.0
+		 *
+		 * @param array  $statuses Post statuses eligible for closing.
+		 * @param string $type     Discussion type. Either comment or ping.
+		 */
+		$statuses = apply_filters( 'acc_close_post_statuses', array( 'publish', 'private' ), $type );
+		$statuses = array_filter( array_map( 'sanitize_key', (array) $statuses ) );
+
+		if ( empty( $statuses ) ) {
+			return '1=0';
+		}
+
+		$quoted = array_map(
+			static function ( $status ) {
+				return "'" . esc_sql( $status ) . "'";
+			},
+			$statuses
+		);
+
+		return 'post_status IN (' . implode( ', ', $quoted ) . ')';
 	}
 
 	/**
@@ -753,7 +794,7 @@ class Comments {
 			$clause = 'post_type IN (' . implode( ', ', $quoted_post_types ) . ')';
 
 			if ( null !== $group['cutoff'] ) {
-				$clause .= $wpdb->prepare( ' AND post_date_gmt < %s', $group['cutoff'] );
+				$clause .= $wpdb->prepare( " AND post_date_gmt < %s AND post_date_gmt <> '0000-00-00 00:00:00'", $group['cutoff'] );
 			}
 
 			$clauses[] = '(' . $clause . ')';
@@ -944,7 +985,7 @@ class Comments {
 			ARRAY_A
 		);
 
-		if ( null === $comments && ! empty( $wpdb->last_error ) ) {
+		if ( ! empty( $wpdb->last_error ) ) {
 			return array(
 				'status'  => 'failed',
 				'deleted' => 0,

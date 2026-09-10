@@ -170,6 +170,96 @@ class CommentsTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Unpublished posts are not closed by a scheduled run.
+	 */
+	public function test_draft_posts_are_not_closed() {
+		$this->set_settings(
+			array(
+				'close_comment'      => 1,
+				'close_pbtb'         => 1,
+				'comment_post_types' => 'post',
+				'pbtb_post_types'    => 'post',
+				'comment_age'        => 0,
+				'pbtb_age'           => 0,
+			)
+		);
+
+		$draft = self::factory()->post->create(
+			array(
+				'post_status'    => 'draft',
+				'comment_status' => 'open',
+				'ping_status'    => 'open',
+			)
+		);
+
+		$this->comments->process_comments();
+
+		$this->assertSame( 'open', get_post_field( 'comment_status', $draft ) );
+		$this->assertSame( 'open', get_post_field( 'ping_status', $draft ) );
+	}
+
+	/**
+	 * A zero post_date_gmt does not bypass the configured age cutoff.
+	 */
+	public function test_zero_post_date_gmt_does_not_bypass_the_age_cutoff() {
+		global $wpdb;
+
+		$this->set_settings(
+			array(
+				'close_comment'      => 1,
+				'comment_post_types' => 'post',
+				'comment_age'        => 90,
+			)
+		);
+
+		$post_id = self::factory()->post->create( array( 'comment_status' => 'open' ) );
+		$wpdb->update(
+			$wpdb->posts,
+			array( 'post_date_gmt' => '0000-00-00 00:00:00' ),
+			array( 'ID' => $post_id )
+		);
+		clean_post_cache( $post_id );
+
+		$result = $this->comments->process_comments();
+
+		$this->assertSame( 0, $result['comments_closed'] );
+		$this->assertSame( 'open', get_post_field( 'comment_status', $post_id ) );
+	}
+
+	/**
+	 * The eligible post statuses can be filtered.
+	 */
+	public function test_close_post_statuses_are_filterable() {
+		$this->set_settings(
+			array(
+				'close_comment'      => 1,
+				'comment_post_types' => 'post',
+				'comment_age'        => 0,
+			)
+		);
+
+		$draft = self::factory()->post->create(
+			array(
+				'post_status'    => 'draft',
+				'comment_status' => 'open',
+			)
+		);
+
+		$allow_drafts = static function () {
+			return array( 'publish', 'draft' );
+		};
+		add_filter( 'acc_close_post_statuses', $allow_drafts );
+
+		try {
+			$this->comments->process_comments();
+		} finally {
+			remove_filter( 'acc_close_post_statuses', $allow_drafts );
+		}
+
+		$this->assertSame( 'closed', get_post_field( 'comment_status', $draft ) );
+	}
+
+	/**
 	 * Reopening comments does not suppress an independent ping close.
 	 */
 	public function test_reopen_window_only_excludes_comments() {

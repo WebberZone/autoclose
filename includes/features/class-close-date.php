@@ -58,6 +58,20 @@ class Close_Date {
 	public const RESTORE_DONE_OPTION = 'acc_close_date_restore_done';
 
 	/**
+	 * Option counting consecutive failed restore selections.
+	 *
+	 * @since 3.2.0
+	 */
+	private const RESTORE_ATTEMPTS_OPTION = 'acc_close_date_restore_attempts';
+
+	/**
+	 * Maximum consecutive selection failures before the restore stops retrying.
+	 *
+	 * @since 3.2.0
+	 */
+	private const RESTORE_MAX_ATTEMPTS = 5;
+
+	/**
 	 * Prefix for meta keys and filters.
 	 *
 	 * @var string
@@ -137,9 +151,19 @@ class Close_Date {
 
 			if ( ! empty( $wpdb->last_error ) ) {
 				$result['errors'][] = $wpdb->last_error;
-				$result['pending']  = true;
+				$attempts           = (int) get_option( self::RESTORE_ATTEMPTS_OPTION, 0 ) + 1;
+				update_option( self::RESTORE_ATTEMPTS_OPTION, $attempts, false );
+
+				if ( self::RESTORE_MAX_ATTEMPTS > $attempts ) {
+					$result['pending'] = true;
+				} else {
+					$result['errors'][] = __( 'The close-date restoration was abandoned after repeated database failures.', 'autoclose' );
+				}
+
 				break;
 			}
+
+			delete_option( self::RESTORE_ATTEMPTS_OPTION );
 
 			$post_ids    = array_map( 'intval', $post_ids );
 			$batch_count = count( $post_ids );
@@ -171,6 +195,7 @@ class Close_Date {
 
 		if ( ! $result['pending'] ) {
 			delete_option( self::RESTORE_CURSOR_OPTION );
+			delete_option( self::RESTORE_ATTEMPTS_OPTION );
 
 			if ( empty( $result['errors'] ) ) {
 				update_option( self::RESTORE_DONE_OPTION, true, false );

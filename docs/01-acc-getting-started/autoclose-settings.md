@@ -76,6 +76,12 @@ Select the post types on which to close comments. At least one option must be se
 
 **Default:** `post`
 
+Only published and private posts are closed, so a draft is never published with its comments already closed. The eligible statuses are filterable:
+
+```php
+add_filter( 'acc_close_post_statuses', fn() => array( 'publish', 'private', 'draft' ) );
+```
+
 ### Close comments on posts/pages older than
 
 Comments on posts older than this number of days are closed automatically when the schedule is enabled.

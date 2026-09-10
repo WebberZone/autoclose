@@ -110,6 +110,11 @@ Release post: https://webberzone.com/announcements/auto-close-v3-2/
 * Revision deletion now removes orphaned metadata and term relationships.
 * Fixed stale caches, cache invalidation notifications, and per-site cron notification counts.
 * Fixed the `fortnightly` and `monthly` maintenance recurrences, which were selectable but never registered, so choosing either scheduled no maintenance event at all. Sites on either setting should confirm a next run on the Tools page.
+* Drafts, auto-drafts, and other unpublished posts are no longer closed, so a post is never published with its discussion already closed. The eligible statuses can be adjusted with the new `acc_close_post_statuses` filter.
+* Posts with an empty `post_date_gmt` no longer bypass the configured age cutoff.
+* Activation now schedules the first maintenance run at the next occurrence of the configured time instead of a time that has already passed today.
+* A repeatedly failing close-date restoration now stops rescheduling itself instead of retrying every minute.
+* A failed pingback/trackback deletion query is now reported as a failure instead of as zero deletions.
 
 = Earlier versions =
 
