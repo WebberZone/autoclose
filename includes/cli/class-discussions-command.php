@@ -34,7 +34,6 @@ class Discussions_Command extends Base_Command {
 	 */
 	private $type;
 
-
 	/**
 	 * Constructor.
 	 *
