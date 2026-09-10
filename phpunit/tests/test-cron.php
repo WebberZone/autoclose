@@ -137,16 +137,38 @@ class CronTest extends WP_UnitTestCase {
 	public function test_close_date_reports_scheduling_failure() {
 		$post_id = self::factory()->post->create();
 		update_post_meta( $post_id, '_acc_comments_date', '2027-01-15T09:00' );
+
+		// The sweep is registered on init, so remove it to exercise the failure path.
+		wp_unschedule_hook( Close_Date::SWEEP_HOOK );
+
 		$filter = static function () {
 			return false;
 		};
 		add_filter( 'pre_schedule_event', $filter, 10, 3 );
 
-		$result = ( new Close_Date() )->maybe_schedule_or_close( $post_id );
+		try {
+			$result = ( new Close_Date() )->maybe_schedule_or_close( $post_id );
+		} finally {
+			remove_filter( 'pre_schedule_event', $filter, 10 );
+		}
 
-		remove_filter( 'pre_schedule_event', $filter, 10 );
 		$this->assertSame( 'failed', $result['status'] );
 		$this->assertNotEmpty( $result['errors'] );
+		$this->assertFalse( wp_next_scheduled( Close_Date::SWEEP_HOOK ) );
+	}
+
+	/**
+	 * An already registered sweep is enough for a future date to be accepted.
+	 */
+	public function test_close_date_succeeds_when_the_sweep_is_already_registered() {
+		$post_id = self::factory()->post->create();
+		update_post_meta( $post_id, '_acc_comments_date', '2027-01-15T09:00' );
+		Close_Date::schedule_sweep();
+
+		$result = ( new Close_Date() )->maybe_schedule_or_close( $post_id );
+
+		$this->assertSame( 'success', $result['status'] );
+		$this->assertSame( 1, $result['scheduled'] );
 	}
 
 	/**
