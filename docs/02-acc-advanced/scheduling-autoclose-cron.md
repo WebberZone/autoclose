@@ -89,7 +89,7 @@ The plugin's own `acc_cron_hook` event is registered with the standard WordPress
 
 When `acc_cron_hook` fires, the plugin calls into the registered feature classes:
 
-- `WebberZoneAutoCloseFeaturesComments::process_comments()` — closes comments and pingbacks/trackbacks on posts older than the configured ages, then re-opens comments on the post IDs in the keep-open list.
-- `WebberZoneAutoCloseFeaturesRevisions::process_revisions()` — deletes revisions beyond the per-post-type limit.
+- `WebberZone\AutoClose\Features\Comments::process_comments()` — closes comments and pingbacks/trackbacks on posts older than the configured ages, then re-opens comments on the post IDs in the keep-open list.
+- `WebberZone\AutoClose\Features\Revisions::process_revisions()` — deletes revisions beyond the per-post-type limit.
 
 If **Send summary email after cron run** is enabled, an HTML email is sent to the configured address (or the site admin email) summarizing how many comments, pingbacks/trackbacks, and revisions were processed.

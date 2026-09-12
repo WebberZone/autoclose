@@ -35,7 +35,7 @@ When you save the post, the plugin stores both date fields as post meta:
 
 A single hourly `autoclose_close_dates_event` sweep applies every due date on the site, so the close happens at the first sweep after the time you set rather than to the exact minute. If the configured date is already in the past when you save the post, the close runs immediately on save.
 
-Once a date has been applied the field is cleared, because the close has already happened. Change either date and re-save and the new date simply replaces the old one — there are no per-post events to go stale.
+Once a date has been applied the field is cleared, because the close has already happened. Change either date and re-save and the new date replaces the old one — there are no per-post events to go stale.
 
 ## Interaction with the global scheduled close
 

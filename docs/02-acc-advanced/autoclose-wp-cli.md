@@ -3,7 +3,7 @@ slug: autoclose-wp-cli
 title: "AutoClose WP-CLI"
 products: [autoclose]
 sections: ["02-acc-advanced"]
-tags: [autoclose, wp-cli, cron]
+tags: [autoclose, cron, wp-cli]
 status: publish
 order: 4
 toc: true
