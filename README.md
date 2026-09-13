@@ -6,6 +6,7 @@
 
 _Requires:_ 6.6
 _Tested up to:_ 7.1
+_Requires PHP:_ 7.4
 _License:_ [GPL-2.0+](http://www.gnu.org/licenses/gpl-2.0.html)  
 _Plugin page:_ [Auto-Close Comments, Pingbacks and Trackbacks](https://webberzone.com/plugins/autoclose/) | [WordPress.org plugin page](https://wordpress.org/plugins/autoclose/)
 
