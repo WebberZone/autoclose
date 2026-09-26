@@ -118,6 +118,9 @@ class Settings {
 			'modified_legend'      => esc_html__( 'Setting modified from its default value', 'autoclose' ),
 			'default_label'        => esc_html__( 'Default', 'autoclose' ),
 			'default_none'         => esc_html__( 'None', 'autoclose' ),
+			'repeater_move_up'     => esc_html__( 'Move item up', 'autoclose' ),
+			'repeater_move_down'   => esc_html__( 'Move item down', 'autoclose' ),
+			'repeater_remove_item' => esc_html__( 'Remove item', 'autoclose' ),
 		);
 
 		/**
