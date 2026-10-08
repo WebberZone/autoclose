@@ -2,7 +2,7 @@
 Tags: comments, pingback, revisions, spam, anti-spam
 Contributors: webberzone, Ajay
 Donate link: https://wzn.io/donate-wz
-Stable tag: 3.2.0
+Stable tag: 3.2.1
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 7.4
@@ -74,10 +74,19 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 == Upgrade Notice ==
 
-= 3.2.0 =
-Behavior change: scheduled revision cleanup now keeps revisions within each post's retention limit and newer than the age cutoff (90 days) instead of deleting all; check the Revisions tab if enabled. On fortnightly or monthly maintenance, confirm a next run on the Tools page. Per-post close dates are now applied by one hourly sweep instead of one cron event per post, so a close happens within the hour after the time you set rather than to the exact minute; the `acc_close_dates_recurrence` filter sweeps more often.
+= 3.2.1 =
+Fixes settings labels for screen readers and a PHP error when saving settings that were stored in the wrong format. Updating from 3.1.x? Read the 3.2.0 changelog: revision cleanup and close-date scheduling changed.
 
 == Changelog ==
+
+= 3.2.1 =
+
+Release date: 8 October 2026
+
+**Fixed**
+
+* Settings field labels were not linked to their fields, so clicking a label did not focus the field and screen readers did not announce the label.
+* Saving or deleting an individual setting failed with a PHP error when the stored settings option was not an array.
 
 = 3.2.0 =
 
@@ -86,8 +95,8 @@ Release post: https://webberzone.com/announcements/auto-close-v3-2/
 
 **Added**
 
-* Added WP-CLI commands for status, settings, maintenance runs, comments, pings, pingbacks, revisions, close dates, and cron.
-* Added age- and retention-aware revision pruning with a 90-day default cutoff and the `acc_revisions_prune_limit` and `acc_revisions_prune_cutoff` filters.
+* WP-CLI commands for status, settings, maintenance runs, comments, pings, pingbacks, revisions, close dates, and cron.
+* Age- and retention-aware revision pruning with a 90-day default cutoff and the `acc_revisions_prune_limit` and `acc_revisions_prune_cutoff` filters.
 * Independent per-post-type age overrides for closing comments and pingbacks/trackbacks, alongside the existing global age.
 * An optional approved-comment count threshold: comments close once a post reaches the configured count, in addition to the age rule.
 * A read-only Preview changes option on the Tools page for the closing algorithm, pingback/trackback deletion, and revision deletion, showing matching counts, scope, and a sample of affected posts before you run them.
@@ -101,7 +110,7 @@ Release post: https://webberzone.com/announcements/auto-close-v3-2/
 * Added lifecycle reconciliation for scheduled close dates and labeled cron schedule times as UTC.
 * Improved bulk maintenance with supported public post-type scopes and truthful no-op and partial results.
 * Migrated legacy `close` discussion statuses to WordPress's canonical `closed` value once per site.
-* Per-post close dates no longer schedule one cron event per post. A single hourly `autoclose_close_dates_event` sweep applies every due date, so the number of scheduled events no longer grows with the number of close dates — on a large site the old behaviour could push megabytes into the autoloaded `cron` option and slow every request. Existing per-post events are removed automatically on upgrade, close dates themselves are unaffected, and a date now closes at the first sweep after its time rather than to the exact minute. Use `acc_close_dates_recurrence` to sweep more often.
+* Per-post close dates no longer schedule one cron event per post. A single hourly `autoclose_close_dates_event` sweep applies every due date, so the number of scheduled events no longer grows with the number of close dates — on a large site the old behavior could push megabytes into the autoloaded `cron` option and slow every request. Existing per-post events are removed automatically on upgrade, close dates themselves are unaffected, and a date now closes at the first sweep after its time rather than to the exact minute. Use `acc_close_dates_recurrence` to sweep more often.
 * Preserved existing revision settings and added an admin notice explaining the new cleanup policy.
 
 **Fixed**
