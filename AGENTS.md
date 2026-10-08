@@ -23,7 +23,7 @@ Guidance for AI coding agents working in this repository.
 
 ## Plugin Overview
 
-**Auto-Close Comments, Pingbacks and Trackbacks** (slug: `autoclose`) is a WordPress plugin (v3.2.0) that closes comments/pingbacks/trackbacks after a configurable age or approved-comment count, manages revision limits, and can block self-pings, via WP-Cron (`acc_cron_hook`). Namespace: `WebberZone\AutoClose`. Requires WordPress 6.6+, PHP 7.4+. No Freemius.
+**Auto-Close Comments, Pingbacks and Trackbacks** (slug: `autoclose`) is a WordPress plugin (v3.2.1) that closes comments/pingbacks/trackbacks after a configurable age or approved-comment count, manages revision limits, and can block self-pings, via WP-Cron (`acc_cron_hook`). Namespace: `WebberZone\AutoClose`. Requires WordPress 6.6+, PHP 7.4+. No Freemius.
 
 Constants defined in `autoclose.php`: `ACC_PLUGIN_VERSION`, `ACC_PLUGIN_DIR`, `ACC_PLUGIN_URL`, `ACC_PLUGIN_FILE`.
 
