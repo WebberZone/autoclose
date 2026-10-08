@@ -75,7 +75,7 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 == Upgrade Notice ==
 
 = 3.2.1 =
-Fixes settings labels for screen readers and a PHP error when saving settings that were stored in the wrong format. Updating from 3.1.x? Read the 3.2.0 changelog: revision cleanup and close-date scheduling changed.
+Fixes settings labels for screen readers and a PHP error in the settings API when the stored settings were not an array. Updating from 3.1.x? Read the 3.2.0 changelog: revision cleanup and close-date scheduling changed.
 
 == Changelog ==
 
@@ -86,7 +86,7 @@ Release date: 8 October 2026
 **Fixed**
 
 * Settings field labels were not linked to their fields, so clicking a label did not focus the field and screen readers did not announce the label.
-* Saving or deleting an individual setting failed with a PHP error when the stored settings option was not an array.
+* `Options_API::update_option()` and `Options_API::delete_option()` failed with a PHP error when the stored settings option was not an array.
 
 = 3.2.0 =
 
