@@ -81,6 +81,8 @@ Fixes settings labels for screen readers and a PHP error in the settings API whe
 
 = 3.2.2 =
 
+Release date: 11 October 2026
+
 **Fixed**
 
 * Clarified that an age of -1 disables only the age rule; the approved-comment threshold still applies.
