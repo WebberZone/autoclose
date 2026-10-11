@@ -502,7 +502,7 @@ class Settings {
 				'id'   => 'comment_age_per_type',
 				'name' => '<strong>' . esc_html__( 'Age per post type', 'autoclose' ) . '</strong>',
 				/* translators: 1: Line break. */
-				'desc' => sprintf( esc_html__( 'Override the age above for individual post types. %1$s -2: use the age above (default). %1$s -1: never close comments for this post type. %1$s 0 or higher: age in days for this post type.', 'autoclose' ), '<br />' ),
+				'desc' => sprintf( esc_html__( 'Override the age above for individual post types. %1$s -2: use the age above (default). %1$s -1: disable the age rule for this post type (the approved-comment threshold below still applies). %1$s 0 or higher: age in days for this post type.', 'autoclose' ), '<br />' ),
 				'type' => 'descriptive_text',
 			),
 		);

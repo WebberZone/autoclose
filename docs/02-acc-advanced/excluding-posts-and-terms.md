@@ -37,10 +37,10 @@ The plugin saves the term IDs to a separate `*_term_ids` option when you save th
 The **Comments → Age per post type** and **Pingbacks/Trackbacks → Age per post type** settings override the global age cutoff for individual post types, rather than excluding them entirely:
 
 - `-2` — use the global age above (default).
-- `-1` — never close this post type.
+- `-1` — disable the age rule for this post type. For comments, the approved-comment count threshold still closes it; pingbacks/trackbacks are never closed by age.
 - `0` or higher — an explicit age in days for this post type, independent of the global setting.
 
-Setting a post type to `-1` is effectively a blanket exclusion for that post type, without needing a term or ID list. A post type left at `-2` still respects the term exclusions and keep-open ID list described above; those checks run before the age (global or per-type) is applied.
+Setting a post type to `-1` disables the age rule for it; with no approved-comment threshold set, that is effectively a blanket exclusion without needing a term or ID list. A post type left at `-2` still respects the term exclusions and keep-open ID list described above; those checks run before the age (global or per-type) is applied.
 
 ## Per-post override via the metabox
 

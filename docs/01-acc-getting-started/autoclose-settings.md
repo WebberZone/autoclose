@@ -127,7 +127,7 @@ Overrides **Close comments on posts/pages older than** for individual post types
 **Value semantics:**
 
 - `-2` — use the age above (default).
-- `-1` — never close comments for this post type.
+- `-1` — disable the age rule for this post type. The approved-comment count threshold still applies.
 - `0` or higher — age in days for this post type.
 
 **Default:** `-2` for every post type.
@@ -178,7 +178,7 @@ One URL per line. Pings to any of these URLs are blocked in addition to self-pin
 
 ### Age per post type
 
-Overrides **Close pingbacks/trackbacks on posts/pages older than** for individual post types, using the same value semantics as the comments **Age per post type** setting above (`-2` uses the global age, `-1` never closes, `0` or higher is an explicit age in days).
+Overrides **Close pingbacks/trackbacks on posts/pages older than** for individual post types, using the same value semantics as the comments **Age per post type** setting above (`-2` uses the global age, `-1` never closes pingbacks/trackbacks for the post type, `0` or higher is an explicit age in days).
 
 **Default:** `-2` for every post type.
 

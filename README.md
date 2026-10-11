@@ -39,7 +39,7 @@ _Auto-Close_ is a WordPress plugin that _automatically closes comments, pingback
 ## Features
 
 - _Automatically close_ comments, pingbacks, and trackbacks on posts, pages, and custom post types
-- _Per-post-type closing ages_ overriding the global age, each set to inherit, never, or an explicit number of days
+- _Per-post-type closing ages_ overriding the global age, each set to inherit, disable the age rule, or an explicit number of days
 - _Close by approved comment count_ as an alternative trigger to age; a post closes on whichever condition it meets first
 - _Open or close_ comments/pingbacks/trackbacks selectively by post ID
 - _Close on a specific date_ per post, reconciled on activation so scheduled events survive deactivation

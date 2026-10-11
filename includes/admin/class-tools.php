@@ -303,7 +303,7 @@ class Tools {
 		);
 		$this->render_status_row( __( 'Comments kept open (ID exceptions)', 'autoclose' ), (string) (int) ( $comments['keep_open_post_id_count'] ?? 0 ) );
 		$this->render_status_row( __( 'Comments excluded terms', 'autoclose' ), (string) (int) ( $comments['exclude_term_id_count'] ?? 0 ) );
-		$this->render_status_row( __( 'Comments age by post type', 'autoclose' ), $this->format_type_ages( (array) ( $comments['age_days_by_type'] ?? array() ) ) );
+		$this->render_status_row( __( 'Comments age by post type', 'autoclose' ), $this->format_type_ages( (array) ( $comments['age_days_by_type'] ?? array() ), (int) ( $comments['count_threshold'] ?? 0 ) ) );
 		$this->render_status_row(
 			__( 'Reopen on post update', 'autoclose' ),
 			! empty( $comments['reopen_on_update'] ) ? sprintf(
@@ -362,14 +362,37 @@ class Tools {
 	}
 
 	/**
+	 * Label an effective age, noting when only the age rule is off.
+	 *
+	 * @since 3.2.2
+	 *
+	 * @param int|null $age       Effective age in days, null when the age rule is disabled.
+	 * @param int      $threshold Approved-comment threshold; zero when not applicable.
+	 * @return string Label.
+	 */
+	private function format_age_label( ?int $age, int $threshold ): string {
+		if ( null !== $age ) {
+			return sprintf( _n( '%d day', '%d days', $age, 'autoclose' ), $age );
+		}
+
+		if ( $threshold > 0 ) {
+			/* translators: %d: Approved-comment threshold. */
+			return sprintf( __( 'age rule off, threshold %d', 'autoclose' ), $threshold );
+		}
+
+		return __( 'never', 'autoclose' );
+	}
+
+	/**
 	 * Format effective age overrides for the configuration report.
 	 *
 	 * @since 3.2.0
 	 *
-	 * @param array $ages Post type to age mapping.
+	 * @param array $ages      Post type to age mapping.
+	 * @param int   $threshold Approved-comment threshold; zero when not applicable.
 	 * @return string Formatted age mapping.
 	 */
-	private function format_type_ages( array $ages ): string {
+	private function format_type_ages( array $ages, int $threshold = 0 ): string {
 		$formatted = array();
 
 		foreach ( $ages as $post_type => $age ) {
@@ -377,7 +400,7 @@ class Tools {
 				/* translators: 1: Post type, 2: Age in days or never. */
 				__( '%1$s: %2$s', 'autoclose' ),
 				(string) $post_type,
-				null === $age ? __( 'never', 'autoclose' ) : sprintf( _n( '%d day', '%d days', (int) $age, 'autoclose' ), (int) $age )
+				$this->format_age_label( $age, $threshold )
 			);
 		}
 
@@ -586,7 +609,7 @@ class Tools {
 		} elseif ( ! empty( $operation['type_ages'] ) ) {
 			$per_type = array();
 			foreach ( (array) $operation['type_ages'] as $post_type => $age ) {
-				$per_type[] = $post_type . ': ' . ( null === $age ? __( 'never', 'autoclose' ) : sprintf( _n( '%d day', '%d days', (int) $age, 'autoclose' ), (int) $age ) );
+				$per_type[] = $post_type . ': ' . $this->format_age_label( null === $age ? null : (int) $age, (int) ( $operation['count_threshold'] ?? 0 ) );
 			}
 			$scope[] = esc_html__( 'Age cutoff by post type: ', 'autoclose' ) . esc_html( implode( ', ', $per_type ) );
 		} elseif ( isset( $operation['cutoff_gmt'] ) && $operation['cutoff_gmt'] ) {
