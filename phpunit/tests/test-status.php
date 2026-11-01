@@ -43,6 +43,7 @@ class StatusTest extends WP_UnitTestCase {
 		$this->assertSame( 'warning', $status['health'] );
 		$this->assertContains( 'The last maintenance run did not complete successfully.', $status['warnings'] );
 	}
+
 	/**
 	 * A run that started but never recorded completion (e.g. a fatal error
 	 * or timeout) is reported as unhealthy once it's stale.

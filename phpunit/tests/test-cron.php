@@ -25,6 +25,7 @@ class CronTest extends WP_UnitTestCase {
 
 		parent::tear_down();
 	}
+
 	/**
 	 * An invalid recurrence does not replace an existing event.
 	 */
@@ -39,6 +40,7 @@ class CronTest extends WP_UnitTestCase {
 		$this->assertSame( $before->timestamp, $after->timestamp );
 		$this->assertSame( 'daily', $after->schedule );
 	}
+
 	/**
 	 * Local close dates are converted to the site's timezone before scheduling.
 	 */
@@ -97,6 +99,7 @@ class CronTest extends WP_UnitTestCase {
 			update_option( 'timezone_string', $original_timezone );
 		}
 	}
+
 	/**
 	 * Repair registers a missing event when maintenance is enabled.
 	 */

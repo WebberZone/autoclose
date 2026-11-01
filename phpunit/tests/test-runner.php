@@ -53,6 +53,7 @@ class RunnerTest extends WP_UnitTestCase {
 		$this->assertSame( 1, $summary['revisions_deleted'] );
 		$this->assertSame( array( 'One discussion batch failed.' ), $summary['errors'] );
 	}
+
 	/**
 	 * A preview does not persist an attempt or completed run.
 	 */

@@ -105,6 +105,7 @@ class CommentsTest extends WP_UnitTestCase {
 		$this->assertSame( 0, $second['updated'] );
 		$this->assertSame( 'close', get_post_field( 'comment_status', $post_id ) );
 	}
+
 	/**
 	 * A successful batch reports the affected count.
 	 */
@@ -120,6 +121,7 @@ class CommentsTest extends WP_UnitTestCase {
 		$this->assertSame( 1, $result['affected'] );
 		$this->assertSame( 'closed', get_post_field( 'comment_status', $post_id ) );
 	}
+
 	/**
 	 * Unpublished posts are not closed by a scheduled run.
 	 */
@@ -148,6 +150,7 @@ class CommentsTest extends WP_UnitTestCase {
 		$this->assertSame( 'open', get_post_field( 'comment_status', $draft ) );
 		$this->assertSame( 'open', get_post_field( 'ping_status', $draft ) );
 	}
+
 	/**
 	 * Reopening comments does not suppress an independent ping close.
 	 */
@@ -177,6 +180,7 @@ class CommentsTest extends WP_UnitTestCase {
 		$this->assertSame( 0, $result['comments_closed'] );
 		$this->assertSame( 1, $result['pings_closed'] );
 	}
+
 	/**
 	 * -2 inherits the global age setting.
 	 */
@@ -232,6 +236,7 @@ class CommentsTest extends WP_UnitTestCase {
 			),
 		);
 	}
+
 	/**
 	 * A per-post-type override closes one type while leaving another, disabled, type untouched.
 	 */

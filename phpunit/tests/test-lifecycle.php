@@ -46,6 +46,7 @@ class LifecycleTest extends WP_UnitTestCase {
 
 		return $post_ids;
 	}
+
 	/**
 	 * The number of scheduled events does not grow with the number of close dates.
 	 */
@@ -149,6 +150,7 @@ class LifecycleTest extends WP_UnitTestCase {
 			$this->assertSame( 'closed', get_post_field( 'comment_status', $post_id ) );
 		}
 	}
+
 	/**
 	 * A database failure is reported instead of being treated as no work.
 	 */
@@ -193,6 +195,7 @@ class LifecycleTest extends WP_UnitTestCase {
 		$this->assertTrue( (bool) get_option( Close_Date::MIGRATED_OPTION ) );
 		$this->assertNotFalse( wp_next_scheduled( Close_Date::SWEEP_HOOK ) );
 	}
+
 	/**
 	 * Activation registers the sweep and leaves existing content untouched.
 	 */
@@ -205,6 +208,7 @@ class LifecycleTest extends WP_UnitTestCase {
 		$this->assertNotFalse( wp_next_scheduled( Close_Date::SWEEP_HOOK ) );
 		$this->assertSame( 'open', get_post_field( 'comment_status', $post_id ) );
 	}
+
 	/**
 	 * Deactivation clears the sweep and any legacy events left behind.
 	 */

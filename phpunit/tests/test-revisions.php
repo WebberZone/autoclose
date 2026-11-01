@@ -189,6 +189,7 @@ class RevisionsTest extends WP_UnitTestCase
         $this->assertContains($recent, $this->get_revision_ids($parent));
         $this->assertContains($latest, $this->get_revision_ids($parent));
     }
+
     /**
      * A revision exactly at the cutoff is kept; one second older is pruned.
      */
@@ -248,6 +249,7 @@ class RevisionsTest extends WP_UnitTestCase
         $this->assertSame(0, $result['deleted']);
         $this->assertCount(2, $this->get_revision_ids($parent));
     }
+
     /**
      * Autosaves survive ordinary pruning.
      */
@@ -271,6 +273,7 @@ class RevisionsTest extends WP_UnitTestCase
         $this->assertContains($autosave, $remaining);
         $this->assertNotContains($revision, $remaining);
     }
+
     /**
      * The per-run limit bounds deletion and reports that more remain.
      */
@@ -295,6 +298,7 @@ class RevisionsTest extends WP_UnitTestCase
         $this->assertTrue($result['limit_reached']);
         $this->assertCount(1, $this->get_revision_ids($parent));
     }
+
     /**
      * A partially failed run still reports what it deleted.
      */
@@ -328,6 +332,7 @@ class RevisionsTest extends WP_UnitTestCase
         $this->assertSame(array( $blocked ), $this->get_revision_ids($parent));
         $this->assertNotContains($doomed, $this->get_revision_ids($parent));
     }
+
     /**
      * Warmed taxonomy relationship caches are invalidated by the deletion.
      */
@@ -446,6 +451,7 @@ class RevisionsTest extends WP_UnitTestCase
 
         $this->assertSame($preview['affected'], $result['deleted']);
     }
+
     /**
      * Delete-all removes every revision, autosaves included.
      */

@@ -77,6 +77,7 @@ class ReopenTest extends WP_UnitTestCase {
 		$this->assertSame( 'open', get_post_field( 'comment_status', $post_id ) );
 		$this->assertGreaterThan( time(), (int) get_post_meta( $post_id, '_acc_reopen_until', true ) );
 	}
+
 	/**
 	 * Restoring a revision does not reopen a post that was closed before restore.
 	 */
