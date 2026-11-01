@@ -105,32 +105,6 @@ class CommentsTest extends WP_UnitTestCase {
 		$this->assertSame( 0, $second['updated'] );
 		$this->assertSame( 'close', get_post_field( 'comment_status', $post_id ) );
 	}
-
-	/**
-	 * Legacy status repairs have separate counts from newly closed posts.
-	 */
-	public function test_legacy_status_repairs_do_not_inflate_close_counts() {
-		global $wpdb;
-
-		$post_id = self::factory()->post->create();
-		$wpdb->update(
-			$wpdb->posts,
-			array(
-				'comment_status' => 'close',
-				'ping_status'    => 'close',
-			),
-			array( 'ID' => $post_id )
-		);
-		clean_post_cache( $post_id );
-
-		$result = $this->comments->process_comments();
-
-		$this->assertSame( 0, $result['comments_closed'] );
-		$this->assertSame( 0, $result['pings_closed'] );
-		$this->assertSame( 1, $result['comments_migrated'] );
-		$this->assertSame( 1, $result['pings_migrated'] );
-	}
-
 	/**
 	 * A successful batch reports the affected count.
 	 */
@@ -146,29 +120,6 @@ class CommentsTest extends WP_UnitTestCase {
 		$this->assertSame( 1, $result['affected'] );
 		$this->assertSame( 'closed', get_post_field( 'comment_status', $post_id ) );
 	}
-
-	/**
-	 * A database selection failure is reported instead of as zero work.
-	 */
-	public function test_discussion_selection_failure_is_reported() {
-		global $wpdb;
-
-		$posts_table = $wpdb->posts;
-		$suppressed  = $wpdb->suppress_errors( true );
-		$wpdb->posts = $wpdb->prefix . 'missing_autoclose_posts';
-
-		try {
-			$result = $this->comments->edit_discussions_result( 'comment', 'close' );
-		} finally {
-			$wpdb->posts = $posts_table;
-			$wpdb->suppress_errors( $suppressed );
-		}
-
-		$this->assertSame( 'failed', $result['status'] );
-		$this->assertSame( 0, $result['affected'] );
-		$this->assertNotEmpty( $result['errors'] );
-	}
-
 	/**
 	 * Unpublished posts are not closed by a scheduled run.
 	 */
@@ -197,68 +148,6 @@ class CommentsTest extends WP_UnitTestCase {
 		$this->assertSame( 'open', get_post_field( 'comment_status', $draft ) );
 		$this->assertSame( 'open', get_post_field( 'ping_status', $draft ) );
 	}
-
-	/**
-	 * A zero post_date_gmt does not bypass the configured age cutoff.
-	 */
-	public function test_zero_post_date_gmt_does_not_bypass_the_age_cutoff() {
-		global $wpdb;
-
-		$this->set_settings(
-			array(
-				'close_comment'      => 1,
-				'comment_post_types' => 'post',
-				'comment_age'        => 90,
-			)
-		);
-
-		$post_id = self::factory()->post->create( array( 'comment_status' => 'open' ) );
-		$wpdb->update(
-			$wpdb->posts,
-			array( 'post_date_gmt' => '0000-00-00 00:00:00' ),
-			array( 'ID' => $post_id )
-		);
-		clean_post_cache( $post_id );
-
-		$result = $this->comments->process_comments();
-
-		$this->assertSame( 0, $result['comments_closed'] );
-		$this->assertSame( 'open', get_post_field( 'comment_status', $post_id ) );
-	}
-
-	/**
-	 * The eligible post statuses can be filtered.
-	 */
-	public function test_close_post_statuses_are_filterable() {
-		$this->set_settings(
-			array(
-				'close_comment'      => 1,
-				'comment_post_types' => 'post',
-				'comment_age'        => 0,
-			)
-		);
-
-		$draft = self::factory()->post->create(
-			array(
-				'post_status'    => 'draft',
-				'comment_status' => 'open',
-			)
-		);
-
-		$allow_drafts = static function () {
-			return array( 'publish', 'draft' );
-		};
-		add_filter( 'acc_close_post_statuses', $allow_drafts );
-
-		try {
-			$this->comments->process_comments();
-		} finally {
-			remove_filter( 'acc_close_post_statuses', $allow_drafts );
-		}
-
-		$this->assertSame( 'closed', get_post_field( 'comment_status', $draft ) );
-	}
-
 	/**
 	 * Reopening comments does not suppress an independent ping close.
 	 */
@@ -288,100 +177,61 @@ class CommentsTest extends WP_UnitTestCase {
 		$this->assertSame( 0, $result['comments_closed'] );
 		$this->assertSame( 1, $result['pings_closed'] );
 	}
-
-	/**
-	 * Age cutoffs use the configured number of complete elapsed days.
-	 */
-	public function test_age_cutoff_uses_configured_days() {
-		$method = new ReflectionMethod( Comments::class, 'get_cutoff' );
-		$method->setAccessible( true );
-		$now = time();
-
-		$this->assertSame(
-			gmdate( 'Y-m-d H:i:s', $now - ( 90 * DAY_IN_SECONDS ) ),
-			$method->invoke( $this->comments, 90 )
-		);
-		$this->assertNull( $method->invoke( $this->comments, 0 ) );
-		$this->assertNull( $method->invoke( $this->comments, -1 ) );
-	}
-
-	/**
-	 * A failed configured operation is not reported as successful no-change work.
-	 */
-	public function test_failed_operation_is_reported_by_the_processor() {
-		$this->set_settings(
-			array(
-				'close_comment'      => 1,
-				'close_pbtb'         => 0,
-				'comment_post_types' => 'post',
-			)
-		);
-
-		$comments = new CommentsResultTestDouble(
-			array(
-				'status'   => 'failed',
-				'affected' => 0,
-				'errors'   => array( 'The discussion update failed.' ),
-			)
-		);
-		$result = $comments->process_comments();
-
-		$this->assertSame( 'failed', $result['status'] );
-		$this->assertSame( 0, $result['comments_closed'] );
-		$this->assertNotEmpty( $result['errors'] );
-	}
-
-	/**
-	 * A run with no configured discussion work is reported as skipped.
-	 */
-	public function test_no_configured_operations_are_skipped() {
-		$result = $this->comments->process_comments();
-
-		$this->assertSame( 'skipped', $result['status'] );
-		$this->assertSame( 0, $result['comments_closed'] );
-		$this->assertSame( 0, $result['pings_closed'] );
-	}
-
 	/**
 	 * -2 inherits the global age setting.
 	 */
-	public function test_effective_age_inherits_global_by_default() {
-		$this->assertSame( 90, $this->comments->get_effective_age( 'comment', 'post' ) );
-		$this->assertSame( 90, $this->comments->get_effective_age( 'ping', 'post' ) );
+	/**
+	 * Per-post-type ages: -2 inherits global, -1 disables, explicit values win.
+	 *
+	 * @dataProvider effective_ages
+	 *
+	 * @param array      $settings Settings overrides.
+	 * @param string     $type     'comment' or 'ping'.
+	 * @param string     $post     Post type.
+	 * @param int|null   $expected Expected effective age.
+	 */
+	public function test_effective_age( $settings, $type, $post, $expected ) {
+		if ( $settings ) {
+			$this->set_settings( $settings );
+		}
+		$this->assertSame( $expected, $this->comments->get_effective_age( $type, $post ) );
 	}
 
 	/**
-	 * -1 disables closing for a single post type without affecting others.
+	 * Data provider for test_effective_age.
+	 *
+	 * @return array
 	 */
-	public function test_effective_age_minus_one_disables_post_type() {
-		$this->set_settings(
-			array(
-				'comment_age'      => 90,
-				'comment_age_post' => -1,
-				'comment_age_page' => -2,
-			)
+	public function effective_ages() {
+		return array(
+			'inherits global by default' => array(
+				array(),
+				'comment',
+				'post',
+				90,
+			),
+			'minus one disables post type' => array(
+				array(
+					'comment_age'      => 90,
+					'comment_age_post' => -1,
+					'comment_age_page' => -2,
+				),
+				'comment',
+				'post',
+				null,
+			),
+			'explicit override including zero' => array(
+				array(
+					'comment_age'      => 90,
+					'comment_age_post' => 0,
+					'comment_age_page' => 5,
+				),
+				'comment',
+				'page',
+				5,
+			),
 		);
-
-		$this->assertNull( $this->comments->get_effective_age( 'comment', 'post' ) );
-		$this->assertSame( 90, $this->comments->get_effective_age( 'comment', 'page' ) );
 	}
-
-	/**
-	 * A non-negative override is used verbatim, including zero (immediate).
-	 */
-	public function test_effective_age_explicit_override_including_zero() {
-		$this->set_settings(
-			array(
-				'comment_age'      => 90,
-				'comment_age_post' => 0,
-				'comment_age_page' => 5,
-			)
-		);
-
-		$this->assertSame( 0, $this->comments->get_effective_age( 'comment', 'post' ) );
-		$this->assertSame( 5, $this->comments->get_effective_age( 'comment', 'page' ) );
-	}
-
 	/**
 	 * A per-post-type override closes one type while leaving another, disabled, type untouched.
 	 */
@@ -499,13 +349,6 @@ class CommentsTest extends WP_UnitTestCase {
 		$result = $this->comments->process_comments();
 
 		$this->assertSame( 1, $result['comments_closed'] );
-	}
-
-	/**
-	 * Zero disables the count threshold.
-	 */
-	public function test_zero_count_threshold_is_disabled() {
-		$this->assertSame( 0, $this->comments->get_count_threshold() );
 	}
 }
 

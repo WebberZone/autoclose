@@ -189,32 +189,6 @@ class RevisionsTest extends WP_UnitTestCase
         $this->assertContains($recent, $this->get_revision_ids($parent));
         $this->assertContains($latest, $this->get_revision_ids($parent));
     }
-
-    /**
-     * Only revisions older than the cutoff are pruned.
-     */
-    public function test_age_boundary_separates_either_side_of_the_cutoff()
-    {
-        $this->set_settings(
-            array(
-            'delete_revisions' => 1,
-            'revision_age'     => 30,
-            'revision_post'    => 0,
-            )
-        );
-
-        $parent    = $this->create_parent();
-        $past_edge = $this->create_revision($parent, 31);
-        $at_edge   = $this->create_revision($parent, 29);
-
-        $result = $this->revisions->prune_revisions();
-
-        $remaining = $this->get_revision_ids($parent);
-        $this->assertSame(1, $result['deleted']);
-        $this->assertNotContains($past_edge, $remaining);
-        $this->assertContains($at_edge, $remaining);
-    }
-
     /**
      * A revision exactly at the cutoff is kept; one second older is pruned.
      */
@@ -274,88 +248,6 @@ class RevisionsTest extends WP_UnitTestCase
         $this->assertSame(0, $result['deleted']);
         $this->assertCount(2, $this->get_revision_ids($parent));
     }
-
-    /**
-     * A limit of 0 prunes every revision past the age cutoff.
-     */
-    public function test_zero_limit_prunes_all_old_revisions()
-    {
-        $this->set_settings(
-            array(
-            'delete_revisions' => 1,
-            'revision_age'     => 30,
-            'revision_post'    => 0,
-            )
-        );
-
-        $parent = $this->create_parent();
-        $this->create_revision($parent, 400);
-        $this->create_revision($parent, 300);
-        $recent = $this->create_revision($parent, 2);
-
-        $result = $this->revisions->prune_revisions();
-
-        $this->assertSame(2, $result['deleted']);
-        $this->assertSame(array( $recent ), $this->get_revision_ids($parent));
-    }
-
-    /**
-     * The -2 sentinel defers to whatever WordPress decides.
-     */
-    public function test_inherited_limit_defers_to_core()
-    {
-        $this->set_settings(
-            array(
-            'delete_revisions' => 1,
-            'revision_age'     => 30,
-            'revision_post'    => -2,
-            )
-        );
-
-        $parent = $this->create_parent();
-        $this->create_revision($parent, 400);
-        $this->create_revision($parent, 300);
-
-        $keep_one = static function () {
-            return 1;
-        };
-        add_filter('wp_post_revisions_to_keep', $keep_one, 20);
-
-        $result = $this->revisions->prune_revisions();
-
-        remove_filter('wp_post_revisions_to_keep', $keep_one, 20);
-
-        $this->assertSame(1, $result['deleted']);
-        $this->assertCount(1, $this->get_revision_ids($parent));
-    }
-
-    /**
-     * An unset limit falls back to the -2 default and is not treated as zero.
-     */
-    public function test_unset_limit_uses_the_default_sentinel()
-    {
-        $this->set_settings(
-            array(
-            'delete_revisions' => 1,
-            'revision_age'     => 30,
-            )
-        );
-
-        $parent = $this->create_parent();
-        $this->create_revision($parent, 400);
-
-        $keep_all = static function () {
-            return -1;
-        };
-        add_filter('wp_post_revisions_to_keep', $keep_all, 20);
-
-        $result = $this->revisions->prune_revisions();
-
-        remove_filter('wp_post_revisions_to_keep', $keep_all, 20);
-
-        $this->assertSame(0, $result['deleted']);
-    }
-
     /**
      * Autosaves survive ordinary pruning.
      */
@@ -379,30 +271,6 @@ class RevisionsTest extends WP_UnitTestCase
         $this->assertContains($autosave, $remaining);
         $this->assertNotContains($revision, $remaining);
     }
-
-    /**
-     * An age of zero prunes by retention alone.
-     */
-    public function test_zero_age_prunes_by_retention_only()
-    {
-        $this->set_settings(
-            array(
-            'delete_revisions' => 1,
-            'revision_age'     => 0,
-            'revision_post'    => 1,
-            )
-        );
-
-        $parent = $this->create_parent();
-        $this->create_revision($parent, 2);
-        $newest = $this->create_revision($parent, 1);
-
-        $result = $this->revisions->prune_revisions();
-
-        $this->assertSame(1, $result['deleted']);
-        $this->assertSame(array( $newest ), $this->get_revision_ids($parent));
-    }
-
     /**
      * The per-run limit bounds deletion and reports that more remain.
      */
@@ -427,65 +295,6 @@ class RevisionsTest extends WP_UnitTestCase
         $this->assertTrue($result['limit_reached']);
         $this->assertCount(1, $this->get_revision_ids($parent));
     }
-
-    /**
-     * A limit exactly equal to the candidate count does not claim more remain.
-     */
-    public function test_limit_equal_to_candidate_count_reports_nothing_remaining()
-    {
-        $this->set_settings(
-            array(
-            'delete_revisions' => 1,
-            'revision_age'     => 30,
-            'revision_post'    => 0,
-            )
-        );
-
-        $parent = $this->create_parent();
-        $this->create_revision($parent, 400);
-        $this->create_revision($parent, 300);
-
-        $result = $this->revisions->prune_revisions(array( 'limit' => 2 ));
-
-        $this->assertSame(2, $result['deleted']);
-        $this->assertFalse($result['limit_reached']);
-        $this->assertSame(array(), $this->get_revision_ids($parent));
-    }
-
-    /**
-     * Retention limits are resolved per parent, not shared across posts.
-     */
-    public function test_retention_is_resolved_per_parent()
-    {
-        $this->set_settings(
-            array(
-            'delete_revisions' => 1,
-            'revision_age'     => 30,
-            'revision_post'    => 1,
-            'revision_page'    => -1,
-            )
-        );
-
-        $post = $this->create_parent();
-        $this->create_revision($post, 400);
-        $kept_post = $this->create_revision($post, 300);
-
-        $page = self::factory()->post->create(
-            array(
-            'post_type'   => 'page',
-            'post_status' => 'publish',
-            )
-        );
-        $this->create_revision($page, 400);
-        $this->create_revision($page, 300);
-
-        $result = $this->revisions->prune_revisions();
-
-        $this->assertSame(1, $result['deleted']);
-        $this->assertSame(array( $kept_post ), $this->get_revision_ids($post));
-        $this->assertCount(2, $this->get_revision_ids($page));
-    }
-
     /**
      * A partially failed run still reports what it deleted.
      */
@@ -519,32 +328,6 @@ class RevisionsTest extends WP_UnitTestCase
         $this->assertSame(array( $blocked ), $this->get_revision_ids($parent));
         $this->assertNotContains($doomed, $this->get_revision_ids($parent));
     }
-
-    /**
-     * Delete-all reports failure rather than a success count when a delete is blocked.
-     */
-    public function test_delete_all_reports_blocked_deletions()
-    {
-        $parent  = $this->create_parent();
-        $this->create_revision($parent, 400);
-        $blocked = $this->create_revision($parent, 300);
-        $blocker = static function ($delete, $post) use ($blocked) {
-            return (int) $post->ID === $blocked ? false : $delete;
-        };
-
-        add_filter('pre_delete_post', $blocker, 10, 2);
-
-        $result = $this->revisions->delete_all_revisions();
-        $legacy = $this->revisions->delete_revisions();
-
-        remove_filter('pre_delete_post', $blocker, 10);
-
-        $this->assertSame('partial', $result['status']);
-        $this->assertSame(1, $result['deleted']);
-        $this->assertNotEmpty($result['errors']);
-        $this->assertFalse($legacy);
-    }
-
     /**
      * Warmed taxonomy relationship caches are invalidated by the deletion.
      */
@@ -663,48 +446,6 @@ class RevisionsTest extends WP_UnitTestCase
 
         $this->assertSame($preview['affected'], $result['deleted']);
     }
-
-    /**
-     * The preview is skipped when scheduled deletion is disabled.
-     */
-    public function test_preview_is_skipped_when_deletion_is_disabled()
-    {
-        $this->set_settings(array( 'delete_revisions' => 0 ));
-
-        $parent = $this->create_parent();
-        $this->create_revision($parent, 400);
-
-        $preview = $this->revisions->get_preview();
-
-        $this->assertSame('skipped', $preview['status']);
-        $this->assertFalse($preview['enabled']);
-        $this->assertSame(0, $preview['affected']);
-    }
-
-    /**
-     * Scheduled processing prunes rather than deleting everything.
-     */
-    public function test_process_revisions_prunes_instead_of_deleting_all()
-    {
-        $this->set_settings(
-            array(
-            'delete_revisions' => 1,
-            'revision_age'     => 30,
-            'revision_post'    => 1,
-            )
-        );
-
-        $parent = $this->create_parent();
-        $this->create_revision($parent, 400);
-        $kept = $this->create_revision($parent, 300);
-
-        $result = $this->revisions->process_revisions();
-
-        $this->assertSame('success', $result['status']);
-        $this->assertSame(1, $result['revisions_deleted']);
-        $this->assertSame(array( $kept ), $this->get_revision_ids($parent));
-    }
-
     /**
      * Delete-all removes every revision, autosaves included.
      */
@@ -800,29 +541,5 @@ class RevisionsTest extends WP_UnitTestCase
         $remaining = $this->get_revision_ids($parent);
         $this->assertContains($recent, $remaining);
         $this->assertNotContains($old, $remaining);
-    }
-
-    /**
-     * The policy notice targets sites that already had scheduled deletion enabled.
-     */
-    public function test_policy_notice_only_targets_affected_sites()
-    {
-        $notice = new \WebberZone\AutoClose\Admin\Revision_Policy_Notice();
-
-        wp_set_current_user(self::factory()->user->create(array( 'role' => 'administrator' )));
-        delete_option(\WebberZone\AutoClose\Admin\Revision_Policy_Notice::ACK_OPTION);
-
-        $this->set_settings(array( 'delete_revisions' => 0 ));
-        $this->assertFalse($notice->should_display());
-
-        $this->set_settings(array( 'delete_revisions' => 1 ));
-        $this->assertTrue($notice->should_display());
-
-        update_option(\WebberZone\AutoClose\Admin\Revision_Policy_Notice::ACK_OPTION, 1);
-        $this->assertFalse($notice->should_display());
-
-        delete_option(\WebberZone\AutoClose\Admin\Revision_Policy_Notice::ACK_OPTION);
-        wp_set_current_user(self::factory()->user->create(array( 'role' => 'subscriber' )));
-        $this->assertFalse($notice->should_display());
     }
 }

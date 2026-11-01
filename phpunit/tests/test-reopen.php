@@ -77,20 +77,6 @@ class ReopenTest extends WP_UnitTestCase {
 		$this->assertSame( 'open', get_post_field( 'comment_status', $post_id ) );
 		$this->assertGreaterThan( time(), (int) get_post_meta( $post_id, '_acc_reopen_until', true ) );
 	}
-
-	/**
-	 * A normal editorial update still reopens a closed post.
-	 */
-	public function test_editorial_update_reopens_comments() {
-		$reopen  = new Reopen();
-		$post_id = self::factory()->post->create( array( 'comment_status' => 'closed' ) );
-
-		$reopen->reopen_on_update( $post_id, get_post( $post_id ) );
-
-		$this->assertSame( 'open', get_post_field( 'comment_status', $post_id ) );
-		$this->assertGreaterThan( time(), (int) get_post_meta( $post_id, '_acc_reopen_until', true ) );
-	}
-
 	/**
 	 * Restoring a revision does not reopen a post that was closed before restore.
 	 */

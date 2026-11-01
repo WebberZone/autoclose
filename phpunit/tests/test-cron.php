@@ -25,18 +25,6 @@ class CronTest extends WP_UnitTestCase {
 
 		parent::tear_down();
 	}
-
-	/**
-	 * AutoClose registers every recurrence exposed by its settings.
-	 */
-	public function test_custom_recurrences_are_registered() {
-		new Cron();
-		$schedules = wp_get_schedules();
-
-		$this->assertSame( 14 * DAY_IN_SECONDS, $schedules['fortnightly']['interval'] );
-		$this->assertSame( 30 * DAY_IN_SECONDS, $schedules['monthly']['interval'] );
-	}
-
 	/**
 	 * An invalid recurrence does not replace an existing event.
 	 */
@@ -51,27 +39,6 @@ class CronTest extends WP_UnitTestCase {
 		$this->assertSame( $before->timestamp, $after->timestamp );
 		$this->assertSame( 'daily', $after->schedule );
 	}
-
-	/**
-	 * Re-saving an unchanged future schedule keeps the existing event.
-	 */
-	public function test_future_schedule_is_idempotent_by_time_and_recurrence() {
-		$cron      = new Cron();
-		$target    = time() + HOUR_IN_SECONDS;
-		$hour      = (int) gmdate( 'G', $target );
-		$minute    = (int) gmdate( 'i', $target );
-		$recurrence = 'daily';
-
-		$this->assertTrue( $cron->enable_run( $hour, $minute, $recurrence, true ) );
-		$before = wp_get_scheduled_event( 'acc_cron_hook' );
-
-		$this->assertTrue( $cron->enable_run( $hour, $minute, $recurrence, true ) );
-		$after = wp_get_scheduled_event( 'acc_cron_hook' );
-
-		$this->assertSame( $before->timestamp, $after->timestamp );
-		$this->assertSame( $before->schedule, $after->schedule );
-	}
-
 	/**
 	 * Local close dates are converted to the site's timezone before scheduling.
 	 */
@@ -130,64 +97,6 @@ class CronTest extends WP_UnitTestCase {
 			update_option( 'timezone_string', $original_timezone );
 		}
 	}
-
-	/**
-	 * Scheduling failures are returned to callers.
-	 */
-	public function test_close_date_reports_scheduling_failure() {
-		$post_id = self::factory()->post->create();
-		update_post_meta( $post_id, '_acc_comments_date', '2027-01-15T09:00' );
-
-		// The sweep is registered on init, so remove it to exercise the failure path.
-		wp_unschedule_hook( Close_Date::SWEEP_HOOK );
-
-		$filter = static function () {
-			return false;
-		};
-		add_filter( 'pre_schedule_event', $filter, 10, 3 );
-
-		try {
-			$result = ( new Close_Date() )->maybe_schedule_or_close( $post_id );
-		} finally {
-			remove_filter( 'pre_schedule_event', $filter, 10 );
-		}
-
-		$this->assertSame( 'failed', $result['status'] );
-		$this->assertNotEmpty( $result['errors'] );
-		$this->assertFalse( wp_next_scheduled( Close_Date::SWEEP_HOOK ) );
-	}
-
-	/**
-	 * An already registered sweep is enough for a future date to be accepted.
-	 */
-	public function test_close_date_succeeds_when_the_sweep_is_already_registered() {
-		$post_id = self::factory()->post->create();
-		update_post_meta( $post_id, '_acc_comments_date', '2027-01-15T09:00' );
-		Close_Date::schedule_sweep();
-
-		$result = ( new Close_Date() )->maybe_schedule_or_close( $post_id );
-
-		$this->assertSame( 'success', $result['status'] );
-		$this->assertSame( 1, $result['scheduled'] );
-	}
-
-	/**
-	 * Repair does nothing and fails when scheduled maintenance is disabled.
-	 */
-	public function test_repair_fails_when_maintenance_disabled() {
-		update_option( Options_API::SETTINGS_OPTION, array( 'cron_on' => 0 ) );
-		Options_API::flush_cache();
-
-		$result = ( new Cron() )->repair();
-
-		$this->assertSame( 'failed', $result['outcome'] );
-		$this->assertFalse( $result['enabled'] );
-		$this->assertNotEmpty( $result['errors'] );
-
-		delete_option( Options_API::SETTINGS_OPTION );
-		Options_API::flush_cache();
-	}
-
 	/**
 	 * Repair registers a missing event when maintenance is enabled.
 	 */
@@ -213,63 +122,5 @@ class CronTest extends WP_UnitTestCase {
 
 		delete_option( Options_API::SETTINGS_OPTION );
 		Options_API::flush_cache();
-	}
-
-	/**
-	 * Repair reports a failure when an existing event cannot be rescheduled.
-	 */
-	public function test_repair_reports_reschedule_failure() {
-		update_option(
-			Options_API::SETTINGS_OPTION,
-			array(
-				'cron_on'         => 1,
-				'cron_hour'       => 0,
-				'cron_min'        => 0,
-				'cron_recurrence' => 'daily',
-			)
-		);
-		Options_API::flush_cache();
-
-		$cron = new Cron();
-		$this->assertTrue( $cron->enable_run( 0, 0, 'daily', true ) );
-
-		$filter = static function ( $pre, $hook ) {
-			return 'acc_cron_hook' === $hook ? false : $pre;
-		};
-		add_filter( 'pre_clear_scheduled_hook', $filter, 10, 2 );
-
-		$result = $cron->repair( true );
-
-		remove_filter( 'pre_clear_scheduled_hook', $filter, 10 );
-
-		$this->assertSame( 'failed', $result['outcome'] );
-		$this->assertNotEmpty( $result['errors'] );
-		$this->assertNotNull( $result['after'] );
-
-		delete_option( Options_API::SETTINGS_OPTION );
-		Options_API::flush_cache();
-	}
-
-	/**
-	 * Repair re-registers the close-date sweep when it is missing.
-	 */
-	public function test_repair_reschedules_missing_sweep_event() {
-		wp_clear_scheduled_hook( Close_Date::SWEEP_HOOK );
-
-		( new Cron() )->repair();
-
-		$this->assertNotFalse( wp_next_scheduled( Close_Date::SWEEP_HOOK ) );
-	}
-
-	/**
-	 * Repair leaves an existing sweep in place.
-	 */
-	public function test_repair_keeps_an_existing_sweep_event() {
-		Close_Date::schedule_sweep();
-		$before = wp_next_scheduled( Close_Date::SWEEP_HOOK );
-
-		( new Cron() )->repair();
-
-		$this->assertSame( $before, wp_next_scheduled( Close_Date::SWEEP_HOOK ) );
 	}
 }

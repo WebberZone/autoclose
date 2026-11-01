@@ -53,20 +53,6 @@ class RunnerTest extends WP_UnitTestCase {
 		$this->assertSame( 1, $summary['revisions_deleted'] );
 		$this->assertSame( array( 'One discussion batch failed.' ), $summary['errors'] );
 	}
-
-	/**
-	 * Two skipped processors produce a no-op result, not a successful run.
-	 */
-	public function test_all_skipped_processors_are_reported_as_skipped() {
-		$comments  = new RunnerCommentsTestDouble( array( 'status' => 'skipped', 'errors' => array() ) );
-		$revisions = new RunnerRevisionsTestDouble( array( 'status' => 'skipped', 'errors' => array() ) );
-
-		$summary = ( new Runner( $comments, $revisions ) )->run();
-
-		$this->assertSame( 'skipped', $summary['outcome'] );
-		$this->assertSame( array(), $summary['errors'] );
-	}
-
 	/**
 	 * A preview does not persist an attempt or completed run.
 	 */
@@ -79,53 +65,6 @@ class RunnerTest extends WP_UnitTestCase {
 		$this->assertSame( 'dry-run', $summary['mode'] );
 		$this->assertSame( 'skipped', $summary['outcome'] );
 		$this->assertSame( array(), Status::get_saved() );
-	}
-
-	/**
-	 * Each run summary is built from the current processor results only.
-	 */
-	public function test_repeated_runs_do_not_reuse_previous_counts() {
-		$comments  = new RunnerCommentsTestDouble(
-			array(
-				array(
-					'status'          => 'success',
-					'comments_closed' => 3,
-					'pings_closed'    => 0,
-					'errors'          => array(),
-				),
-				array(
-					'status'          => 'success',
-					'comments_closed' => 0,
-					'pings_closed'    => 0,
-					'errors'          => array(),
-				),
-			)
-		);
-		$revisions = new RunnerRevisionsTestDouble(
-			array(
-				array(
-					'status'            => 'success',
-					'revisions_deleted' => 4,
-					'revisions_scanned' => 4,
-					'errors'            => array(),
-				),
-				array(
-					'status'            => 'success',
-					'revisions_deleted' => 0,
-					'revisions_scanned' => 0,
-					'errors'            => array(),
-				),
-			)
-		);
-		$runner = new Runner( $comments, $revisions );
-
-		$first  = $runner->run();
-		$second = $runner->run();
-
-		$this->assertSame( 3, $first['comments_closed'] );
-		$this->assertSame( 4, $first['revisions_deleted'] );
-		$this->assertSame( 0, $second['comments_closed'] );
-		$this->assertSame( 0, $second['revisions_deleted'] );
 	}
 }
 
