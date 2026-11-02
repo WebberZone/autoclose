@@ -2,7 +2,7 @@
 Tags: comments, pingback, revisions, spam, anti-spam
 Contributors: webberzone, Ajay
 Donate link: https://wzn.io/donate-wz
-Stable tag: 3.2.1
+Stable tag: 3.2.2
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 7.4
@@ -74,14 +74,18 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 == Upgrade Notice ==
 
-= 3.2.1 =
-Fixes settings labels for screen readers and a PHP error in the settings API when the stored settings were not an array. Updating from 3.1.x? Read the 3.2.0 changelog: revision cleanup and close-date scheduling changed.
+= 3.2.2 =
+Security hardening release. Update recommended.
 
 == Changelog ==
 
 = 3.2.2 =
 
-Release date: 11 October 2026
+Release date: 2 November 2026
+
+**Security**
+
+* Hardened the settings search.
 
 **Fixed**
 
