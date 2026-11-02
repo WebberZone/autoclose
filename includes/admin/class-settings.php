@@ -69,7 +69,6 @@ class Settings {
 		Hook_Registry::add_action( 'admin_head', array( $this, 'admin_head' ), 11 );
 		Hook_Registry::add_filter( self::$prefix . '_settings_sanitize', array( $this, 'change_settings_on_save' ), 99 );
 		Hook_Registry::add_action( 'wp_ajax_' . self::$prefix . '_taxonomy_search_tom_select', array( __CLASS__, 'taxonomy_search_tom_select' ) );
-		Hook_Registry::add_action( 'wp_ajax_nopriv_' . self::$prefix . '_taxonomy_search_tom_select', array( __CLASS__, 'taxonomy_search_tom_select' ) );
 	}
 
 	/**
@@ -924,6 +923,9 @@ class Settings {
 		}
 
 		if ( 'public_taxonomies' === $endpoint ) {
+			if ( ! current_user_can( 'edit_posts' ) ) {
+				wp_send_json_error( 'Insufficient permissions' );
+			}
 			$taxonomies = array_keys( (array) get_taxonomies( array( 'public' => true ) ) );
 		} else {
 			$tax = get_taxonomy( $endpoint );
