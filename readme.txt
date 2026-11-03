@@ -81,7 +81,7 @@ Security hardening release. Update recommended.
 
 = 3.2.2 =
 
-Release date: 2 November 2026
+Release date: 3 November 2026
 
 **Security**
 
