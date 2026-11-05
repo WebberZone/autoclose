@@ -7,7 +7,10 @@ tags: [autoclose, installation]
 status: publish
 order: 0
 featured_image: "https://webberzone.com/wp-content/uploads/2020/05/Install-AutoClose-1.png"
+toc: true
 ---
+
+[toc]
 
 [AutoClose](https://webberzone.com/plugins/autoclose/) is hosted on WordPress.org. Installing it follows the standard WordPress plugin flow.
 

@@ -11,7 +11,7 @@ toc: true
 
 [toc]
 
-AutoClose registers the following WP-CLI command tree. Use WP-CLI's global `--url` option to select a site in a multisite installation.
+[AutoClose](https://webberzone.com/plugins/autoclose/) registers the following WP-CLI command tree. Use WP-CLI's global `--url` option to select a site in a multisite installation.
 
 ```text
 wp autoclose status
@@ -147,7 +147,7 @@ wp autoclose run --dry-run --sample=25 --format=json
 
 The preview reports the effective age cutoff, post-type and exclusion filters, counts, and a bounded sample of matching post IDs. A preview is a snapshot; the content can change before a later real run.
 
-`--sample` accepts 1–100 rows per operation and defaults to 10.
+`--sample` accepts 1 to 100 rows per operation and defaults to 10.
 
 ## Output formats and exit codes
 

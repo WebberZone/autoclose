@@ -13,7 +13,7 @@ toc: true
 
 This document describes all available settings for the [AutoClose](https://webberzone.com/plugins/autoclose/) plugin. Access settings via **Settings → AutoClose** in your WordPress admin.
 
-Since v3.1.2, a search box on the settings screen filters options across all tabs as you type — start typing to jump straight to the setting you are looking for.
+Since v3.1.2, a search box on the settings screen filters options across all tabs as you type: start typing to jump straight to the setting you are looking for.
 
 ## General
 
@@ -29,13 +29,13 @@ The next two options set the time the cron job runs. The cron job runs immediate
 
 #### Hour
 
-Hour at which the cron job runs. `0`–`23`.
+Hour at which the cron job runs. `0` to `23`.
 
 **Default:** `0`
 
 #### Minute
 
-Minute at which the cron job runs. `0`–`59`.
+Minute at which the cron job runs. `0` to `59`.
 
 **Default:** `0`
 
@@ -102,7 +102,7 @@ Taxonomy terms whose posts should not have comments closed. Start typing to sear
 
 ### Close comments with at least this many approved comments
 
-Optional. Comments close once a post reaches this number of approved comments, in addition to the age rule above — whichever condition is met first. Only ordinary approved comments count; pingbacks, trackbacks, spam, unapproved comments, and internal editor notes are excluded. Set to `0` to disable.
+Optional. Comments close once a post reaches this number of approved comments, in addition to the age rule above, whichever condition is met first. Only ordinary approved comments count; pingbacks, trackbacks, spam, unapproved comments, and internal editor notes are excluded. Set to `0` to disable.
 
 Scheduled checking is not an atomic cap: comments submitted between runs, or at the same time as a run, can push a post past this number before it is closed.
 
@@ -126,9 +126,9 @@ Overrides **Close comments on posts/pages older than** for individual post types
 
 **Value semantics:**
 
-- `-2` — use the age above (default).
-- `-1` — disable the age rule for this post type. The approved-comment count threshold still applies.
-- `0` or higher — age in days for this post type.
+- `-2`: use the age above (default).
+- `-1`: disable the age rule for this post type. The approved-comment count threshold still applies.
+- `0` or higher: age in days for this post type.
 
 **Default:** `-2` for every post type.
 
@@ -166,7 +166,7 @@ Taxonomy terms whose posts should not have pingbacks/trackbacks closed. Start ty
 
 ### Block Self-Pings
 
-Enable to block self-pings — pings from a post to other pages on the same site.
+Enable to block self-pings: pings from a post to other pages on the same site.
 
 **Default:** Disabled
 
@@ -219,7 +219,7 @@ WordPress stores a record of each saved draft or published update. This can buil
 
 ### Delete revisions older than
 
-Age cutoff in days. Only revisions older than this — and beyond the retention limit — are deleted. Set to `0` to delete every revision beyond the retention limit regardless of age.
+Age cutoff in days. Only revisions older than this (and beyond the retention limit) are deleted. Set to `0` to delete every revision beyond the retention limit regardless of age.
 
 **Default:** `90`
 
@@ -229,9 +229,9 @@ Limit the number of revisions that WordPress stores in the database for each pos
 
 The setting is per post type. Value semantics:
 
-- `-2` — ignore this plugin's setting (use the WordPress default, `WP_POST_REVISIONS`, or another plugin's filter).
-- `-1` — store every revision. Scheduled cleanup never prunes this post type.
-- `0` — do not store any revisions. Every revision older than the age cutoff is eligible.
-- `>0` — store that many revisions per post. The newest that many are kept.
+- `-2`: ignore this plugin's setting (use the WordPress default, `WP_POST_REVISIONS`, or another plugin's filter).
+- `-1`: store every revision. Scheduled cleanup never prunes this post type.
+- `0`: do not store any revisions. Every revision older than the age cutoff is eligible.
+- `>0`: store that many revisions per post. The newest that many are kept.
 
 **Default:** `-2` for every supported post type.

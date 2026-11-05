@@ -6,7 +6,10 @@ sections: ["02-acc-advanced"]
 tags: [autoclose, cron, scheduling]
 status: publish
 order: 0
+toc: true
 ---
+
+[toc]
 
 [AutoClose](https://webberzone.com/plugins/autoclose/) uses a WordPress cron event named `acc_cron_hook` to run its maintenance tasks on a schedule. Understanding how the schedule is built helps when you want to debug missed runs, run at a different time, or migrate to a real server cron.
 
@@ -14,9 +17,9 @@ order: 0
 
 The schedule is created from the **General** tab of the settings page:
 
-- **Activate scheduled closing** — the master switch. When disabled, no cron event is registered.
-- **Hour** and **Minute** — the time of day the event fires, in `0`–`23` and `0`–`59` respectively.
-- **Run maintenance** — the recurrence: `daily`, `weekly`, `fortnightly`, or `monthly`.
+- **Activate scheduled closing**: the master switch. When disabled, no cron event is registered.
+- **Hour** and **Minute**: the time of day the event fires, in `0` to `23` and `0` to `59` respectively.
+- **Run maintenance**: the recurrence: `daily`, `weekly`, `fortnightly`, or `monthly`.
 
 > **Fixed in v3.2.0.** The `fortnightly` and `monthly` recurrences were selectable in earlier versions but were never registered as WordPress cron schedules, so choosing either one scheduled no maintenance event at all. If your site was set to `fortnightly` or `monthly`, confirm a next run is now showing on the **Tools → AutoClose Tools** status panel after upgrading.
 
@@ -46,7 +49,7 @@ If you deactivate the plugin, the deactivator clears `acc_cron_hook` and the `au
 
 Per-post close dates set through the [AutoClose metabox](autoclose-metabox-and-close-dates.md) are stored as post meta, not as one cron event per post. A single recurring event, `autoclose_close_dates_event`, runs hourly and closes every date that has fallen due, then deletes the meta it applied. One event serves the whole site, so a site with 100,000 close dates schedules exactly as much cron work as a site with one.
 
-This means a close happens at the first sweep after the configured time rather than to the exact minute. Change the frequency with the `acc_close_dates_recurrence` filter, naming any registered schedule — WordPress provides `hourly`, `twicedaily`, `daily` and `weekly`, and AutoClose adds `fortnightly` and `monthly`:
+This means a close happens at the first sweep after the configured time rather than to the exact minute. Change the frequency with the `acc_close_dates_recurrence` filter by naming a registered schedule. WordPress provides `hourly`, `twicedaily`, `daily` and `weekly`, and AutoClose adds `fortnightly` and `monthly`:
 
 ```php
 add_filter( 'acc_close_dates_recurrence', fn() => 'twicedaily' );
@@ -89,7 +92,7 @@ The plugin's own `acc_cron_hook` event is registered with the standard WordPress
 
 When `acc_cron_hook` fires, the plugin calls into the registered feature classes:
 
-- `WebberZone\AutoClose\Features\Comments::process_comments()` — closes comments and pingbacks/trackbacks on posts older than the configured ages, then re-opens comments on the post IDs in the keep-open list.
-- `WebberZone\AutoClose\Features\Revisions::process_revisions()` — deletes revisions beyond the per-post-type limit.
+- `WebberZone\AutoClose\Features\Comments::process_comments()`: closes comments and pingbacks/trackbacks on posts older than the configured ages, then re-opens comments on the post IDs in the keep-open list.
+- `WebberZone\AutoClose\Features\Revisions::process_revisions()`: deletes revisions beyond the per-post-type limit.
 
 If **Send summary email after cron run** is enabled, an HTML email is sent to the configured address (or the site admin email) summarizing how many comments, pingbacks/trackbacks, and revisions were processed.
