@@ -79,6 +79,12 @@ Security hardening release. Update recommended.
 
 == Changelog ==
 
+= 3.2.3 =
+
+**Added**
+
+* Save Changes button in settings navigation.
+
 = 3.2.2 =
 
 Release date: 3 November 2026
