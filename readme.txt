@@ -2,7 +2,7 @@
 Tags: comments, pingback, revisions, spam, anti-spam
 Contributors: webberzone, Ajay
 Donate link: https://wzn.io/donate-wz
-Stable tag: 3.2.2
+Stable tag: 3.2.3
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 7.4
@@ -74,16 +74,23 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 == Upgrade Notice ==
 
-= 3.2.2 =
-Security hardening release. Update recommended.
+= 3.2.3 =
+Keeps backslashes in settings values and adds a Save Changes button to the settings navigation. No action needed.
 
 == Changelog ==
 
 = 3.2.3 =
 
+Release date: 20 November 2026
+
 **Added**
 
-* Save Changes button in settings navigation.
+* Save Changes button in the settings navigation.
+
+**Fixed**
+
+* Backslashes were stripped from settings values when they were saved.
+* A single-value setting that received an array, for example from a modified form submission, could trigger a PHP error on save.
 
 = 3.2.2 =
 
