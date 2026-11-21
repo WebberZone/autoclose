@@ -81,7 +81,7 @@ Keeps backslashes in settings values and adds a Save Changes button to the setti
 
 = 3.2.3 =
 
-Release date: 20 November 2026
+Release date: 21 November 2026
 
 **Added**
 
